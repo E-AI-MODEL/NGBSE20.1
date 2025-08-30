@@ -1,0 +1,20 @@
+import json
+from types import SimpleNamespace
+
+from ngbse20.runtime.orchestrator import run_pipeline
+
+
+def fake_get(url, timeout=15, headers=None):
+    return SimpleNamespace(text="<html><title>Test</title></html>", status_code=200)
+
+
+def test_run_pipeline(monkeypatch, tmp_path):
+    monkeypatch.setattr('requests.get', fake_get)
+    seeds = [{"id":"s1","query":"https://example.com","type":"web"}]
+    rules = []
+    config = {"output_dir": tmp_path, "allowlist": ["example.com"]}
+    result = run_pipeline(seeds=seeds, rules=rules, config=config)
+    assert result["status"] == "ok"
+    assert result["findings"]
+    assert result["forecast"] is not None
+    assert result["next_seeds"] is not None
