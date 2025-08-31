@@ -39,8 +39,18 @@ exclude = ["tests*", "docs*", "data*"]
 
 [tool.ruff]
 line-length = 100
-select = ["E","F","I","UP","B","SIM","PL","RUF"]
-ignore = ["E203","E501"]
+target-version = "py311"
+src = ["src"]
+exclude = ["build/", "dist/", ".venv/"]
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B","PL","RUF"]
+ignore = []
+per-file-ignores = { "tests/**" = ["PLR2004", "PLC0415", "F401"] }
+
+[tool.ruff.lint.isort]
+known-first-party = ["ngbse20"]
+combine-as-imports = true
 
 [tool.mypy]
 python_version = "3.11"

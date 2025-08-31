@@ -16,8 +16,19 @@ class LLMClient:
     def __init__(self, provider_priority):
         self.providers = provider_priority
 
-    def call(self, system_prompt: str, user_prompt: str, max_tokens=800, temperature=0.2) -> str | None:
-        for p in self.providers or ["openai", "azure_openai", "anthropic", "google"]:
+    def call(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        max_tokens: int = 800,
+        temperature: float = 0.2,
+    ) -> str | None:
+        for p in self.providers or [
+            "openai",
+            "azure_openai",
+            "anthropic",
+            "google",
+        ]:
             fn = getattr(self, f"_call_{p}", None)
             if fn:
                 print(f"INFO: Attempting to call LLM provider: {p}")
@@ -39,7 +50,9 @@ class LLMClient:
     ) -> dict[str, Any] | None:
         for attempt in range(retries + 1):
             try:
-                r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=timeout)
+                r = requests.post(
+                    url, headers=headers, data=json.dumps(payload), timeout=timeout
+                )
                 r.raise_for_status()
                 return r.json()
             except RequestException as e:
@@ -79,7 +92,9 @@ class LLMClient:
         deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT","gpt-4o-mini")
         if not api_key or not endpoint:
             return None
-        url = f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-02-15-preview"
+        url = (
+            f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-02-15-preview"
+        )
         data = self._post_json(
             url, {"api-key": api_key, "Content-Type": "application/json"},
             {
@@ -100,7 +115,11 @@ class LLMClient:
             return None
         data = self._post_json(
             "https://api.anthropic.com/v1/messages",
-            {"x-api-key": api_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"},
+            {
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+            },
             {
                 "model": model,
                 "max_tokens": max_tokens,
@@ -110,17 +129,43 @@ class LLMClient:
             },
         )
         parts = data.get("content", []) if data else []
-        return "\n".join([p.get("text", "") for p in parts if p.get("type") == "text"]) if parts else None
+        return (
+            "\n".join([p.get("text", "") for p in parts if p.get("type") == "text"])
+            if parts
+            else None
+        )
     def _call_google(self, system_prompt, user_prompt, max_tokens, temperature):
         api_key = os.getenv("GOOGLE_API_KEY")
         model = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
         if not api_key:
             return None
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model}:generateContent?key={api_key}"
+        )
         payload = {
-            "contents": [{"role": "user", "parts": [{"text": f"System:\n{system_prompt}\n\nUser:\n{user_prompt}"}]}],
-            "generationConfig": {"temperature": float(temperature), "maxOutputTokens": int(max_tokens)}
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": f"System:\n{system_prompt}\n\nUser:\n{user_prompt}"
+                        }
+                    ],
+                }
+            ],
+            "generationConfig": {
+                "temperature": float(temperature),
+                "maxOutputTokens": int(max_tokens),
+            },
         }
         data = self._post_json(url, {"Content-Type": "application/json"}, payload)
-        parts = ((data.get("candidates", [{}])[0] or {}).get("content", {}) or {}).get("parts", []) if data else []
-        return "\n".join([p.get("text", "") for p in parts if isinstance(p, dict)]).strip() or None
+        parts = (
+            ((data.get("candidates", [{}])[0] or {}).get("content", {}) or {}).get("parts", [])
+            if data
+            else []
+        )
+        return (
+            "\n".join([p.get("text", "") for p in parts if isinstance(p, dict)]).strip()
+            or None
+        )

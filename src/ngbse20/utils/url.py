@@ -1,5 +1,7 @@
 from __future__ import annotations
-from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 import tldextract
 
 _UTM_PREFIXES = ("utm_", "icid", "gclid", "fbclid", "mc_cid", "mc_eid")
