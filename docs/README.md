@@ -130,7 +130,7 @@ NGBSE 20.1 is a comprehensive Open-Source Intelligence (OSINT) engine that:
 
 ## 📄 **Documentation License**
 
-This documentation is part of the E-AI-MODEL research initiative and is provided under the same license as the NGBSE 20.1 project.
+This documentation is part of the E-AI-MODEL research initiative and is provided under the same Commercial License Agreement as the NGBSE 20.1 project. This documentation is proprietary and confidential.
 
 ---
 

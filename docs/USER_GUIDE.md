@@ -509,7 +509,13 @@ python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json
 
 ## 📄 **License**
 
-This project is part of the E-AI-MODEL research initiative.
+This project is licensed under a Commercial License Agreement. This software is proprietary and confidential to the E-AI-MODEL research initiative.
+
+**Commercial Use**: This software is licensed for commercial use under specific terms and conditions outlined in the LICENSE file.
+
+**Restrictions**: Redistribution, modification, reverse engineering, and public distribution are not permitted without explicit written consent.
+
+For licensing inquiries, please contact the E-AI-MODEL research initiative.
 
 ---
 
