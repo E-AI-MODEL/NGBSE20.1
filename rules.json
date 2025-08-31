@@ -1,0 +1,12 @@
+[
+    {
+        "id": "rule_high_risk",
+        "trigger": {
+            "risk_score": ">= 0.8"
+        },
+        "action": {
+            "type": "warning_flag",
+            "message": "High risk score detected"
+        }
+    }
+]
