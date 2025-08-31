@@ -39,7 +39,7 @@ class Finding:
     meta: dict[str, Any]
 
 def _now_iso() -> str:
-    return datetime.datetime.now(datetime.UTC).isoformat()
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 async def _fetch(session: aiohttp.ClientSession, url: str) -> str | None:
     try:
@@ -57,37 +57,35 @@ async def _fetch(session: aiohttp.ClientSession, url: str) -> str | None:
         return None
 
 def _robots_allows(url: str, user_agent: str) -> bool:
-    # Robots per host
     try:
         base = normalize_url(url)
         rp = robotparser.RobotFileParser()
-        # Build robots.txt URL
         parts = urlsplit(base)
         robots_url = urlunsplit((parts.scheme, parts.netloc, "/robots.txt", "", ""))
         rp.set_url(robots_url)
-        # Small timeout via read()
         rp.read()
         return rp.can_fetch(user_agent, base)
     except Exception:
-        return True  # fail open to avoid hard stops in demo contexts
+        return True
 
 def _parse_html(url: str, html: str, fetched_at: str) -> Finding:
     soup = BeautifulSoup(html, "html.parser")
     title = (soup.title.string if soup.title else "") or ""
     title = title.strip()
-    # Try some common published-time metas
+    
     published = None
     for key in ("article:published_time", "og:published_time", "publish-date", "date", "dc.date"):
         tag = soup.find("meta", attrs={"property": key}) or soup.find("meta", attrs={"name": key})
         if tag and tag.get("content"):
             published = tag["content"].strip()
             break
-    # Build excerpt (first 500 chars of text)
+    
     text = soup.get_text(separator=" ", strip=True)
     excerpt = (text[:EXCERPT_LIMIT] + "…") if len(text) > EXCERPT_LIMIT else text
     h = content_hash(text, url=url, title=title)
     domain = extract_domain(url)
     fid = h[:16]
+    
     return Finding(
         id=fid,
         type="web Finding",
@@ -112,14 +110,9 @@ async def collect_urls(
     per_domain_delay_sec: float = PER_DOMAIN_DELAY_SEC,
     timeout: aiohttp.ClientTimeout = DEFAULT_TIMEOUT,
 ) -> list[dict[str, Any]]:
-    """
-    Concurrent, polite collector met robots.txt-respect, per-domain pace en echte hashes.
-    Returns list[dict] findings.
-    """
     urls_norm = [normalize_url(u) for u in urls]
     LOGGER.info("Collecting %d urls (concurrency=%d)", len(urls_norm), concurrency)
 
-    # Per-domain pacing
     last_request_ts: dict[str, float] = {}
     domain_locks: dict[str, asyncio.Lock] = {}
 
@@ -147,7 +140,10 @@ async def collect_urls(
         "User-Agent": user_agent,
         "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
     }
-    sem = asyncio.Semaphore(max(1, min(concurrency, MAX_CONCURRENCY)))
+    
+    semaphore_value = max(1, min(concurrency, MAX_CONCURRENCY))
+    sem = asyncio.Semaphore(semaphore_value)
+    
     async with aiohttp.ClientSession(
         connector=connector, headers=headers, timeout=timeout
     ) as session:
@@ -157,6 +153,7 @@ async def collect_urls(
 
         tasks = [_task(u) for u in urls_norm]
         results = await asyncio.gather(*tasks, return_exceptions=False)
+    
     findings = [r for r in results if r]
     LOGGER.info("Collected %d/%d findings", len(findings), len(urls_norm))
     return findings
