@@ -8,7 +8,7 @@ _UTM_PREFIXES = ("utm_", "icid", "gclid", "fbclid", "mc_cid", "mc_eid")
 
 def normalize_url(raw: str) -> str:
     """
-    Canonicaliseer URL: lowercase host, fragment weg, sorteer query, drop tracking params.
+    Canonicalize URL: lowercase host, remove fragment, sort query, drop tracking params.
     """
     parts = urlsplit(raw)
     scheme = parts.scheme or "http"
