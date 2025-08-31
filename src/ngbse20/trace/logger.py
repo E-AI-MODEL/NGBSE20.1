@@ -6,7 +6,7 @@ from typing import Any
 
 
 def now_iso() -> str:
-    return datetime.datetime.now(datetime.UTC).isoformat()
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 def event(  # noqa: PLR0913
     component: str,
