@@ -10,6 +10,7 @@ from urllib import robotparser
 from urllib.parse import urlsplit, urlunsplit
 
 import aiohttp
+import bs4
 from bs4 import BeautifulSoup
 
 from ngbse20.logging import get_logger
@@ -76,12 +77,16 @@ def _parse_html(url: str, html: str, fetched_at: str) -> Finding:
     title = (soup.title.string if soup.title else "") or ""
     title = title.strip()
     # Try some common published-time metas
-    published = None
+    published: str | None = None
     for key in ("article:published_time", "og:published_time", "publish-date", "date", "dc.date"):
-        tag = soup.find("meta", attrs={"property": key}) or soup.find("meta", attrs={"name": key})
-        if tag and tag.get("content"):
-            published = tag["content"].strip()
-            break
+        tag: bs4.element.Tag | None = (
+            soup.find("meta", attrs={"property": key}) or soup.find("meta", attrs={"name": key})
+        )
+        if tag is not None:
+            content = tag.get("content")
+            if content:
+                published = content.strip()
+                break
     # Build excerpt (first 500 chars of text)
     text = soup.get_text(separator=" ", strip=True)
     excerpt = (text[:EXCERPT_LIMIT] + "…") if len(text) > EXCERPT_LIMIT else text
