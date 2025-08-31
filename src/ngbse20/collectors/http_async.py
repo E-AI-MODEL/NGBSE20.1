@@ -1,18 +1,20 @@
 from __future__ import annotations
+
 import asyncio
-import json
 import time
-from dataclasses import dataclass, asdict
+from collections.abc import Iterable
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from typing import Iterable, List, Dict, Any, Optional
+from typing import Any
 from urllib import robotparser
+from urllib.parse import urlsplit, urlunsplit
 
 import aiohttp
 from bs4 import BeautifulSoup
 
 from ngbse20.logging import get_logger
-from ngbse20.utils.url import normalize_url, extract_domain
 from ngbse20.utils.hash import content_hash
+from ngbse20.utils.url import extract_domain, normalize_url
 
 LOGGER = get_logger(__name__)
 
@@ -20,6 +22,8 @@ DEFAULT_UA = "NGBSE20.1-Collector (+https://example.invalid)"
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=20, connect=7, sock_read=15)
 MAX_CONCURRENCY = 10
 PER_DOMAIN_DELAY_SEC = 1.0
+HTTP_ERROR_THRESHOLD = 400
+EXCERPT_LIMIT = 500
 
 @dataclass
 class Finding:
@@ -28,19 +32,19 @@ class Finding:
     url: str
     domain: str
     title: str
-    published: Optional[str]
+    published: str | None
     fetched_at: str
     excerpt: str
     hash: str
-    meta: Dict[str, Any]
+    meta: dict[str, Any]
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
-async def _fetch(session: aiohttp.ClientSession, url: str) -> Optional[str]:
+async def _fetch(session: aiohttp.ClientSession, url: str) -> str | None:
     try:
         async with session.get(url) as resp:
-            if resp.status >= 400:
+            if resp.status >= HTTP_ERROR_THRESHOLD:
                 LOGGER.warning("HTTP %s for %s", resp.status, url)
                 return None
             ctype = resp.headers.get("Content-Type", "")
@@ -58,7 +62,6 @@ def _robots_allows(url: str, user_agent: str) -> bool:
         base = normalize_url(url)
         rp = robotparser.RobotFileParser()
         # Build robots.txt URL
-        from urllib.parse import urlsplit, urlunsplit
         parts = urlsplit(base)
         robots_url = urlunsplit((parts.scheme, parts.netloc, "/robots.txt", "", ""))
         rp.set_url(robots_url)
@@ -81,7 +84,7 @@ def _parse_html(url: str, html: str, fetched_at: str) -> Finding:
             break
     # Build excerpt (first 500 chars of text)
     text = soup.get_text(separator=" ", strip=True)
-    excerpt = (text[:500] + "…") if len(text) > 500 else text
+    excerpt = (text[:EXCERPT_LIMIT] + "…") if len(text) > EXCERPT_LIMIT else text
     h = content_hash(text, url=url, title=title)
     domain = extract_domain(url)
     fid = h[:16]
@@ -108,7 +111,7 @@ async def collect_urls(
     concurrency: int = MAX_CONCURRENCY,
     per_domain_delay_sec: float = PER_DOMAIN_DELAY_SEC,
     timeout: aiohttp.ClientTimeout = DEFAULT_TIMEOUT,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Concurrent, polite collector met robots.txt-respect, per-domain pace en echte hashes.
     Returns list[dict] findings.
@@ -117,10 +120,10 @@ async def collect_urls(
     LOGGER.info("Collecting %d urls (concurrency=%d)", len(urls_norm), concurrency)
 
     # Per-domain pacing
-    last_request_ts: Dict[str, float] = {}
-    domain_locks: Dict[str, asyncio.Lock] = {}
+    last_request_ts: dict[str, float] = {}
+    domain_locks: dict[str, asyncio.Lock] = {}
 
-    async def _paced_fetch(session: aiohttp.ClientSession, url: str) -> Optional[Dict[str, Any]]:
+    async def _paced_fetch(session: aiohttp.ClientSession, url: str) -> dict[str, Any] | None:
         if not _robots_allows(url, user_agent):
             LOGGER.info("Robots disallow: %s", url)
             return None
@@ -140,7 +143,10 @@ async def collect_urls(
         return asdict(f)
 
     connector = aiohttp.TCPConnector(ssl=False, limit=0)
-    headers = {"User-Agent": user_agent, "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8"}
+    headers = {
+        "User-Agent": user_agent,
+        "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+    }
     sem = asyncio.Semaphore(max(1, min(concurrency, MAX_CONCURRENCY)))
     async with aiohttp.ClientSession(connector=connector, headers=headers, timeout=timeout) as session:
         async def _task(u: str):

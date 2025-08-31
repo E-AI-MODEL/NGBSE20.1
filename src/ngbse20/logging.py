@@ -1,11 +1,10 @@
 import logging
 import os
-from typing import Optional
 
 _LEVEL = os.getenv("NGBSE_LOG_LEVEL", "INFO").upper()
 _FORMAT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 
-def get_logger(name: Optional[str] = None) -> logging.Logger:
+def get_logger(name: str | None = None) -> logging.Logger:
     logger = logging.getLogger(name or "ngbse20")
     if not logger.handlers:
         handler = logging.StreamHandler()

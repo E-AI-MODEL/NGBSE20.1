@@ -1,14 +1,23 @@
 """Trace logger."""
-from typing import Dict, Any, List
-from datetime import datetime, timezone
+
 import uuid
+from datetime import datetime, timezone
+from typing import Any
+
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
-def event(component: str, input: Dict[str, Any], output: Dict[str, Any], reasoning: str,
-          rules_fired: List[str]|None=None, seeds_used: List[str]|None=None,
-          metrics: Dict[str, Any]|None=None, rubric: Dict[str, float]|None=None) -> Dict[str, Any]:
+def event(  # noqa: PLR0913
+    component: str,
+    input: dict[str, Any],
+    output: dict[str, Any],
+    reasoning: str,
+    rules_fired: list[str] | None = None,
+    seeds_used: list[str] | None = None,
+    metrics: dict[str, Any] | None = None,
+    rubric: dict[str, float] | None = None,
+) -> dict[str, Any]:
     return {
         "id": f"evt_{uuid.uuid4().hex[:12]}",
         "timestamp": now_iso(),

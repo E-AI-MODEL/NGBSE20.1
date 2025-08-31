@@ -1,7 +1,7 @@
 import re
 import urllib.parse
 import urllib.request
-from typing import List, Dict, Any
+from typing import Any
 
 try:
     import requests
@@ -11,9 +11,15 @@ try:
     from bs4 import BeautifulSoup
 except Exception:
     BeautifulSoup = None
+try:
+    import tldextract
+except Exception:
+    tldextract = None
 
 META_DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.IGNORECASE | re.DOTALL)
+
+HTTP_OK = 200
 
 
 def parse_published(html: str) -> str:
@@ -36,19 +42,17 @@ def parse_published(html: str) -> str:
 
 
 def extract_domain(url: str) -> str:
-    try:
-        import tldextract
+    if tldextract:
         ext = tldextract.extract(url)
         return ".".join(p for p in [ext.domain, ext.suffix] if p)
-    except ImportError:
-        host = urllib.parse.urlparse(url).netloc.split('@')[-1].split(':')[0]
-        if host.startswith("www."):
-            host = host[4:]
-        return host
+    host = urllib.parse.urlparse(url).netloc.split("@")[-1].split(":")[0]
+    if host.startswith("www."):
+        host = host[4:]
+    return host
 
 
 class HttpWebCollector:
-    def __init__(self, allowlist_domains: List[str]):
+    def __init__(self, allowlist_domains: list[str]):
         self.allow_domains = [d.lower() for d in allowlist_domains]
 
     def _is_allowed(self, domain: str) -> bool:
@@ -57,12 +61,9 @@ class HttpWebCollector:
             return True
         if d in self.allow_domains:
             return True
-        for entry in self.allow_domains:
-            if entry.startswith('.') and d.endswith(entry):
-                return True
-        return False
+        return any(entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains)
 
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         query = seed.get("query", "")
         urls = re.findall(r"https?://[^\s\"'>]+", query)
         findings = []
@@ -99,7 +100,7 @@ class HttpWebCollector:
                     "raw": {"url": url, "status": status, "title": title},
                     "source": {"type": seed.get("type","web"), "url": url, "domain": domain},
                     "timestamp": published or now_iso,
-                    "quality": {"q": 0.6 if status==200 else 0.3}
+                    "quality": {"q": 0.6 if status == HTTP_OK else 0.3}
                 })
             except Exception as e:
                 print(f"ERROR: Collector failed for {url}: {e}")

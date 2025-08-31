@@ -1,3 +1,5 @@
+from datetime import datetime
+
 try:
     from docx import Document
     from docx.shared import Pt
@@ -6,16 +8,19 @@ except ImportError:
     _DOCX_AVAILABLE = False
     Document, Pt = None, None
 
-from typing import Dict, Any
-from datetime import datetime
-
-def write_report(path: str, brief: Dict, blindspots: Dict, forecast: Dict, scenarios: Dict | None = None):
+def write_report(
+    path: str,
+    brief: dict,
+    blindspots: dict,
+    forecast: dict,
+    scenarios: dict | None = None,
+):
     if not _DOCX_AVAILABLE:
         print("WARN: python-docx not installed, skipping .docx report generation.")
         return
 
     doc = Document()
-    doc.add_heading("NGBSE 20.1 – Intelligence Brief", 0)
+    doc.add_heading("NGBSE 20.1 - Intelligence Brief", 0)
     doc.add_paragraph(f"Generated: {datetime.utcnow().isoformat()}Z")
 
     doc.add_heading("BLUF (Bottom Line Up Front)", 1)
