@@ -1,0 +1,12 @@
+services:
+  ngbse:
+    build: .
+    image: ngbse:20.1
+    container_name: ngbse20
+    env_file:
+      - .env
+    volumes:
+      - ./out:/app/out
+      - ./seeds.jsonl:/app/seeds.jsonl
+      - ./rules.json:/app/rules.json
+    command: ["ngbse20", "demo", "--seeds", "seeds.jsonl", "--rules", "rules.json", "--outdir", "out", "--allowlist", "example.com,example.org"]
