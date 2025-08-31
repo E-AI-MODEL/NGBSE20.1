@@ -9,13 +9,12 @@ description = "Next-Gen Breach Scenario Engine 20.1"
 requires-python = ">=3.10"
 dependencies = [
   "requests>=2.31",
-  "beautifulsoup4>=4.12.3",
-  "tldextract>=5.1.2",
-  "aiohttp>=3.10.5",
+  "beautifulsoup4>=4.12",
+  "tldextract>=5.1",
+  "aiohttp>=3.9",
   "click>=8.1",
   "pydantic>=2.8",
-  "aiodns>=3.2.0",
-  "stix2>=3.0.1",
+  "stix2>=3.0",
 ]
 
 [project.optional-dependencies]
