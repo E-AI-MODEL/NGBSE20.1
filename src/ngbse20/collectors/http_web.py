@@ -1,12 +1,9 @@
 import re
 import urllib.parse
-import urllib.request
 from typing import Any
 
-try:
-    import requests
-except Exception:
-    requests = None
+import requests
+
 try:
     from bs4 import BeautifulSoup
 except Exception:
@@ -73,14 +70,9 @@ class HttpWebCollector:
                 print(f"WARN: Domain not in allowlist, skipping: {domain}")
                 continue
             try:
-                if requests:
-                    r = requests.get(url, timeout=15)
-                    text = r.text
-                    status = r.status_code
-                else:
-                    with urllib.request.urlopen(url, timeout=15) as r:
-                        text = r.read().decode('utf-8', 'ignore')
-                        status = getattr(r, 'status', 200)
+                r = requests.get(url, timeout=15)
+                text = r.text
+                status = r.status_code
 
                 text = text[:500000]
                 published = parse_published(text)
