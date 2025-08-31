@@ -5,7 +5,7 @@ Order: validate -> collect -> score -> history -> forecast -> propose -> blindsp
 import json
 import os
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from ..collectors.http_web import HttpWebCollector
 from ..export.stix import to_stix_bundle
@@ -168,7 +168,7 @@ def run_pipeline(
     return {
         "status": "ok",
         "findings": scored_findings,
-        "stix": json.loads(bundle.serialize()),
+        "stix": cast(dict[str, Any], json.loads(bundle.serialize())),
         "traces": traces,
         "cai": cai,
         "forecast": forecast,

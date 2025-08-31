@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import datetime
 import json
-from typing import Any
+from typing import Any, cast
 
-from stix2 import Bundle, Indicator, Note
+from stix2 import Bundle, Indicator, Note  # type: ignore[import-untyped]
 
 from ngbse20.logging import get_logger
 
@@ -57,7 +57,9 @@ def write_stix(findings: list[dict[str, Any]], path: str) -> str:
     return path
 
 
-def findings_to_stix(findings: list[dict[str, Any]], score_lookup=None) -> dict[str, Any]:
+def findings_to_stix(
+    findings: list[dict[str, Any]], score_lookup: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Return STIX bundle as Python dict for given findings."""
     bundle = to_stix_bundle(findings)
-    return json.loads(bundle.serialize())
+    return cast(dict[str, Any], json.loads(bundle.serialize()))
