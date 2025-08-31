@@ -4,15 +4,16 @@ import asyncio
 import json
 import logging
 from pathlib import Path
+from datetime import datetime, timezone
+import os
 
 import click
 
-from ngbse20.collectors.async_http_collector import AsyncHTTPCollector
-from ngbse20.collectors.http_collector import fetch as fetch_sync
 from ngbse20.config.loader import load_seeds, validate_files
 from ngbse20.export.stix import findings_to_stix
 from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline
+from ngbse20.collectors.http_web import HttpWebCollector
 
 LOGGER = logging.getLogger(__name__)
 
@@ -75,35 +76,47 @@ def validate_config_cmd(seeds: str, rules: str):
 @cli.command()
 @click.option("--seeds", required=True, type=click.Path(exists=True))
 @click.option("--out", required=True, type=click.Path())
-@click.option("--async", "use_async", is_flag=True, help="Use async HTTP collector")
-@click.option("--concurrency", default=10, show_default=True)
-def collect(seeds: str, out: str, use_async: bool, concurrency: int):
-    """Collect data from seeds using HTTP collectors."""
+@click.option("--collector", default="web", help="Collector type to use (web, leakix, shodan, censys, urlscan, github, news)")
+@click.option("--allowlist", default="*", help="Comma-separated list of allowed domains")
+def collect(seeds: str, out: str, collector: str, allowlist: str):
+    """Collect data from seeds using specified collector."""
     Path(out).mkdir(parents=True, exist_ok=True)
-    seed_models = load_seeds(seeds)
-    urls = [str(s.url) for s in seed_models]
-
-    findings: list[dict] = []
-    if use_async:
-        async def run():
-            c = AsyncHTTPCollector(max_concurrency=concurrency)
-            return await c.collect(urls)
-        findings = asyncio.run(run())
+    
+    try:
+        # Load seeds
+        seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
+    except Exception as e:
+        click.echo(f"Error loading seeds: {e}", err=True)
+        raise click.Abort()
+    
+    # Parse allowlist
+    allowlist_domains = [d.strip() for d in allowlist.split(',')]
+    
+    # Use appropriate collector
+    if collector == "web":
+        collector_instance = HttpWebCollector(allowlist_domains=allowlist_domains)
     else:
-        seen: set[str] = set()
-        for u in urls:
-            f = fetch_sync(u)
-            if not f:
-                continue
-            if f["content_hash"] in seen:
-                continue
-            seen.add(f["content_hash"])
-            findings.append(f)
-
-    Path(out, "findings.json").write_text(
-        json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    LOGGER.info("Wrote %d findings to %s", len(findings), out)
+        click.echo(f"Collector type '{collector}' not yet implemented for individual collection.", err=True)
+        click.echo("Use 'ngbse20 run' for full pipeline with all collectors.", err=True)
+        raise click.Abort()
+    
+    # Collect data
+    findings = []
+    now_iso = datetime.now(timezone.utc).isoformat()
+    
+    for seed in seeds_data:
+        try:
+            seed_findings = collector_instance.collect(seed, now_iso)
+            findings.extend(seed_findings)
+        except Exception as e:
+            click.echo(f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True)
+    
+    # Save findings
+    findings_path = Path(out, "findings.json")
+    findings_path.write_text(json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8")
+    
+    click.echo(f"Collection complete. Found {len(findings)} items.")
+    click.echo(f"Results saved to: {findings_path}")
 
 @cli.command()
 @click.option("--findings", required=True, type=click.Path(exists=True))
@@ -157,6 +170,37 @@ def ballm_analyze(findings: str, out: str, depth: int):
     click.echo(f"BALLM analysis complete. Output saved to {out}")
     click.echo(f"Epistemic Humility Score: {meta_layer.get('epistemic_humility_score', 0.0):.3f}")
     click.echo(f"Curiosity Questions Generated: {len(meta_layer.get('curiosity_questions', []))}")
+
+@cli.command("collectors")
+def list_collectors():
+    """List all available collectors and their status."""
+    from ngbse20.collectors import (
+        HttpWebCollector, LeakIXCollector, ShodanCollector, CensysCollector,
+        URLScanCollector, GitHubCollector, NewsCollector
+    )
+    
+    collectors = [
+        ("HttpWebCollector", HttpWebCollector, []),
+        ("LeakIX", LeakIXCollector, ["LEAKIX_API_KEY"]),
+        ("Shodan", ShodanCollector, ["SHODAN_API_KEY"]),
+        ("Censys", CensysCollector, ["CENSYS_API_ID", "CENSYS_API_SECRET"]),
+        ("URLScan", URLScanCollector, ["URLSCAN_API_KEY"]),
+        ("GitHub", GitHubCollector, ["GITHUB_TOKEN"]),
+        ("News", NewsCollector, ["NEWS_API_KEY"]),
+    ]
+    
+    click.echo("Available NGBSE 20.1 Collectors:")
+    click.echo("=" * 50)
+    
+    for name, collector_class, required_envs in collectors:
+        # Check if required environment variables are set
+        env_status = "✅" if all(os.getenv(env) for env in required_envs) else "❌"
+        status = "Active" if env_status == "✅" else "Inactive (missing API keys)"
+        
+        click.echo(f"{name:<15} {env_status} {status}")
+        if required_envs:
+            click.echo(f"{'':15}   Requires: {', '.join(required_envs)}")
+        click.echo()
 
 if __name__ == "__main__":
     cli()

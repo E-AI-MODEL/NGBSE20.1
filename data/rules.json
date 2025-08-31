@@ -1,3 +1,38 @@
 [
-  {"id":"r1","pattern":"example","weight":1.0}
+  {
+    "id": "r1",
+    "name": "Example Rule",
+    "pattern": "example",
+    "weight": 1.0,
+    "action": {"type": "warning_flag", "message": "Example pattern detected"},
+    "enabled": true,
+    "tags": ["demo", "example"]
+  },
+  {
+    "id": "r2",
+    "name": "Threat Detection",
+    "pattern": "malware|ransomware|phishing",
+    "weight": 2.0,
+    "action": {"type": "warning_flag", "message": "Threat indicator detected"},
+    "enabled": true,
+    "tags": ["threat", "security"]
+  },
+  {
+    "id": "r3",
+    "name": "Infrastructure Alert",
+    "pattern": "nginx|apache|mysql",
+    "weight": 1.5,
+    "action": {"type": "warning_flag", "message": "Infrastructure component detected"},
+    "enabled": true,
+    "tags": ["infrastructure", "monitoring"]
+  },
+  {
+    "id": "r4",
+    "name": "High Priority Block",
+    "pattern": "critical|urgent|emergency",
+    "weight": 5.0,
+    "action": {"type": "hard_block", "message": "Critical pattern detected - blocking"},
+    "enabled": true,
+    "tags": ["critical", "block"]
+  }
 ]

@@ -8,7 +8,14 @@ services:
     volumes:
       - ./data:/app/data:ro
       - ./out:/app/out
+    environment:
+      - SEEDS_PATH=${SEEDS_PATH:-data/seeds.jsonl}
+      - RULES_PATH=${RULES_PATH:-data/rules.json}
+      - OUT_DIR=${OUT_DIR:-out}
+      - ALLOWLIST=${ALLOWLIST:-*}
     command: >
-      collect --seeds ${SEEDS_PATH:-data/seeds.jsonl}
-      --out ${OUT_DIR:-out}
-      --async --concurrency ${CONCURRENCY:-20}
+      run 
+      --seeds ${SEEDS_PATH:-data/seeds.jsonl}
+      --rules ${RULES_PATH:-data/rules.json}
+      --outdir ${OUT_DIR:-out}
+      --allowlist ${ALLOWLIST:-*}
