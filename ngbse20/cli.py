@@ -6,13 +6,22 @@ from .runtime.orchestrator import run_pipeline
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["demo"])
+    ap.add_argument("--version", action="store_true", help="Print version and exit")
+    ap.add_argument("cmd", nargs="?", choices=["demo"], help="Command to run")
     ap.add_argument("--rules", dest="rules_path", default=None)
     ap.add_argument("--seeds", dest="seeds_path", default=None)
     ap.add_argument("--metrics", dest="metrics_json", default='{}')
     ap.add_argument("--outdir", default='out', help="Output directory")
     ap.add_argument("--allowlist", default='*', help="Comma-separated allowed domains")
     args = ap.parse_args()
+
+    if args.version:
+        from . import __version__
+        print(__version__)
+        return
+
+    if args.cmd != "demo":
+        ap.error("cmd must be 'demo'")
 
     rules = []
     if args.rules_path:
