@@ -48,7 +48,7 @@ The easiest way to get started is with Docker Compose. This ensures the environm
    ```
 
 3. **Start the pipeline:**
-   This command builds the Docker image and runs the collect step as defined in docker-compose.yml.
+   This command builds the Docker image and runs the complete pipeline.
    ```bash
    docker compose up --build
    ```
@@ -56,7 +56,8 @@ The easiest way to get started is with Docker Compose. This ensures the environm
 4. **View results:**
    Results are stored in the `out/` directory.
    - `out/findings.json`: Raw findings
-   - `out/stix_bundle.json`: Findings exported to STIX 2.1 (after running the export-stix step)
+   - `out/stix_bundle.json`: Findings exported to STIX 2.1
+   - `out/history/`: Historical asset scores for trend analysis
 
 ### Local (Python)
 
@@ -76,8 +77,18 @@ For local installation, Python 3.11+ is required.
    pip install .[dev]
    ```
 
-3. **Run the pipeline:**
-   The pipeline consists of several steps called via the CLI.
+3. **Run the complete pipeline:**
+   The new unified command runs everything from collection to export in one go.
+   ```bash
+   # Run the complete pipeline (recommended)
+   make run
+   
+   # Or directly:
+   python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --outdir out
+   ```
+
+4. **Individual pipeline steps (legacy):**
+   You can still run individual steps if needed.
    
    **Validate configuration:**
    ```bash
@@ -98,22 +109,27 @@ For local installation, Python 3.11+ is required.
 
 The tool is controlled via `ngbse20.cli`:
 
-- **validate-config**: Validates the syntax of seeds and rules files
+- **`run`**: Run the complete NGBSE pipeline from collection to reporting (recommended)
+  ```bash
+  ngbse20 run --seeds <path> --rules <path> [--outdir <dir>] [--allowlist <domains>]
+  ```
+
+- **`validate-config`**: Validates the syntax of seeds and rules files
   ```bash
   ngbse20 validate-config --seeds <path> --rules <path>
   ```
 
-- **collect**: Starts the data collection pipeline
+- **`collect`**: Starts the data collection pipeline
   ```bash
   ngbse20 collect --seeds <path> --out <dir> [--async] [--concurrency <int>]
   ```
 
-- **export-stix**: Converts JSON findings to a STIX 2.1 bundle
+- **`export-stix`**: Converts JSON findings to a STIX 2.1 bundle
   ```bash
   ngbse20 export-stix --findings <path> --out <path>
   ```
 
-- **ballm-analyze**: Run BALLM analysis to generate epistemic insights and curiosity questions
+- **`ballm-analyze`**: Run BALLM analysis to generate epistemic insights and curiosity questions
   ```bash
   ngbse20 ballm-analyze --findings <path> --out <path> [--depth <int>]
   ```
@@ -122,13 +138,14 @@ The tool is controlled via `ngbse20.cli`:
 
 - **data/seeds.jsonl**: This file contains the starting points (URLs) for the collector. Each line is a JSON object.
 - **data/rules.json**: Defines rules that can be applied during analysis (functionality in development).
-- **.env**: Store your API keys and other secrets here. Use .env.example as a template.
+- **.env**: Store your API keys and other secrets here. Use `.env.example` as a template.
 
 ## Development
 
-- **Linting**: `make lint` (uses Ruff)
-- **Type Checking**: `make type` (uses MyPy)
-- **Testing**: `make test` (uses Pytest)
+- **Linting:** `make lint` (uses Ruff)
+- **Type Checking:** `make type` (uses MyPy)
+- **Testing:** `make test` (uses Pytest)
+- **Complete Pipeline:** `make run` (runs the full NGBSE pipeline)
 
 ## Research Context
 

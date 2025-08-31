@@ -1,4 +1,4 @@
-.PHONY: install dev lint type test build run export-stix docker-run clean format security pre-commit
+.PHONY: install dev lint type test build run run-full export-stix docker-run clean format security pre-commit
 
 install:
 	python -m pip install --upgrade pip
@@ -41,11 +41,24 @@ clean:
 build:
 	docker build -t ngbse20:latest .
 
+# Run the complete NGBSE pipeline (recommended)
 run:
+	python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --outdir out --allowlist "*"
+
+# Run individual pipeline steps (legacy)
+run-collect:
 	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --async --concurrency 20
 
 export-stix:
-	python -m ngbse20.cli export_stix --findings out/findings.json --out out/stix_bundle.json
+	python -m ngbse20.cli export-stix --findings out/findings.json --out out/stix_bundle.json
+
+# Validate configuration files
+validate:
+	python -m ngbse20.cli validate-config --seeds data/seeds.jsonl --rules data/rules.json
+
+# Run BALLM analysis
+ballm-analyze:
+	python -m ngbse20.cli ballm-analyze --findings out/findings.json --out out/ballm_analysis.json
 
 docker-run:
 	docker compose up --build

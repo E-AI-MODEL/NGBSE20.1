@@ -1,6 +1,6 @@
 """
 Pipeline orchestrator for NGBSE 20.1 (Complete Version).
-Order: validate -> collect -> score -> history -> forecast -> propose -> blindspots -> scenarios -> export.
+Order: validate -> collect -> score -> history -> forecast -> propose -> blindspots -> BALLM -> scenarios -> export.
 """
 import json
 import os
@@ -23,6 +23,7 @@ from ..synth.reverse_llm import (
 from ..synth.scenario_engine import build_scenarios
 from ..trace.logger import event
 from ..ballm.meta_layer_generator import BALLMMetaLayerGenerator
+from ..llm_client import LLMClient
 
 LOGGER = get_logger(__name__)
 
@@ -36,6 +37,9 @@ def run_pipeline(
     config = config or {"output_dir": "out", "allowlist": ["*"]}
     output_dir = config.get("output_dir", "out")
     allowlist = config.get("allowlist", ["*"])
+    
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
 
     traces: list[dict[str, Any]] = []
     metrics = metrics or {}
@@ -102,7 +106,7 @@ def run_pipeline(
     asset_scores = aggregate_asset_scores(scored_findings)
     history_dir = os.path.join(output_dir, "history")
     os.makedirs(history_dir, exist_ok=True)
-    ts_filename = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+    ts_filename = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     history_path = os.path.join(history_dir, f"{ts_filename}.asset_scores.json")
     with open(history_path, "w", encoding="utf-8") as f:
         json.dump(asset_scores, f, indent=2)
@@ -144,16 +148,20 @@ def run_pipeline(
     )
     
     # 7.5. BALLM Meta-Layer Generation
-    ballm_generator = BALLMMetaLayerGenerator(LLMClient())
-    meta_layer = ballm_generator.generate_meta_layer(scored_findings, blindspots, asset_scores)
-    traces.append(
-        event(
-            "ballm_meta_layer",
-            {},
-            {"meta_layer_generated": True, "epistemic_humility": meta_layer.get("epistemic_humility_score", 0.0)},
-            "generated BALLM meta-layer with epistemic insights",
+    try:
+        ballm_generator = BALLMMetaLayerGenerator(LLMClient())
+        meta_layer = ballm_generator.generate_meta_layer(scored_findings, blindspots, asset_scores)
+        traces.append(
+            event(
+                "ballm_meta_layer",
+                {},
+                {"meta_layer_generated": True, "epistemic_humility": meta_layer.get("epistemic_humility_score", 0.0)},
+                "generated BALLM meta-layer with epistemic insights",
+            )
         )
-    )
+    except Exception as e:
+        LOGGER.warning(f"BALLM meta-layer generation failed: {e}")
+        meta_layer = {"error": str(e)}
 
     # 8. Scenario Synthesis (Optional LLM)
     scenarios = build_scenarios(scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none"))
@@ -181,12 +189,33 @@ def run_pipeline(
         )
     )
 
+    # Save findings to output directory
+    findings_path = os.path.join(output_dir, "findings.json")
+    with open(findings_path, "w", encoding="utf-8") as f:
+        json.dump(scored_findings, f, indent=2, ensure_ascii=False)
+
+    # Save STIX bundle
+    stix_path = os.path.join(output_dir, "stix_bundle.json")
+    with open(stix_path, "w", encoding="utf-8") as f:
+        json.dump(json.loads(bundle.serialize()), f, indent=2, ensure_ascii=False)
+
     return {
         "status": "ok",
+        "cai": cai,
+        "counts": {
+            "findings": len(scored_findings),
+            "forecasts": len(forecast),
+            "next_seeds": len(next_seeds),
+            "scenarios": len(scenarios)
+        },
+        "output_files": {
+            "findings": findings_path,
+            "stix_bundle": stix_path,
+            "history": history_path
+        },
         "findings": scored_findings,
         "stix": json.loads(bundle.serialize()),
         "traces": traces,
-        "cai": cai,
         "forecast": forecast,
         "next_seeds": next_seeds,
         "blindspots": blindspots,
