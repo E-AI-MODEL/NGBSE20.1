@@ -1,19 +1,21 @@
 """Simple rules engine."""
+from collections.abc import Callable
 from typing import Any
 
-OPS = {
-    '>':  lambda a,b: a >  b,
-    '<':  lambda a,b: a <  b,
-    '>=': lambda a,b: a >= b,
-    '<=': lambda a,b: a <= b,
-    '==': lambda a,b: a == b,
-    '!=': lambda a,b: a != b,
+OPS: dict[str, Callable[[Any, Any], bool]] = {
+    '>':  lambda a, b: a > b,
+    '<':  lambda a, b: a < b,
+    '>=': lambda a, b: a >= b,
+    '<=': lambda a, b: a <= b,
+    '==': lambda a, b: a == b,
+    '!=': lambda a, b: a != b,
 }
 
-def parse_condition(cond: str):
-    for op in ('>=','<=','>','<','==','!='):
+def parse_condition(cond: str) -> tuple[str, float | str]:
+    v: float | str
+    for op in ('>=', '<=', '>', '<', '==', '!='):
         if op in cond:
-            val = cond.split(op,1)[1].strip()
+            val = cond.split(op, 1)[1].strip()
             try:
                 v = float(val)
             except Exception:
@@ -31,15 +33,21 @@ def trigger_matches(trigger: dict[str, str], metrics: dict[str, Any]) -> bool:
             return False
         op, v = parse_condition(str(cond))
         x = metrics.get(k)
-        if isinstance(v, int | float):
+        if x is None:
+            return False
+        if isinstance(v, float):
             try:
                 x = float(x)
             except Exception:
                 return False
+        op_func = OPS.get(op)
+        if op_func is None:
+            return False
         try:
-            if not OPS[op](x, v):
-                return False
+            result = op_func(x, v)
         except Exception:
+            result = False
+        if not result:
             return False
     return True
 
