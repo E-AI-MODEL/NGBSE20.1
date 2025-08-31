@@ -1,4 +1,5 @@
-from ngbse20.utils.url import normalize_url, extract_domain
+from ngbse20.utils.url import extract_domain, normalize_url
+
 
 def test_normalize_basic():
     u = "HTTP://Example.COM:80/path?b=2&a=1&utm_source=x#frag"

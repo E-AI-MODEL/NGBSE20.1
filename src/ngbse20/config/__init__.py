@@ -1,4 +1,12 @@
-from .models import Config, Seed, Rule  # re-export
-from .loader import load_config, load_seeds, load_rules, validate_files
+from .loader import load_config, load_rules, load_seeds, validate_files
+from .models import Config, Rule, Seed
 
-__all__ = ["Config", "Seed", "Rule", "load_config", "load_seeds", "load_rules", "validate_files"]
+__all__ = [
+    "Config",
+    "Rule",
+    "Seed",
+    "load_config",
+    "load_rules",
+    "load_seeds",
+    "validate_files",
+]
