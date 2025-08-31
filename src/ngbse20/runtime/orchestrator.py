@@ -5,7 +5,7 @@ Order: validate -> collect -> score -> history -> forecast -> propose -> blindsp
 import json
 import os
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal, cast
 
 from ..collectors.http_web import HttpWebCollector
 from ..export.stix import to_stix_bundle
@@ -48,7 +48,7 @@ def run_pipeline(
                 {"metrics": metrics},
                 {"hard_block": True},
                 "hard block triggered",
-                rules_fired=[a["rule_id"] for a in acts_block],
+                rules_fired=[cast(str, rid) for a in acts_block if (rid := a.get("rule_id")) is not None],
             )
         )
         return {"status": "blocked", "traces": traces}
@@ -75,7 +75,7 @@ def run_pipeline(
             {"metrics": metrics},
             {"actions": acts_warn},
             "rules evaluated",
-            rules_fired=[a.get("rule_id") for a in acts_warn],
+            rules_fired=[cast(str, rid) for a in acts_warn if (rid := a.get("rule_id")) is not None],
         )
     )
     for a in acts_warn:
@@ -140,7 +140,10 @@ def run_pipeline(
     )
 
     # 8. Scenario Synthesis (Optional LLM)
-    scenarios = build_scenarios(scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none"))
+    scenario_mode = cast(
+        Literal["none", "prompt", "api"], os.getenv("NGBSE_SCENARIO_MODE", "none")
+    )
+    scenarios = build_scenarios(scored_findings, mode=scenario_mode)
     traces.append(
         event(
             "scenario_synthesis",

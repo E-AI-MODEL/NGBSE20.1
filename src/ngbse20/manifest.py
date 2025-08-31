@@ -18,7 +18,7 @@ def write_manifest(out_dir: str, version: str, seeds_path: str, config_path: str
     time.sleep(1) # Simulate work
     end_time = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     
-    manifest = {
+    manifest_data = {
         "ngbse_version": version,
         "start_time": start_time,
         "end_time": end_time,
@@ -28,5 +28,5 @@ def write_manifest(out_dir: str, version: str, seeds_path: str, config_path: str
             "findings.jsonl": sha256_file(findings_path)
         }
     }
-    with open(f"{out_dir}/MANIFEST.json", "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    with open(f"{out_dir}/MANIFEST.json", "w", encoding="utf-8") as fh:
+        json.dump(manifest_data, fh, ensure_ascii=False, indent=2)
