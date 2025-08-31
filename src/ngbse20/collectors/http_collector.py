@@ -1,15 +1,19 @@
 from __future__ import annotations
+
 import requests
 from bs4 import BeautifulSoup
+
 from ngbse20.utils.hash import content_hash
 from ngbse20.utils.url import normalize_url
+
+HTTP_ERROR_THRESHOLD = 400
 
 
 def fetch(url: str):
     url_norm = normalize_url(url)
     try:
         resp = requests.get(url_norm, timeout=15)
-        if resp.status_code >= 400:
+        if resp.status_code >= HTTP_ERROR_THRESHOLD:
             return None
         ctype = resp.headers.get("Content-Type", "")
         if "text/html" not in ctype and "application/xhtml+xml" not in ctype:

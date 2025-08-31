@@ -9,7 +9,7 @@ def fake_get(url, timeout=15, headers=None):
 
 
 def test_run_pipeline(monkeypatch, tmp_path):
-    import ngbse20.collectors.http_web as http_web
+    from ngbse20.collectors import http_web
     monkeypatch.setattr(http_web.requests, 'get', fake_get)
 
     seeds = [{"id": "s1", "query": "https://example.com", "type": "web"}]

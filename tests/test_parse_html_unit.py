@@ -1,4 +1,5 @@
 import json
+
 from ngbse20.collectors.http_async import _parse_html
 
 HTML = """

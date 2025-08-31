@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import datetime
 import json
-from datetime import datetime, timezone
 from typing import Any
 
-from stix2 import Bundle, Indicator, Note, ObservedData
+from stix2 import Bundle, Indicator, Note
 
 from ngbse20.logging import get_logger
 
 LOGGER = get_logger(__name__)
 
-def _now():
-    return datetime.now(timezone.utc)
+HASH_LENGTH = 64
+
+def _now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.UTC)
 
 def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     url = f.get("url") or ""
@@ -31,37 +33,19 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
         },
     )
 
-def _observed_for_finding(f: dict[str, Any]) -> ObservedData:
-    # ObservedData met minimaal url/domain + hash als custom
-    objs = {
-        "0": {
-            "type": "x-oca-asset",  # neutraal custom-ish object type
-            "x_url": f.get("url"),
-            "x_domain": f.get("domain"),
-            "x_hash": f.get("hash"),
-            "x_title": f.get("title"),
-            "x_excerpt": f.get("excerpt", "")[:2048],
-        }
-    }
-    return ObservedData(
-        first_observed=_now(),
-        last_observed=_now(),
-        number_observed=1,
-        object_refs=["0"],
-        objects=objs,
-        allow_custom=True,
-    )
-
 def to_stix_bundle(findings: list[dict[str, Any]]) -> Bundle:
     objects = []
     for f in findings:
         ind = _indicator_for_finding(f)
-        obs = _observed_for_finding(f)
         note = Note(
-            content=f"Source: {f.get('url')}\nFetched: {f.get('fetched_at')}\nPublished: {f.get('published')}",
-            object_refs=[ind, obs],
+            content=(
+                f"Source: {f.get('url')}\n"
+                f"Fetched: {f.get('fetched_at')}\n"
+                f"Published: {f.get('published')}"
+            ),
+            object_refs=[ind],
         )
-        objects.extend([ind, obs, note])
+        objects.extend([ind, note])
     bundle = Bundle(objects=objects, allow_custom=True)
     LOGGER.info("Built STIX bundle with %d objects", len(objects))
     return bundle
