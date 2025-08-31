@@ -13,7 +13,7 @@ class LLMClient:
         self.providers = provider_priority
 
     def call(self, system_prompt: str, user_prompt: str, max_tokens=800, temperature=0.2) -> Optional[str]:
-        for p in self.providers:
+        for p in self.providers or ["openai", "azure_openai", "anthropic", "google"]:
             fn = getattr(self, f"_call_{p}", None)
             if fn:
                 print(f"INFO: Attempting to call LLM provider: {p}")
