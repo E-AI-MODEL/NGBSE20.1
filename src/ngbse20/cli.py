@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 from pathlib import Path
+from typing import Any, Awaitable, Callable
 
 import click
 
@@ -17,13 +18,13 @@ LOGGER = logging.getLogger(__name__)
 
 @click.group()
 @click.option("--log-level", default="INFO", help="DEBUG|INFO|WARNING|ERROR")
-def cli(log_level: str):
+def cli(log_level: str) -> None:
     configure_logging(log_level)
 
 @cli.command("validate-config")
 @click.option("--seeds", required=True, type=click.Path(exists=True))
 @click.option("--rules", required=True, type=click.Path(exists=True))
-def validate_config_cmd(seeds: str, rules: str):
+def validate_config_cmd(seeds: str, rules: str) -> None:
     try:
         n_seeds, n_rules = validate_files(seeds, rules)
     except Exception as e:
@@ -36,17 +37,19 @@ def validate_config_cmd(seeds: str, rules: str):
 @click.option("--out", required=True, type=click.Path())
 @click.option("--async", "use_async", is_flag=True, help="Gebruik async HTTP collector")
 @click.option("--concurrency", default=10, show_default=True)
-def collect(seeds: str, out: str, use_async: bool, concurrency: int):
+def collect(seeds: str, out: str, use_async: bool, concurrency: int) -> None:
     Path(out).mkdir(parents=True, exist_ok=True)
     seed_models = load_seeds(seeds)
     urls = [str(s.url) for s in seed_models]
 
-    findings: list[dict] = []
+    findings: list[dict[str, Any]] = []
     if use_async:
-        async def run():
+        async def run_async() -> list[dict[str, Any]]:
             c = AsyncHTTPCollector(max_concurrency=concurrency)
             return await c.collect(urls)
-        findings = asyncio.run(run())
+
+        runner: Callable[..., Awaitable[list[dict[str, Any]]]] = run_async
+        findings = asyncio.run(runner())
     else:
         seen: set[str] = set()
         for u in urls:
@@ -66,7 +69,7 @@ def collect(seeds: str, out: str, use_async: bool, concurrency: int):
 @cli.command()
 @click.option("--findings", required=True, type=click.Path(exists=True))
 @click.option("--out", required=True, type=click.Path())
-def export_stix(findings: str, out: str):
+def export_stix(findings: str, out: str) -> None:
     data = json.loads(Path(findings).read_text(encoding="utf-8"))
     bundle = findings_to_stix(data, score_lookup=None)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
