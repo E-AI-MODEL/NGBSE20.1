@@ -7,18 +7,44 @@ This tool is the practical implementation of the research paper "From Closure to
 ## Key Features
 
 - **Seed-Driven Analysis**: Start analyses with curated probes (seeds) to guide the search process
-- **Asynchronous Collectors**: Efficiently collect data from web sources with respect for robots.txt and per-domain rate limiting
+- **Multi-Source OSINT Collectors**: Comprehensive data collection from diverse intelligence sources
 - **Epistemic Scoring**: Evaluate findings based on source credibility, content, and recency
 - **Blindspot Analysis**: Identify gaps in collected data regarding coverage, recency, and reliability
 - **BALLM Integration**: Blindspot-Aware Large Language Models that interpret blindspots and generate curiosity questions
 - **STIX 2.1 Export**: Export results in a standardized format for cybersecurity applications
 - **Reproducible & Scalable**: Fully containerized with Docker for consistent and easy deployment
 
+## OSINT Collectors
+
+NGBSE 20.1 includes comprehensive OSINT collectors for threat intelligence:
+
+### **Core Collectors**
+- **HttpWebCollector**: Web scraping and content analysis
+- **LeakIX**: Data breach intelligence and leaked credentials
+- **Shodan**: IoT devices, servers, and infrastructure intelligence
+- **Censys**: Network topology and SSL certificate intelligence
+- **URLScan**: Threat intelligence and malicious URL detection
+- **GitHub**: Code repository and tool intelligence
+- **News**: Recent developments and threat intelligence
+
+### **Collector Configuration**
+Each collector automatically activates when its API key is configured in `.env`:
+```bash
+# Example .env configuration
+LEAKIX_API_KEY=your_key_here
+SHODAN_API_KEY=your_key_here
+CENSYS_API_ID=your_id_here
+CENSYS_API_SECRET=your_secret_here
+URLSCAN_API_KEY=your_key_here
+GITHUB_TOKEN=your_token_here
+NEWS_API_KEY=your_key_here
+```
+
 ## Architecture
 
 The NGBSE pipeline follows a modular approach:
 ```
-Seeds → Collect → Enrich & Score → Dual Output (Answers + Blindspots) → BALLM Meta-Layer → STIX Export
+Seeds → Multi-Collector Data Gathering → Enrich & Score → Dual Output (Answers + Blindspots) → BALLM Meta-Layer → STIX Export
 ```
 
 The BALLM (Blindspot-Aware Large Language Models) layer transforms raw blindspot data into:
@@ -42,9 +68,10 @@ The easiest way to get started is with Docker Compose. This ensures the environm
    ```
 
 2. **Configure your environment:**
-   Copy the example file and fill in any API keys you want to use for LLM integrations.
+   Copy the example file and fill in any API keys you want to use for LLM integrations and OSINT collectors.
    ```bash
    cp .env.example .env
+   # Edit .env and add your API keys
    ```
 
 3. **Start the pipeline:**
@@ -55,7 +82,7 @@ The easiest way to get started is with Docker Compose. This ensures the environm
 
 4. **View results:**
    Results are stored in the `out/` directory.
-   - `out/findings.json`: Raw findings
+   - `out/findings.json`: Raw findings from all collectors
    - `out/stix_bundle.json`: Findings exported to STIX 2.1
    - `out/history/`: Historical asset scores for trend analysis
 
@@ -139,6 +166,16 @@ The tool is controlled via `ngbse20.cli`:
 - **data/seeds.jsonl**: This file contains the starting points (URLs) for the collector. Each line is a JSON object.
 - **data/rules.json**: Defines rules that can be applied during analysis (functionality in development).
 - **.env**: Store your API keys and other secrets here. Use `.env.example` as a template.
+
+### **Seed Types**
+Configure different collector types in your seeds:
+```json
+{"id": "web-1", "query": "https://example.com", "type": "web"}
+{"id": "threat-1", "query": "malware", "type": "leakix"}
+{"id": "infra-1", "query": "nginx", "type": "shodan"}
+{"id": "code-1", "query": "ransomware", "type": "github"}
+{"id": "news-1", "query": "cyber attack", "type": "news"}
+```
 
 ## Development
 

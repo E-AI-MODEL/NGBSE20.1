@@ -5,9 +5,15 @@ Order: validate -> collect -> score -> history -> forecast -> propose -> blindsp
 import json
 import os
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Dict, List
 
 from ..collectors.http_web import HttpWebCollector
+from ..collectors.leakix import LeakIXCollector
+from ..collectors.shodan import ShodanCollector
+from ..collectors.censys import CensysCollector
+from ..collectors.urlscan import URLScanCollector
+from ..collectors.github import GitHubCollector
+from ..collectors.news import NewsCollector
 from ..export.stix import to_stix_bundle
 from ..forecast.engine import aggregate_asset_scores, build_forecast
 from ..logging import get_logger
@@ -26,6 +32,35 @@ from ..ballm.meta_layer_generator import BALLMMetaLayerGenerator
 from ..llm_client import LLMClient
 
 LOGGER = get_logger(__name__)
+
+
+def _build_collectors(config: Dict[str, Any], allowlist: List[str]) -> List[Any]:
+    """Build all available collectors."""
+    collectors = [
+        HttpWebCollector(allowlist_domains=allowlist),
+        LeakIXCollector(config, allowlist),
+        ShodanCollector(config, allowlist),
+        CensysCollector(config, allowlist),
+        URLScanCollector(config, allowlist),
+        GitHubCollector(config, allowlist),
+        NewsCollector(config, allowlist),
+    ]
+    
+    # Filter out collectors that don't have required API keys
+    active_collectors = []
+    for collector in collectors:
+        if hasattr(collector, 'api_key') or hasattr(collector, 'token') or hasattr(collector, 'api_id'):
+            # Check if collector has required credentials
+            if (hasattr(collector, 'api_key') and not collector.api_key):
+                continue
+            if (hasattr(collector, 'token') and not collector.token):
+                continue
+            if (hasattr(collector, 'api_id') and not collector.api_id):
+                continue
+        active_collectors.append(collector)
+    
+    LOGGER.info(f"Active collectors: {[c.__class__.__name__ for c in active_collectors]}")
+    return active_collectors
 
 
 def run_pipeline(
@@ -61,16 +96,24 @@ def run_pipeline(
         )
         return {"status": "blocked", "traces": traces}
 
-    # 2. Collection
-    collector = HttpWebCollector(allowlist_domains=allowlist)
+    # 2. Collection with Multiple Collectors
+    collectors = _build_collectors(config, allowlist)
     findings: list[dict[str, Any]] = []
+    
     for seed in seeds:
-        try:
-            findings.extend(collector.collect(seed, now_iso))
-        except Exception as e:
-            LOGGER.error(f"Collector error for seed {seed.get('id')}: {e}")
+        seed_findings = []
+        for collector in collectors:
+            try:
+                collector_findings = collector.collect(seed, now_iso)
+                seed_findings.extend(collector_findings)
+                LOGGER.debug(f"Collector {collector.__class__.__name__} found {len(collector_findings)} items for seed {seed.get('id')}")
+            except Exception as e:
+                LOGGER.error(f"Collector {collector.__class__.__name__} failed for seed {seed.get('id')}: {e}")
+        
+        findings.extend(seed_findings)
+    
     traces.append(
-        event("collect", {"n_seeds": len(seeds)}, {"n_findings": len(findings)}, "collected findings")
+        event("collect", {"n_seeds": len(seeds), "n_collectors": len(collectors)}, {"n_findings": len(findings)}, "collected findings")
     )
 
     # 3. Rules (non-blocking)
