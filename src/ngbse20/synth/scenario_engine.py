@@ -1,7 +1,10 @@
 import json
-from typing import Any, Literal
+from typing import Any, Literal, TYPE_CHECKING
 
-from ..llm_client import LLMClient
+from ..types import Findings
+
+if TYPE_CHECKING:  # pragma: no cover - imported for type checkers only
+    from ..llm_client import LLMClient
 
 HIGH_RISK_THRESHOLD = 0.75
 
@@ -11,7 +14,7 @@ def _estimate_probability(avg_score: float, evidence_count: int, prior: float = 
     odds = (prior / (1 - prior)) * lr * max(1.0, min(5.0, evidence_count / 3.0))
     return odds / (1 + odds)
 
-def group_by_themes(findings: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def group_by_themes(findings: Findings) -> dict[str, list[dict[str, Any]]]:
     themes = {
         "Public_Code_Exposure": ["github", "oidc", "token", "secret"],
         "Exposed_Cloud_Signed_URLs": [
@@ -38,17 +41,19 @@ def group_by_themes(findings: list[dict[str, Any]]) -> dict[str, list[dict[str, 
     return {k: v for k, v in grouped.items() if v}
 
 def build_scenarios(
-    findings: list[dict[str, Any]],
+    findings: Findings,
     mode: Literal["none", "prompt", "api"] = "none",
     provider_priority: list[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
     groups = group_by_themes(findings)
     out: dict[str, dict[str, Any]] = {}
-    client = (
-        LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
-        if mode == "api"
-        else None
-    )
+    client = None
+    if mode == "api":
+        try:
+            from ..llm_client import LLMClient
+            client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
+        except Exception:  # pragma: no cover - LLM client optional
+            client = None
     
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))

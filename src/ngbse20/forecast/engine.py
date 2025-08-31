@@ -3,6 +3,7 @@ import json
 import os
 from typing import Any
 
+from ..types import AssetScores, Findings
 
 def ewma(values: list[float], alpha: float = 0.4) -> float:
     if not values:
@@ -36,7 +37,7 @@ def build_forecast(out_dir: str) -> dict:
         }
     return forecast
 
-def aggregate_asset_scores(findings: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+def aggregate_asset_scores(findings: Findings) -> AssetScores:
     by_asset: dict[str, dict[str, Any]] = {}
     for f in findings:
         asset = f.get("asset", "")

@@ -1,5 +1,7 @@
 from typing import Any
 
+from ..types import AssetScores, Findings
+
 MIN_SCORE = 0.6
 
 
@@ -14,8 +16,8 @@ def _seed_row(query: str, seed_type: str, priority: float, reason: str) -> dict[
     }
 
 def propose_next_seeds(
-    findings: list[dict[str, Any]],
-    asset_scores: dict[str, dict[str, float]],
+    findings: Findings,
+    asset_scores: AssetScores,
 ) -> list[dict[str, Any]]:
     proposals: list[dict[str, Any]] = []
     seen_queries = set()

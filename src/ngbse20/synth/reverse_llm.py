@@ -1,12 +1,15 @@
 import json
 import os
 from collections import Counter
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from ..llm_client import LLMClient
+from ..types import AssetScores, Findings
+
+if TYPE_CHECKING:  # pragma: no cover - imported for type checkers only
+    from ..llm_client import LLMClient
 
 
-def coverage_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
+def coverage_gap(findings: Findings) -> dict[str, Any]:
     cats: list[str] = []
     for f in findings:
         t = f.get("source", {}).get("type", "")
@@ -23,11 +26,11 @@ def coverage_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
     if total == 0:
         return {"ratios": {}, "max_category": "", "imbalance": 0.0}
     ratios = {k: v / total for k, v in c.items()}
-    max_cat = max(ratios, key=ratios.get) if ratios else ""
+    max_cat = max(ratios, key=lambda k: ratios[k]) if ratios else ""
     imbalance = (max(ratios.values()) - min(ratios.values())) if len(ratios) > 1 else 0.0
     return {"ratios": ratios, "max_category": max_cat, "imbalance": imbalance}
 
-def recency_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
+def recency_gap(findings: Findings) -> dict[str, Any]:
     days = Counter(
         [
             (f.get("timestamps", {}).get("observed", "") or "")[:10]
@@ -41,7 +44,7 @@ def recency_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
     spike = peak_count >= max(3, int(0.7 * sum(days.values())))
     return {"spike": spike, "detail": dict(days)}
 
-def confidence_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
+def confidence_gap(findings: Findings) -> dict[str, Any]:
     high_score_assets: list[str] = []
     low_quality_assets: set[str] = set()
     for f in findings:
@@ -54,7 +57,7 @@ def confidence_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
     risky = sorted({a for a in high_score_assets if a in low_quality_assets})
     return {"risky_assets": risky, "n": len(risky)}
 
-def synthesize_brief(findings: list[dict[str, Any]], asset_scores: dict[str, dict[str, float]]) -> dict[str, Any]:
+def synthesize_brief(findings: Findings, asset_scores: AssetScores) -> dict[str, Any]:
     top_assets = sorted(
         asset_scores.items(), key=lambda kv: kv[1].get("avg_e_ai_star", 0.0), reverse=True
     )[:5]
@@ -68,8 +71,8 @@ def synthesize_brief(findings: list[dict[str, Any]], asset_scores: dict[str, dic
     return {"BLUF": bluf, "TopRisks": risks, "Actions": actions}
 
 def synthesize_brief_llm(
-    findings: list[dict[str, Any]],
-    asset_scores: dict[str, dict[str, float]],
+    findings: Findings,
+    asset_scores: AssetScores,
     mode: str = "none",
     provider_priority: list[str] | None = None,
     out_dir: str | None = None,
@@ -105,6 +108,11 @@ def synthesize_brief_llm(
         return base
         
     if mode == "api":
+        try:
+            from ..llm_client import LLMClient
+        except Exception:  # pragma: no cover - graceful degradation when client missing
+            return base
+
         client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
         system_prompt = "You are a Dutch security analyst. Produce concise BLUF and 3 concrete actions."
         user_prompt = json.dumps(payload, ensure_ascii=False)

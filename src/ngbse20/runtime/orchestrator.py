@@ -7,6 +7,8 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
+from ..types import AssetScores, Findings
+
 from ..collectors.http_web import HttpWebCollector
 from ..export.stix import to_stix_bundle
 from ..forecast.engine import aggregate_asset_scores, build_forecast
@@ -55,7 +57,7 @@ def run_pipeline(
 
     # 2. Collection
     collector = HttpWebCollector(allowlist_domains=allowlist)
-    findings: list[dict[str, Any]] = []
+    findings: Findings = []
     for seed in seeds:
         try:
             findings.extend(collector.collect(seed, now_iso))
@@ -95,7 +97,7 @@ def run_pipeline(
     )
 
     # 5. History & Forecast
-    asset_scores = aggregate_asset_scores(scored_findings)
+    asset_scores: AssetScores = aggregate_asset_scores(scored_findings)
     history_dir = os.path.join(output_dir, "history")
     os.makedirs(history_dir, exist_ok=True)
     ts_filename = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
