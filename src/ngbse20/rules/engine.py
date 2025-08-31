@@ -1,5 +1,5 @@
 """Simple rules engine."""
-from typing import List, Dict, Any
+from typing import Any
 
 OPS = {
     '>':  lambda a,b: a >  b,
@@ -25,13 +25,13 @@ def parse_condition(cond: str):
         v = cond
     return '==', v
 
-def trigger_matches(trigger: Dict[str, str], metrics: Dict[str, Any]) -> bool:
+def trigger_matches(trigger: dict[str, str], metrics: dict[str, Any]) -> bool:
     for k, cond in trigger.items():
         if k not in metrics:
             return False
         op, v = parse_condition(str(cond))
         x = metrics.get(k)
-        if isinstance(v, (int,float)):
+        if isinstance(v, int | float):
             try:
                 x = float(x)
             except Exception:
@@ -43,7 +43,7 @@ def trigger_matches(trigger: Dict[str, str], metrics: Dict[str, Any]) -> bool:
             return False
     return True
 
-def evaluate_rules(rules: List[Dict[str, Any]], metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+def evaluate_rules(rules: list[dict[str, Any]], metrics: dict[str, Any]) -> list[dict[str, Any]]:
     actions = []
     for r in rules:
         if trigger_matches(r.get('trigger',{}), metrics):

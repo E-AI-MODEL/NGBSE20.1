@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import List, Optional, Dict
+
 from pydantic import BaseModel, Field, HttpUrl, field_validator
+
 
 class Seed(BaseModel):
     url: HttpUrl
-    asset_id: Optional[str] = None
-    tags: List[str] = []
+    asset_id: str | None = None
+    tags: list[str] = []
 
     @field_validator("tags", mode="before")
     @classmethod
@@ -18,6 +19,6 @@ class Rule(BaseModel):
     weight: float = Field(1.0, ge=0)
 
 class Config(BaseModel):
-    seeds: List[Seed] = []
-    rules: List[Rule] = []
-    options: Dict[str, str] = {}
+    seeds: list[Seed] = []
+    rules: list[Rule] = []
+    options: dict[str, str] = {}

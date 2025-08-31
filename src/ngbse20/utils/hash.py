@@ -1,7 +1,7 @@
 from __future__ import annotations
+
 import hashlib
 import re
-from typing import Optional
 
 _WS_RE = re.compile(r"\s+")
 
@@ -14,7 +14,7 @@ def sha256_hex(data: str | bytes) -> str:
         data = data.encode("utf-8", errors="ignore")
     return hashlib.sha256(data).hexdigest()
 
-def content_hash(text: str, *, url: Optional[str] = None, title: Optional[str] = None) -> str:
+def content_hash(text: str, *, url: str | None = None, title: str | None = None) -> str:
     """
     Maak een stabiele hash over genormaliseerde inhoud + optionele context.
     """

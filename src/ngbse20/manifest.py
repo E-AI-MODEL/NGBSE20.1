@@ -1,9 +1,9 @@
+import hashlib
 import json
 import time
-import hashlib
-from typing import Optional
 
-def sha256_file(path: str) -> Optional[str]:
+
+def sha256_file(path: str) -> str | None:
     try:
         h = hashlib.sha256()
         with open(path, "rb") as f:

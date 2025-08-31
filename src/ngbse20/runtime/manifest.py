@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 from ngbse20.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -12,9 +14,9 @@ class Manifest:
     run_id: str
     started_at: str
     finished_at: str
-    inputs: Dict[str, Any]
-    outputs: Dict[str, Any]
-    stats: Dict[str, Any]
+    inputs: dict[str, Any]
+    outputs: dict[str, Any]
+    stats: dict[str, Any]
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -22,9 +24,9 @@ def now_iso() -> str:
 def write_manifest(
     run_id: str,
     *,
-    inputs: Dict[str, Any],
-    outputs: Dict[str, Any],
-    stats: Optional[Dict[str, Any]] = None,
+    inputs: dict[str, Any],
+    outputs: dict[str, Any],
+    stats: dict[str, Any] | None = None,
     path: str = "MANIFEST.json",
 ) -> str:
     manifest = Manifest(
