@@ -36,7 +36,9 @@ dev = [
 ngbse20 = "ngbse20.cli:cli"
 
 [tool.setuptools.packages.find]
+where = ["."]
 include = ["ngbse20*"]
+exclude = ["tests*", "docs*", "data*"]
 
 [tool.ruff]
 line-length = 100
