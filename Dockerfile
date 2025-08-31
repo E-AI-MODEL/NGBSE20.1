@@ -20,6 +20,6 @@ WORKDIR /app
 COPY --from=base /usr/local /usr/local
 COPY . /app
 
-# standaard loglevel via env
-ENV NGBSE_LOGLEVEL=INFO
+# Default logging level
+ENV NGBSE_LOG_LEVEL=INFO
 ENTRYPOINT ["python","-m","ngbse20.cli"]
