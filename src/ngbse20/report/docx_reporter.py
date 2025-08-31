@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..logging import get_logger
@@ -26,7 +26,7 @@ def write_report(
 
     doc = Document()
     doc.add_heading("NGBSE 20.1 - Intelligence Brief", 0)
-    doc.add_paragraph(f"Generated: {datetime.utcnow().isoformat()}Z")
+    doc.add_paragraph(f"Generated: {datetime.now(timezone.utc).isoformat()}")
 
     doc.add_heading("BLUF (Bottom Line Up Front)", 1)
     doc.add_paragraph(brief.get("BLUF", "No summary available."))

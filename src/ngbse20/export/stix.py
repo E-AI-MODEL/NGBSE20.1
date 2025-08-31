@@ -13,13 +13,13 @@ LOGGER = get_logger(__name__)
 HASH_LENGTH = 64
 
 def _now() -> datetime.datetime:
-    return datetime.datetime.now(datetime.UTC)
+    return datetime.datetime.now(datetime.timezone.utc)
 
 def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     url = f.get("url") or ""
     domain = f.get("domain") or ""
     h = f.get("hash") or ""
-    # Primair: url pattern; fallback: domain
+    # Primary: url pattern; fallback: domain
     pattern = f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
     name = (f.get("title") or "Web Finding").strip()[:128]
     return Indicator(

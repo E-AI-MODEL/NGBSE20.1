@@ -67,11 +67,11 @@ def build_scenarios(
                     }
                     for it in items[:8]
                 ],
-                "instructions": "Maak een beknopte NL-samenvatting (2-3 zinnen), zonder geheimen."
+                "instructions": "Make a concise summary (2-3 sentences), without secrets."
             }
             if mode == "api" and client:
                 system_prompt = (
-                    "You are a Dutch security analyst. Write concise, factual risk summaries."
+                    "You are a security analyst. Write concise, factual risk summaries."
                 )
                 user_prompt = json.dumps(payload, ensure_ascii=False)
                 summary = (

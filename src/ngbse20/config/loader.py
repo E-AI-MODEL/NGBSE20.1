@@ -21,13 +21,13 @@ def load_seeds(path: str) -> list[Seed]:
             try:
                 items.append(Seed.model_validate_json(line))
             except ValidationError as e:
-                raise ValueError(f"Seed op regel {ln} faalt validatie: {e}") from e
+                raise ValueError(f"Seed on line {ln} fails validation: {e}") from e
     else:
         data = _read_json(p)
         try:
             items = [Seed(**s) for s in data]
         except ValidationError as e:
-            raise ValueError(f"Seeds faalden validatie: {e}") from e
+            raise ValueError(f"Seeds failed validation: {e}") from e
     return items
 
 def load_rules(path: str) -> list[Rule]:
@@ -36,7 +36,7 @@ def load_rules(path: str) -> list[Rule]:
     try:
         return [Rule(**r) for r in data]
     except ValidationError as e:
-        raise ValueError(f"Rules faalden validatie: {e}") from e
+        raise ValueError(f"Rules failed validation: {e}") from e
 
 def load_config(seeds_path: str, rules_path: str) -> Config:
     seeds = load_seeds(seeds_path)
@@ -44,6 +44,6 @@ def load_config(seeds_path: str, rules_path: str) -> Config:
     return Config(seeds=seeds, rules=rules)
 
 def validate_files(seeds_path: str, rules_path: str) -> tuple[int, int]:
-    """Geeft (#seeds, #rules) terug of raise't ValueError met duidelijke boodschap."""
+    """Returns (#seeds, #rules) or raises ValueError with clear message."""
     cfg = load_config(seeds_path, rules_path)
     return (len(cfg.seeds), len(cfg.rules))

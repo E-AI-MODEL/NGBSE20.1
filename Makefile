@@ -11,7 +11,7 @@ lint:
 	ruff check .
 
 type:
-		mypy --strict ngbse20
+	mypy --strict ngbse20
 
 test:
 		pytest -q --cov=ngbse20
