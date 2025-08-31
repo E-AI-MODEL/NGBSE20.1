@@ -1,92 +1,70 @@
+from __future__ import annotations
 from typing import List, Dict, Any
 from datetime import datetime, timezone
-import uuid
 
-def _ts(ts):
-    if isinstance(ts, str):
-        try:
-            return datetime.fromisoformat(ts.replace('Z','+00:00')).isoformat()
-        except Exception:
-            return datetime.now(timezone.utc).isoformat()
-    if isinstance(ts, datetime):
-        return ts.isoformat()
-    return datetime.now(timezone.utc).isoformat()
+from stix2 import Bundle, Indicator, ObservedData, Note
 
-def _id(ns: str) -> str:
-    return f"{ns}--{uuid.uuid4()}"
+from ngbse20.logging import get_logger
 
-def to_stix(findings: List[Dict[str,Any]], traces: List[Dict[str,Any]]|None=None) -> Dict[str,Any]:
-    traces = traces or []
-    creator = {
-        "type":"identity","spec_version":"2.1","id":_id("identity"),
-        "name":"NGBSE 20.1","identity_class":"organization"
+LOGGER = get_logger(__name__)
+
+def _now():
+    return datetime.now(timezone.utc)
+
+def _indicator_for_finding(f: Dict[str, Any]) -> Indicator:
+    url = f.get("url") or ""
+    domain = f.get("domain") or ""
+    h = f.get("hash") or ""
+    # Primair: url pattern; fallback: domain
+    if url:
+        pattern = f"[url:value = '{url}']"
+    else:
+        pattern = f"[domain-name:value = '{domain}']"
+    name = (f.get("title") or "Web Finding").strip()[:128]
+    return Indicator(
+        name=name,
+        pattern=pattern,
+        pattern_type="stix",
+        valid_from=_now(),
+        custom_properties={
+            "x_ngbse20_domain": domain,
+            "x_ngbse20_hash": h,
+        },
+    )
+
+def _observed_for_finding(f: Dict[str, Any]) -> ObservedData:
+    # ObservedData met minimaal url/domain + hash als custom
+    objs = {
+        "0": {
+            "type": "x-oca-asset",  # neutraal custom-ish object type
+            "x_url": f.get("url"),
+            "x_domain": f.get("domain"),
+            "x_hash": f.get("hash"),
+            "x_title": f.get("title"),
+            "x_excerpt": f.get("excerpt", "")[:2048],
+        }
     }
-    bundle = {"type":"bundle","spec_version":"2.1","id":_id("bundle"),"objects":[creator]}
-    report = {
-        "type":"report","spec_version":"2.1","id":_id("report"),
-        "name":"NGBSE 20.1 Findings","published":datetime.now(timezone.utc).isoformat(),
-        "created_by_ref":creator["id"],"object_refs":[]
-    }
-    bundle["objects"].append(report)
+    return ObservedData(
+        first_observed=_now(), last_observed=_now(),
+        number_observed=1, object_refs=["0"], objects=objs,
+    )
 
+def to_stix_bundle(findings: List[Dict[str, Any]]) -> Bundle:
+    objects = []
     for f in findings:
-        url = f.get("url") or f.get("source",{}).get("url")
-        ts = _ts(f.get("timestamp"))
-        score = f.get("score", 0)
-        od_id, sco_url = None, None
-        if url:
-            sco_url = {"type":"url","value":url,"id":_id("url")}
-            bundle["objects"].append(sco_url)
-            od = {
-                "type":"observed-data","spec_version":"2.1","id":_id("observed-data"),
-                "created":ts,"modified":ts,"created_by_ref":creator["id"],
-                "first_observed":ts,"last_observed":ts,"number_observed":1,
-                "object_refs":[sco_url["id"]]
-            }
-            od_id = od["id"]
-            bundle["objects"].append(od)
-
-        ind = {
-            "type":"indicator","spec_version":"2.1","id":_id("indicator"),
-            "created":ts,"modified":ts,"created_by_ref":creator["id"],
-            "name": f.get("title","NGBSE finding"),
-            "pattern_type":"stix",
-            "pattern": f"[url:value = '{url}']" if url else "[artifact:mime_type = 'text/plain']",
-            "valid_from": ts,
-            "x_ngbse_meta": {
-                "score": score,
-                "score_breakdown": f.get("score_breakdown",{}),
-                "seed_id": f.get("seed_id"),
-                "hash": f.get("hash"),
-                "trace_refs": [t.get("id") for t in traces]
-            }
-        }
-        bundle["objects"].append(ind)
-        report["object_refs"].append(ind["id"])
-        if od_id:
-            rel = {
-                "type":"relationship","spec_version":"2.1","id":_id("relationship"),
-                "relationship_type":"based-on",
-                "source_ref":ind["id"],"target_ref":od_id,
-                "created_by_ref":creator["id"]
-            }
-            bundle["objects"].append(rel)
-            report["object_refs"].append(od_id)
-            report["object_refs"].append(rel["id"])
-
-        note = {
-            "type":"note","spec_version":"2.1","id":_id("note"),
-            "created":ts,"modified":ts,"created_by_ref":creator["id"],
-            "abstract":"NGBSE meta-layer",
-            "content": (f.get("meta",{}).get("blindspots") or f.get("summary","")),
-            "object_refs":[ind["id"]],
-            "x_ngbse_meta": {
-                "provenance": f.get("provenance",{}),
-                "rules_fired": f.get("meta",{}).get("rules_fired",[]),
-                "trace_refs": [t.get("id") for t in traces]
-            }
-        }
-        bundle["objects"].append(note)
-        report["object_refs"].append(note["id"])
-
+        ind = _indicator_for_finding(f)
+        obs = _observed_for_finding(f)
+        note = Note(
+            content=f"Source: {f.get('url')}\nFetched: {f.get('fetched_at')}\nPublished: {f.get('published')}",
+            object_refs=[ind, obs],
+        )
+        objects.extend([ind, obs, note])
+    bundle = Bundle(objects=objects, allow_custom=True)
+    LOGGER.info("Built STIX bundle with %d objects", len(objects))
     return bundle
+
+def write_stix(findings: List[Dict[str, Any]], path: str) -> str:
+    bundle = to_stix_bundle(findings)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(bundle.serialize(pretty=True))
+    return path
