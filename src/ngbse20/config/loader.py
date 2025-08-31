@@ -1,15 +1,17 @@
 from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import List, Tuple
+
 from pydantic import ValidationError
 
-from .models import Config, Seed, Rule
+from .models import Config, Rule, Seed
+
 
 def _read_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
-def load_seeds(path: str) -> List[Seed]:
+def load_seeds(path: str) -> list[Seed]:
     p = Path(path)
     items: list[Seed] = []
     if p.suffix.lower() == ".jsonl":
@@ -28,7 +30,7 @@ def load_seeds(path: str) -> List[Seed]:
             raise ValueError(f"Seeds faalden validatie: {e}") from e
     return items
 
-def load_rules(path: str) -> List[Rule]:
+def load_rules(path: str) -> list[Rule]:
     p = Path(path)
     data = _read_json(p)
     try:
@@ -41,7 +43,7 @@ def load_config(seeds_path: str, rules_path: str) -> Config:
     rules = load_rules(rules_path)
     return Config(seeds=seeds, rules=rules)
 
-def validate_files(seeds_path: str, rules_path: str) -> Tuple[int, int]:
+def validate_files(seeds_path: str, rules_path: str) -> tuple[int, int]:
     """Geeft (#seeds, #rules) terug of raise't ValueError met duidelijke boodschap."""
     cfg = load_config(seeds_path, rules_path)
     return (len(cfg.seeds), len(cfg.rules))
