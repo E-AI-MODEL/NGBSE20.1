@@ -9,7 +9,7 @@ from ngbse20.utils.url import normalize_url
 HTTP_ERROR_THRESHOLD = 400
 
 
-def fetch(url: str):
+def fetch(url: str) -> dict[str, str] | None:
     url_norm = normalize_url(url)
     try:
         resp = requests.get(url_norm, timeout=15)

@@ -27,6 +27,7 @@ def normalize_url(raw: str) -> str:
 
 def extract_domain(raw: str) -> str:
     ext = tldextract.extract(raw)
-    if not ext.registered_domain:
+    # Use top_domain_under_public_suffix instead of deprecated registered_domain
+    if not ext.top_domain_under_public_suffix:
         return (ext.fqdn or raw).lower()
-    return ext.registered_domain.lower()
+    return ext.top_domain_under_public_suffix.lower()

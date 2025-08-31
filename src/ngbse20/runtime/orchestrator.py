@@ -10,6 +10,7 @@ from typing import Any
 from ..collectors.http_web import HttpWebCollector
 from ..export.stix import to_stix_bundle
 from ..forecast.engine import aggregate_asset_scores, build_forecast
+from ..logging import get_logger
 from ..rules.engine import evaluate_rules
 from ..scoring.v18 import DEFAULT as SCORE_DEFAULT, compute_cai, score_findings
 from ..seeds.proposer import propose_next_seeds
@@ -21,6 +22,8 @@ from ..synth.reverse_llm import (
 )
 from ..synth.scenario_engine import build_scenarios
 from ..trace.logger import event
+
+LOGGER = get_logger(__name__)
 
 
 def run_pipeline(
@@ -60,7 +63,7 @@ def run_pipeline(
         try:
             findings.extend(collector.collect(seed, now_iso))
         except Exception as e:
-            print(f"Collector error for seed {seed.get('id')}: {e}")
+            LOGGER.error(f"Collector error for seed {seed.get('id')}: {e}")
     traces.append(
         event("collect", {"n_seeds": len(seeds)}, {"n_findings": len(findings)}, "collected findings")
     )

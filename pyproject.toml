@@ -54,19 +54,11 @@ combine-as-imports = true
 
 [tool.mypy]
 python_version = "3.11"
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-no_implicit_optional = true
-warn_return_any = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-strict_equality = true
+strict = true
 plugins = []
 
 [[tool.mypy.overrides]]
-module = ["tldextract"]
+module = ["tldextract", "stix2", "docx", "docx.shared"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
