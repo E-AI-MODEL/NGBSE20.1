@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any, cast
 
 from pydantic import ValidationError
 
-from .models import Config, Rule, Seed
+from .models import Config, Rule, RuleData, Seed, SeedData
 
 
-def _read_json(path: Path):
+def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 def load_seeds(path: str) -> list[Seed]:
@@ -23,16 +24,16 @@ def load_seeds(path: str) -> list[Seed]:
             except ValidationError as e:
                 raise ValueError(f"Seed op regel {ln} faalt validatie: {e}") from e
     else:
-        data = _read_json(p)
+        data = cast(list[SeedData], _read_json(p))
         try:
-            items = [Seed(**s) for s in data]
+            items = [Seed(**cast(dict[str, Any], s)) for s in data]
         except ValidationError as e:
             raise ValueError(f"Seeds faalden validatie: {e}") from e
     return items
 
 def load_rules(path: str) -> list[Rule]:
     p = Path(path)
-    data = _read_json(p)
+    data = cast(list[RuleData], _read_json(p))
     try:
         return [Rule(**r) for r in data]
     except ValidationError as e:
