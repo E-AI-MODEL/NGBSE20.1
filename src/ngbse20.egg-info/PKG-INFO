@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: ngbse20
+Version: 20.1.1
+Summary: Next-Gen Breach Scenario Engine 20.1
+Requires-Python: >=3.10
+Requires-Dist: requests>=2.31
+Requires-Dist: beautifulsoup4>=4.12
+Requires-Dist: tldextract>=5.1
+Requires-Dist: aiohttp>=3.9
+Requires-Dist: click>=8.1
+Requires-Dist: pydantic>=2.8
+Requires-Dist: stix2>=3.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.2; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.8; extra == "dev"
+Requires-Dist: ruff>=0.5.0; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: pip-audit>=2.7; extra == "dev"
+Requires-Dist: types-requests; extra == "dev"
+Requires-Dist: types-beautifulsoup4; extra == "dev"

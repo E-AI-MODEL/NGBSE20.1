@@ -6,6 +6,10 @@ from typing import Any
 
 import requests
 
+from .logging import get_logger
+
+LOGGER = get_logger(__name__)
+
 try:
     from requests.exceptions import RequestException
 except Exception:  # pragma: no cover - fallback for stubbed requests
@@ -13,7 +17,7 @@ except Exception:  # pragma: no cover - fallback for stubbed requests
         pass
 
 class LLMClient:
-    def __init__(self, provider_priority):
+    def __init__(self, provider_priority: list[str] | None = None):
         self.providers = provider_priority
 
     def call(
@@ -31,13 +35,13 @@ class LLMClient:
         ]:
             fn = getattr(self, f"_call_{p}", None)
             if fn:
-                print(f"INFO: Attempting to call LLM provider: {p}")
+                LOGGER.info(f"Attempting to call LLM provider: {p}")
                 out = fn(system_prompt, user_prompt, max_tokens, temperature)
                 if out:
-                    print(f"INFO: LLM call to {p} successful.")
+                    LOGGER.info(f"LLM call to {p} successful.")
                     return out
                 else:
-                    print(f"WARN: LLM call to {p} failed.")
+                    LOGGER.warning(f"LLM call to {p} failed.")
         return None
 
     def _post_json(
@@ -56,17 +60,17 @@ class LLMClient:
                 r.raise_for_status()
                 return r.json()
             except RequestException as e:
-                print(
-                    f"WARN: llm_request_error, url={url}, attempt={attempt + 1}, err={e!s}"
+                LOGGER.warning(
+                    f"llm_request_error, url={url}, attempt={attempt + 1}, err={e!s}"
                 )
                 if attempt == retries:
                     return None
                 time.sleep(2**attempt)
             except JSONDecodeError as e:
-                print(f"WARN: llm_json_error, url={url}, err={e!s}")
+                LOGGER.warning(f"llm_json_error, url={url}, err={e!s}")
                 return None
 
-    def _call_openai(self, system_prompt, user_prompt, max_tokens, temperature):
+    def _call_openai(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("OPENAI_API_KEY")
         model = os.getenv("OPENAI_MODEL","gpt-4o-mini")
         if not api_key:
@@ -86,7 +90,7 @@ class LLMClient:
         )
         return data["choices"][0]["message"]["content"] if data and data.get("choices") else None
 
-    def _call_azure_openai(self, system_prompt, user_prompt, max_tokens, temperature):
+    def _call_azure_openai(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("AZURE_OPENAI_API_KEY")
         endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT","gpt-4o-mini")
@@ -108,7 +112,7 @@ class LLMClient:
         )
         return data["choices"][0]["message"]["content"] if data and data.get("choices") else None
 
-    def _call_anthropic(self, system_prompt, user_prompt, max_tokens, temperature):
+    def _call_anthropic(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("ANTHROPIC_API_KEY")
         model = os.getenv("ANTHROPIC_MODEL","claude-3-5-sonnet-20240620")
         if not api_key:
@@ -134,7 +138,7 @@ class LLMClient:
             if parts
             else None
         )
-    def _call_google(self, system_prompt, user_prompt, max_tokens, temperature):
+    def _call_google(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("GOOGLE_API_KEY")
         model = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
         if not api_key:

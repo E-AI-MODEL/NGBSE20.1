@@ -34,19 +34,19 @@ def _recency_score(ts: datetime, half_life_days: int) -> float:
 def _clamp(x: float) -> float:
     return max(0.0, min(1.0, float(x)))
 
-def _source_score(f: dict) -> float:
+def _source_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("source", 0))
     except Exception:
         return 0.0
 
-def _keyword_score(f: dict) -> float:
+def _keyword_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("keywords", 0))
     except Exception:
         return 0.0
 
-def compute_cai(traces: list, cfg: dict[str, Any] | None = None) -> float:
+def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None) -> float:
     if not traces:
         return 0.0
     w = {"trace": 0.4, "transparency": 0.3, "blindspot": 0.3}
@@ -74,7 +74,7 @@ def compute_cai(traces: list, cfg: dict[str, Any] | None = None) -> float:
         + w["blindspot"] * blind_rate
     )
 
-def _parse_ts(ts_raw):
+def _parse_ts(ts_raw: Any) -> datetime | None:
     if ts_raw is None:
         return None
     if isinstance(ts_raw, datetime):
