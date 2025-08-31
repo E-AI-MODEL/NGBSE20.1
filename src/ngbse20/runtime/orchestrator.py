@@ -163,7 +163,7 @@ def run_pipeline(
         event(
             "export",
             {"n": len(scored_findings)},
-            {"bundle_objects": len(bundle.objects)},
+            {"bundle_objects": len(bundle["objects"]) if isinstance(bundle, dict) else 0},
             "exported STIX",
         )
     )
