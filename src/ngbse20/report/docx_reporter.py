@@ -1,4 +1,9 @@
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from docx import Document  # type: ignore[import-not-found]
+    from docx.shared import Pt  # type: ignore[import-not-found]
 
 try:
     from docx import Document
@@ -10,11 +15,11 @@ except ImportError:
 
 def write_report(
     path: str,
-    brief: dict,
-    blindspots: dict,
-    forecast: dict,
-    scenarios: dict | None = None,
-):
+    brief: dict[str, Any],
+    blindspots: dict[str, Any],
+    forecast: dict[str, Any],
+    scenarios: dict[str, Any] | None = None,
+) -> None:
     if not _DOCX_AVAILABLE:
         print("WARN: python-docx not installed, skipping .docx report generation.")
         return
