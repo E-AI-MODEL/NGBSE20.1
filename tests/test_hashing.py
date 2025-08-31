@@ -1,5 +1,6 @@
 from ngbse20.utils.hash import content_hash, normalize_text
 
+
 def test_content_hash_stable():
     a = " Hello   world \n\n!"
     b = "Hello world !"

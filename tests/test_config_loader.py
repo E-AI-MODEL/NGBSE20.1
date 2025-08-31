@@ -1,13 +1,22 @@
-from ngbse20.config.loader import load_seeds, load_rules, validate_files
-from pydantic import ValidationError
 import json
 from pathlib import Path
+
+from pydantic import ValidationError
+
+from ngbse20.config.loader import load_rules, load_seeds, validate_files
+
 
 def test_validate_files(tmp_path: Path):
     seeds = tmp_path / "seeds.json"
     rules = tmp_path / "rules.json"
-    seeds.write_text(json.dumps([{"url":"https://example.com","asset_id":"a1","tags":["x"]}]), encoding="utf-8")
-    rules.write_text(json.dumps([{"id":"r1","pattern":"example","weight":1.5}]), encoding="utf-8")
+    seeds.write_text(
+        json.dumps([{"url": "https://example.com", "asset_id": "a1", "tags": ["x"]}]),
+        encoding="utf-8",
+    )
+    rules.write_text(
+        json.dumps([{"id": "r1", "pattern": "example", "weight": 1.5}]),
+        encoding="utf-8",
+    )
 
     n_seeds, n_rules = validate_files(str(seeds), str(rules))
     assert n_seeds == 1 and n_rules == 1

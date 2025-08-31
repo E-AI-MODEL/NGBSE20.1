@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import time
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
 from typing import Any
 from urllib import robotparser
 from urllib.parse import urlsplit, urlunsplit
@@ -39,7 +39,7 @@ class Finding:
     meta: dict[str, Any]
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.datetime.now(datetime.UTC).isoformat()
 
 async def _fetch(session: aiohttp.ClientSession, url: str) -> str | None:
     try:
@@ -148,7 +148,9 @@ async def collect_urls(
         "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
     }
     sem = asyncio.Semaphore(max(1, min(concurrency, MAX_CONCURRENCY)))
-    async with aiohttp.ClientSession(connector=connector, headers=headers, timeout=timeout) as session:
+    async with aiohttp.ClientSession(
+        connector=connector, headers=headers, timeout=timeout
+    ) as session:
         async def _task(u: str):
             async with sem:
                 return await _paced_fetch(session, u)

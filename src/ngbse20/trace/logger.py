@@ -1,12 +1,12 @@
 """Trace logger."""
 
+import datetime
 import uuid
-from datetime import datetime, timezone
 from typing import Any
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.datetime.now(datetime.UTC).isoformat()
 
 def event(  # noqa: PLR0913
     component: str,

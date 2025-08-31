@@ -14,7 +14,13 @@ def _estimate_probability(avg_score: float, evidence_count: int, prior: float = 
 def group_by_themes(findings: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     themes = {
         "Public_Code_Exposure": ["github", "oidc", "token", "secret"],
-        "Exposed_Cloud_Signed_URLs": ["sv=", "signature=", "blob.core.windows.net", "x-amz-signature", "x-goog-signature"],
+        "Exposed_Cloud_Signed_URLs": [
+            "sv=",
+            "signature=",
+            "blob.core.windows.net",
+            "x-amz-signature",
+            "x-goog-signature",
+        ],
         "Exposed_IoT_Infrastructure": ["mqtt", "port:1883", "anonymous"],
         "Archive_Only_Findings": ["web.archive.org", "wayback"],
     }
@@ -38,7 +44,11 @@ def build_scenarios(
 ) -> dict[str, dict[str, Any]]:
     groups = group_by_themes(findings)
     out: dict[str, dict[str, Any]] = {}
-    client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"]) if mode == "api" else None
+    client = (
+        LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
+        if mode == "api"
+        else None
+    )
     
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))
@@ -60,9 +70,14 @@ def build_scenarios(
                 "instructions": "Maak een beknopte NL-samenvatting (2-3 zinnen), zonder geheimen."
             }
             if mode == "api" and client:
-                system_prompt = "You are a Dutch security analyst. Write concise, factual risk summaries."
+                system_prompt = (
+                    "You are a Dutch security analyst. Write concise, factual risk summaries."
+                )
                 user_prompt = json.dumps(payload, ensure_ascii=False)
-                summary = client.call(system_prompt, user_prompt, max_tokens=300, temperature=0.2) or ""
+                summary = (
+                    client.call(system_prompt, user_prompt, max_tokens=300, temperature=0.2)
+                    or ""
+                )
             else:
                 try:
                     with open("out/prompt.scenarios.json", "w", encoding="utf-8") as h:
