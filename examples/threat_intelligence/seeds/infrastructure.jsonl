@@ -1,0 +1,10 @@
+{"id": "web-servers", "query": "nginx apache", "type": "shodan", "priority": 1, "tags": ["infrastructure", "web"], "max_findings": 100}
+{"id": "databases", "query": "mysql postgresql mongodb", "type": "shodan", "priority": 1, "tags": ["infrastructure", "database"], "max_findings": 100}
+{"id": "mail-servers", "query": "smtp imap pop3", "type": "shodan", "priority": 2, "tags": ["infrastructure", "mail"], "max_findings": 50}
+{"id": "ssl-certs", "query": "ssl certificate", "type": "censys", "priority": 2, "tags": ["infrastructure", "ssl"], "max_findings": 100}
+{"id": "vpn-services", "query": "openvpn wireguard", "type": "shodan", "priority": 3, "tags": ["infrastructure", "vpn"], "max_findings": 50}
+{"id": "monitoring", "query": "prometheus grafana", "type": "shodan", "priority": 3, "tags": ["infrastructure", "monitoring"], "max_findings": 50}
+{"id": "container-platforms", "query": "docker kubernetes", "type": "shodan", "priority": 4, "tags": ["infrastructure", "containers"], "max_findings": 50}
+{"id": "cloud-services", "query": "aws azure gcp", "type": "shodan", "priority": 4, "tags": ["infrastructure", "cloud"], "max_findings": 50}
+{"id": "network-devices", "query": "cisco juniper", "type": "shodan", "priority": 5, "tags": ["infrastructure", "network"], "max_findings": 50}
+{"id": "security-tools", "query": "firewall ids ips", "type": "shodan", "priority": 5, "tags": ["infrastructure", "security"], "max_findings": 50}

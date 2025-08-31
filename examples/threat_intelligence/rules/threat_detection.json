@@ -1,0 +1,62 @@
+[
+  {
+    "id": "high-threat-alert",
+    "name": "High Priority Threat Alert",
+    "pattern": "malware|ransomware|phishing",
+    "weight": 3.0,
+    "action": {
+      "type": "warning_flag",
+      "message": "High priority threat indicator detected - immediate review required"
+    },
+    "enabled": true,
+    "tags": ["threat", "high-priority", "alert"]
+  },
+  {
+    "id": "data-breach-alert",
+    "name": "Data Breach Alert",
+    "pattern": "breach|leak|exposed|compromised",
+    "weight": 2.5,
+    "action": {
+      "type": "warning_flag",
+      "message": "Data breach indicator detected - investigate potential exposure"
+    },
+    "enabled": true,
+    "tags": ["breach", "data", "alert"]
+  },
+  {
+    "id": "infrastructure-vulnerability",
+    "name": "Infrastructure Vulnerability",
+    "pattern": "vulnerability|exploit|cve|weakness",
+    "weight": 2.0,
+    "action": {
+      "type": "warning_flag",
+      "message": "Infrastructure vulnerability detected - assess security posture"
+    },
+    "enabled": true,
+    "tags": ["vulnerability", "infrastructure", "security"]
+  },
+  {
+    "id": "critical-block",
+    "name": "Critical Threat Block",
+    "pattern": "critical|urgent|emergency|immediate",
+    "weight": 5.0,
+    "action": {
+      "type": "hard_block",
+      "message": "Critical threat pattern detected - pipeline execution blocked"
+    },
+    "enabled": true,
+    "tags": ["critical", "block", "emergency"]
+  },
+  {
+    "id": "score-boost-threat",
+    "name": "Threat Score Boost",
+    "pattern": "threat|attack|malicious|suspicious",
+    "weight": 1.5,
+    "action": {
+      "type": "score_modifier",
+      "message": "Threat-related finding - score increased for priority"
+    },
+    "enabled": true,
+    "tags": ["threat", "scoring", "priority"]
+  }
+]
