@@ -1,7 +1,8 @@
 import json
-from typing import Any, Literal
+from typing import Any, Literal, TYPE_CHECKING
 
-from ..llm_client import LLMClient
+if TYPE_CHECKING:
+    from ..llm_client import LLMClient
 
 HIGH_RISK_THRESHOLD = 0.75
 
@@ -41,14 +42,16 @@ def build_scenarios(
     findings: list[dict[str, Any]],
     mode: Literal["none", "prompt", "api"] = "none",
     provider_priority: list[str] | None = None,
-) -> dict[str, dict[str, Any]]:
+) -> dict[str, dict[str, int | float | str]]:
     groups = group_by_themes(findings)
-    out: dict[str, dict[str, Any]] = {}
-    client = (
-        LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
-        if mode == "api"
-        else None
-    )
+    out: dict[str, dict[str, int | float | str]] = {}
+    client: LLMClient | None
+    if mode == "api":
+        from ..llm_client import LLMClient
+
+        client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
+    else:
+        client = None
     
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))

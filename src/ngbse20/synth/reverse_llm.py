@@ -1,9 +1,10 @@
 import json
 import os
 from collections import Counter
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from ..llm_client import LLMClient
+if TYPE_CHECKING:
+    from ..llm_client import LLMClient
 
 
 def coverage_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
@@ -105,7 +106,11 @@ def synthesize_brief_llm(
         return base
         
     if mode == "api":
-        client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
+        from ..llm_client import LLMClient
+
+        client: LLMClient | None = LLMClient(
+            provider_priority or ["openai", "azure_openai", "anthropic"]
+        )
         system_prompt = "You are a Dutch security analyst. Produce concise BLUF and 3 concrete actions."
         user_prompt = json.dumps(payload, ensure_ascii=False)
         txt = client.call(system_prompt, user_prompt, max_tokens=400, temperature=0.2)
