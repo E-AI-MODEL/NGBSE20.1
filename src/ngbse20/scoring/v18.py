@@ -28,33 +28,41 @@ DEFAULT = ScoringConfig()
 
 def _recency_score(ts: datetime, half_life_days: int) -> float:
     now = datetime.now(UTC)
-    age_days = max(0.0, (now - ts).total_seconds() / 86400.0)
-    return 0.5 ** (age_days / float(half_life_days))
+    age_days: float = max(0.0, (now - ts).total_seconds() / 86400.0)
+    return float(0.5 ** (age_days / float(half_life_days)))
 
 def _clamp(x: float) -> float:
     return max(0.0, min(1.0, float(x)))
 
-def _source_score(f: dict) -> float:
+def _source_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("source", 0))
     except Exception:
         return 0.0
 
-def _keyword_score(f: dict) -> float:
+def _keyword_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("keywords", 0))
     except Exception:
         return 0.0
 
-def compute_cai(traces: list, cfg: dict[str, Any] | None = None) -> float:
+def compute_cai(
+    traces: list[dict[str, Any]],
+    cfg: dict[str, Any] | None = None,
+) -> float:
+    """Compute the CAI score for the given traces."""
     if not traces:
         return 0.0
-    w = {"trace": 0.4, "transparency": 0.3, "blindspot": 0.3}
+
+    w: dict[str, float] = {"trace": 0.4, "transparency": 0.3, "blindspot": 0.3}
     if isinstance(cfg, dict) and "cai_weights" in cfg:
         w.update(cfg["cai_weights"])
-    trs, trp, blind = [], [], 0
+
+    trs: list[float] = []
+    trp: list[float] = []
+    blind = 0
     for e in traces:
-        rub = (e.get('rubric') or {})
+        rub: dict[str, Any] = e.get("rubric") or {}
         if "reasoning_trace" in rub:
             trs.append(float(rub.get("reasoning_trace", 0)))
         if "transparency" in rub:
@@ -63,8 +71,10 @@ def compute_cai(traces: list, cfg: dict[str, Any] | None = None) -> float:
             acts = (e.get("output") or {}).get("actions", [])
             if any(a.get("type") in ("warning_flag", "hard_block") for a in acts):
                 blind += 1
+
     n = max(1, len(traces))
     blind_rate = blind / n
+
     def mean(xs: list[float]) -> float:
         return (sum(xs) / len(xs)) if xs else 0.0
 
@@ -74,14 +84,15 @@ def compute_cai(traces: list, cfg: dict[str, Any] | None = None) -> float:
         + w["blindspot"] * blind_rate
     )
 
-def _parse_ts(ts_raw):
+def _parse_ts(ts_raw: str | datetime | None) -> datetime | None:
+    """Parse a timestamp from a string or ``datetime``."""
     if ts_raw is None:
         return None
     if isinstance(ts_raw, datetime):
         return ts_raw
     if isinstance(ts_raw, str):
         try:
-            return datetime.fromisoformat(ts_raw.replace('Z','+00:00'))
+            return datetime.fromisoformat(ts_raw.replace("Z", "+00:00"))
         except Exception:
             return None
     return None
