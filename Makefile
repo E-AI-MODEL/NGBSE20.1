@@ -1,28 +1,29 @@
-# NGBSE 20.1 Makefile
-.PHONY: install run test docker build
+.PHONY: install dev lint type test build run export-stix docker-run
 
-# Install dependencies in a virtual environment
 install:
-	python -m venv .venv
-	. .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.lock && pip install -e .
+	python -m pip install --upgrade pip
+	pip install .
 
-# Run the demo pipeline locally
-run:
-	ngbse20 demo --seeds seeds.jsonl --rules rules.json --allowlist "*"
+dev:
+	pip install .[dev]
 
-# Run tests
+lint:
+	ruff check .
+
+type:
+		mypy --strict ngbse20
+
 test:
-	pip install pytest
-	pytest
+		pytest -q --cov=ngbse20
 
-# Build the Docker image
-docker:
-	docker build -t ngbse:20.1 .
+build:
+		docker build -t ngbse20:latest .
 
-# Run the pipeline using Docker Compose
-compose-up:
-	docker compose up --build
+run:
+		python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --async --concurrency 20
 
-# Stop and remove Docker containers
-compose-down:
-	docker compose down
+export-stix:
+			python -m ngbse20.cli export_stix --findings out/findings.json --out out/stix_bundle.json
+
+docker-run:
+			docker compose up --build
