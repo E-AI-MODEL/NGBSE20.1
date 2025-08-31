@@ -1,20 +1,29 @@
+from __future__ import annotations
+
 import re
 import urllib.parse
 import urllib.request
-from typing import Any
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any
 
 try:
     import requests
-except Exception:
+except Exception:  # pragma: no cover - optional dependency
     requests = None
 try:
-    from bs4 import BeautifulSoup
-except Exception:
-    BeautifulSoup = None
-try:
     import tldextract
-except Exception:
+except Exception:  # pragma: no cover - optional dependency
     tldextract = None
+
+if TYPE_CHECKING:
+    import bs4
+
+try:  # pragma: no cover - optional dependency
+    from bs4 import BeautifulSoup as _BeautifulSoup
+except Exception:  # pragma: no cover - optional dependency
+    _BeautifulSoup = None
+
+BeautifulSoup: type[bs4.BeautifulSoup] | None = _BeautifulSoup
 
 META_DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.IGNORECASE | re.DOTALL)
@@ -26,12 +35,13 @@ def parse_published(html: str) -> str:
     if BeautifulSoup:
         soup = BeautifulSoup(html, "html.parser")
         # try common meta tags
-        for tag_name, attrs in [
+        tag_attrs: list[tuple[str, Mapping[str, str]]] = [
             ("meta", {"property": "article:published_time"}),
             ("meta", {"name": "date"}),
             ("meta", {"itemprop": "datePublished"}),
             ("time", {}),
-        ]:
+        ]
+        for tag_name, attrs in tag_attrs:
             node = soup.find(tag_name, attrs=attrs)
             if node:
                 content = node.get("content") or node.get_text(strip=True)
@@ -66,7 +76,7 @@ class HttpWebCollector:
     def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         query = seed.get("query", "")
         urls = re.findall(r"https?://[^\s\"'>]+", query)
-        findings = []
+        findings: list[dict[str, Any]] = []
         for url in urls:
             domain = extract_domain(url)
             if not self._is_allowed(domain):
