@@ -1,4 +1,6 @@
-# NGBSE 20.1: Next-Generation Blind Spot Engine
+# NGBSE20.1
+
+<!-- Test CI trigger - kleine wijziging om CI opnieuw te starten -->
 
 [![CI](https://github.com/E-AI-MODEL/NGBSE20.1/actions/workflows/ci.yml/badge.svg)](https://github.com/E-AI-MODEL/NGBSE20.1/actions/workflows/ci.yml)
 
