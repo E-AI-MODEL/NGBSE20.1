@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from stix2 import Bundle, Indicator, ObservedData, Note
 
 from ngbse20.logging import get_logger
+import json
 
 LOGGER = get_logger(__name__)
 
@@ -68,3 +69,9 @@ def write_stix(findings: List[Dict[str, Any]], path: str) -> str:
     with open(path, "w", encoding="utf-8") as f:
         f.write(bundle.serialize(pretty=True))
     return path
+
+
+def findings_to_stix(findings: List[Dict[str, Any]], score_lookup=None) -> Dict[str, Any]:
+    """Return STIX bundle as Python dict for given findings."""
+    bundle = to_stix_bundle(findings)
+    return json.loads(bundle.serialize())
