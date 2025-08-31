@@ -1,9 +1,5 @@
 # NGBSE20.1
 
-<!-- Test CI trigger - kleine wijziging om CI opnieuw te starten -->
-
-[![CI](https://github.com/E-AI-MODEL/NGBSE20.1/actions/workflows/ci.yml/badge.svg)](https://github.com/E-AI-MODEL/NGBSE20.1/actions/workflows/ci.yml)
-
 NGBSE 20.1 is an engine for epistemic Open-Source Intelligence (OSINT). It's designed not just to find answers, but to expose the "blind spots" in knowledge: assumptions, gaps, and uncertainties. It transforms Large Language Models from "answer machines" into "curiosity partners".
 
 This tool is the practical implementation of the research paper "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs) and the Next-Generation Blind Spot Engine (NGBSE)".
@@ -121,10 +117,6 @@ The tool is controlled via `ngbse20.cli`:
 - **Linting**: `make lint` (uses Ruff)
 - **Type Checking**: `make type` (uses MyPy)
 - **Testing**: `make test` (uses Pytest)
-
-## CI/CD
-
-GitHub Actions runs lint (Ruff), typecheck (mypy), tests (pytest+coverage), and pip-audit.
 
 ## Research Context
 
