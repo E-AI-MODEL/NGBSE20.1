@@ -38,14 +38,14 @@ include = ["ngbse20*"]
 exclude = ["tests*", "docs*", "data*"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py311"
 src = ["src"]
 exclude = ["build/", "dist/", ".venv/"]
 
 [tool.ruff.lint]
 select = ["E","F","I","UP","B","PL","RUF"]
-ignore = []
+ignore = ["E501"]
 per-file-ignores = { "tests/**" = ["PLR2004", "PLC0415", "F401"] }
 
 [tool.ruff.lint.isort]
