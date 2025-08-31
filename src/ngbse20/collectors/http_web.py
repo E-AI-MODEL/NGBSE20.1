@@ -3,6 +3,11 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
+from ..logging import get_logger
+from ..utils.hash import content_hash
+
+LOGGER = get_logger(__name__)
+
 try:
     import requests
 except Exception:
@@ -44,6 +49,9 @@ def parse_published(html: str) -> str:
 def extract_domain(url: str) -> str:
     if tldextract:
         ext = tldextract.extract(url)
+        # Use top_domain_under_public_suffix instead of deprecated API
+        if ext.top_domain_under_public_suffix:
+            return ext.top_domain_under_public_suffix
         return ".".join(p for p in [ext.domain, ext.suffix] if p)
     host = urllib.parse.urlparse(url).netloc.split("@")[-1].split(":")[0]
     if host.startswith("www."):
@@ -70,7 +78,7 @@ class HttpWebCollector:
         for url in urls:
             domain = extract_domain(url)
             if not self._is_allowed(domain):
-                print(f"WARN: Domain not in allowlist, skipping: {domain}")
+                LOGGER.warning(f"Domain not in allowlist, skipping: {domain}")
                 continue
             try:
                 if requests:
@@ -95,7 +103,7 @@ class HttpWebCollector:
 
                 findings.append({
                     "id": f"finding-{seed.get('id', 'unknown')}-{len(findings)}",
-                    "hash": "hash-placeholder",
+                    "hash": content_hash(text, url=url, title=title),
                     "asset": domain.lower(),
                     "raw": {"url": url, "status": status, "title": title},
                     "source": {"type": seed.get("type","web"), "url": url, "domain": domain},
@@ -103,5 +111,5 @@ class HttpWebCollector:
                     "quality": {"q": 0.6 if status == HTTP_OK else 0.3}
                 })
             except Exception as e:
-                print(f"ERROR: Collector failed for {url}: {e}")
+                LOGGER.error(f"Collector failed for {url}: {e}")
         return findings
