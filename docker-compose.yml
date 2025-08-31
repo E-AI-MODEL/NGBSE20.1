@@ -1,12 +1,14 @@
+version: "3.9"
 services:
-  ngbse:
+  ngbse20:
     build: .
-    image: ngbse:20.1
-    container_name: ngbse20
+    image: ngbse20:latest
     env_file:
       - .env
     volumes:
+      - ./data:/app/data:ro
       - ./out:/app/out
-      - ./seeds.jsonl:/app/seeds.jsonl
-      - ./rules.json:/app/rules.json
-    command: ["ngbse20", "demo", "--seeds", "seeds.jsonl", "--rules", "rules.json", "--outdir", "out", "--allowlist", "example.com,example.org"]
+    command: >
+      collect --seeds ${SEEDS_PATH:-data/seeds.jsonl}
+      --out ${OUT_DIR:-out}
+      --async --concurrency ${CONCURRENCY:-20}

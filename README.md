@@ -1,19 +1,24 @@
-# NGBSE 20.1
+# NGBSE20.1
 
-Simplified demonstration of the Next Generation Blind Spot Engine integrating real web collection, scoring, forecasting and seed proposal.
+[![CI](https://github.com/E-AI-MODEL/NGBSE20.1/actions/workflows/ci.yml/badge.svg)](https://github.com/E-AI-MODEL/NGBSE20.1/actions/workflows/ci.yml)
 
-This repository contains a minimal Python package with a CLI entrypoint `ngbse20.cli:main`. The pipeline performs the following steps:
+## Quickstart (local)
+```bash
+python -m pip install --upgrade pip
+pip install .[dev]
+python -m ngbse20.cli validate-config --seeds data/seeds.jsonl --rules data/rules.json
+python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --async --concurrency 20
+python -m ngbse20.cli export_stix --findings out/findings.json --out out/stix_bundle.json
+```
 
-1. Validate rules against metrics
-2. Collect web data for provided seeds using an allowlisted HTTP collector
-3. Score findings
-4. Aggregate asset scores and store history
-5. Build a simple forecast using EWMA
-6. Propose next seeds based on findings and asset risk
-7. Export findings to a STIX 2.1 bundle
-
-Run tests with `pytest` and view the package version with:
+## Docker
 
 ```bash
-python -m ngbse20.cli --version
+cp .env.example .env
+docker compose up --build
+# resultaten: ./out/findings.json en ./out/stix_bundle.json (na export-stap)
 ```
+
+## CI
+
+* GitHub Actions draait lint (Ruff), typecheck (mypy), tests (pytest+coverage) en pip-audit.
