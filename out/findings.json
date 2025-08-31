@@ -1,19 +1,23 @@
 [
   {
-    "id": "5e3f03e368ba51a4",
+    "id": "7c54c785495cdfc6",
     "type": "web Finding",
     "url": "https://www.infosecurity-magazine.com/",
     "domain": "infosecurity-magazine.com",
     "title": "Infosecurity Magazine - Information Security & IT Security News and Resources",
-    "published": null,
-    "fetched_at": "2025-08-31T09:00:24.217503+00:00",
+    "published": "2025-08-29T11:30:00",
+    "fetched_at": "2025-08-31T09:08:26.781800+00:00",
     "excerpt": "Infosecurity Magazine - Information Security & IT Security News and Resources News Topics Features Webinars White Papers Podcasts Events Events & Conferences Directory Npm Package Hijacked to Steal Data and Crypto via AI-Powered Malware News 29 Aug 2025 State-Sponsored Hackers Behind Majority of Vulnerability Exploits News 29 Aug 2025 TransUnion Data Breach Impacts 4.5 Million US Customers News 29 Aug 2025 Fake IT Support Attacks Hit Microsoft Teams News 28 Aug 2025 Malicious VS Code Extensions …",
-    "hash": "5e3f03e368ba51a465839d4807cb01f401f478e5e42c888a4c45a5808402212a",
+    "hash": "7c54c785495cdfc66437ffad20e6ecc082585b04c4509689aecd75a45915e569",
     "meta": {
-      "length": 8906,
-      "has_title": true
+      "length": 8875,
+      "has_title": true,
+      "has_meta_description": true,
+      "has_og_tags": false,
+      "language": "",
+      "word_count": 1386
     },
-    "content_hash": "5e3f03e368ba51a465839d4807cb01f401f478e5e42c888a4c45a5808402212a"
+    "content_hash": "7c54c785495cdfc66437ffad20e6ecc082585b04c4509689aecd75a45915e569"
   },
   {
     "id": "7232ac233aa29028",
@@ -22,12 +26,16 @@
     "domain": "cyberdefensemagazine.com",
     "title": "Cyber Defense Magazine | Cybersecurity Magazine - Daily News",
     "published": "2021-02-13T03:19:45+00:00",
-    "fetched_at": "2025-08-31T09:00:24.327672+00:00",
-    "excerpt": "Cyber Defense Magazine | Cybersecurity Magazine - Daily News Call us Toll Free (USA): 1-833-844-9468      International: +1-603-280-4451 M-F 8am to 6pm EST Media Kit Subscribe Contact Home Subscribe Magazines Subscribe Read Listen Watch Write for Us CDM Editorial Calendar News Cyber Security News InfoSec Research Library Quotables Partners & Events Write for Us Spotlight Innovator Spotlights Artificial Intelligence (A.I.) Whitepapers Certifications Reviews Product Review: How Sacumen Platform Tr…",
+    "fetched_at": "2025-08-31T09:08:26.828227+00:00",
+    "excerpt": "Cyber Defense Magazine | Cybersecurity Magazine - Daily News Call us Toll Free (USA): 1-833-844-9468 International: +1-603-280-4451 M-F 8am to 6pm EST Media Kit Subscribe Contact Home Subscribe Magazines Subscribe Read Listen Watch Write for Us CDM Editorial Calendar News Cyber Security News InfoSec Research Library Quotables Partners & Events Write for Us Spotlight Innovator Spotlights Artificial Intelligence (A.I.) Whitepapers Certifications Reviews Product Review: How Sacumen Platform Transfo…",
     "hash": "7232ac233aa29028b1d7ebd5bc9f5663bd3aad6cb2fa9cc2bd8872b3f358cfd5",
     "meta": {
-      "length": 8052,
-      "has_title": true
+      "length": 8041,
+      "has_title": true,
+      "has_meta_description": true,
+      "has_og_tags": false,
+      "language": "",
+      "word_count": 1189
     },
     "content_hash": "7232ac233aa29028b1d7ebd5bc9f5663bd3aad6cb2fa9cc2bd8872b3f358cfd5"
   }

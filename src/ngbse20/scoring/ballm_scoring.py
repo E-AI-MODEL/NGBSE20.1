@@ -10,10 +10,8 @@ by Hans Visser (August 2025)
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
-import hashlib
-import json
+from datetime import UTC, datetime
+from typing import Any
 
 from ..logging import get_logger
 
@@ -25,16 +23,16 @@ class BlindspotAnalysis:
     type: str  # "coverage", "recency", "confidence", "assumption", "contradiction"
     severity: float  # 0.0 to 1.0
     description: str
-    evidence: List[str]
-    mitigation_suggestions: List[str]
+    evidence: list[str]
+    mitigation_suggestions: list[str]
     epistemic_score: float  # How much this blindspot affects overall confidence
 
 @dataclass
 class EpistemicMetaLayer:
     """Meta-layer containing blind spots and epistemic analysis."""
-    blindspots: List[BlindspotAnalysis]
-    assumptions: List[str]
-    confidence_gaps: List[str]
+    blindspots: list[BlindspotAnalysis]
+    assumptions: list[str]
+    confidence_gaps: list[str]
     curiosity_amplification_index: float  # CAI score
     epistemic_humility_score: float
     overall_epistemic_quality: float
@@ -43,7 +41,7 @@ class EpistemicMetaLayer:
 class BALLMScoringConfig:
     """Configuration for BALLM-aware scoring."""
     # Base scoring weights
-    weights: Dict[str, float] = field(default_factory=lambda: {
+    weights: dict[str, float] = field(default_factory=lambda: {
         "source": 0.25,
         "content": 0.25,
         "recency": 0.20,
@@ -51,7 +49,7 @@ class BALLMScoringConfig:
     })
     
     # Blindspot detection thresholds
-    blindspot_thresholds: Dict[str, float] = field(default_factory=lambda: {
+    blindspot_thresholds: dict[str, float] = field(default_factory=lambda: {
         "coverage_gap": 0.3,
         "recency_gap": 0.4,
         "confidence_gap": 0.5,
@@ -59,7 +57,7 @@ class BALLMScoringConfig:
     })
     
     # Epistemic scoring parameters
-    epistemic_params: Dict[str, float] = field(default_factory=lambda: {
+    epistemic_params: dict[str, float] = field(default_factory=lambda: {
         "humility_bonus": 0.1,
         "uncertainty_penalty": 0.05,
         "contradiction_penalty": 0.15,
@@ -68,16 +66,16 @@ class BALLMScoringConfig:
 
 DEFAULT_CONFIG = BALLMScoringConfig()
 
-def _calculate_recency_score(timestamp: Optional[datetime], half_life_days: int = 30) -> float:
+def _calculate_recency_score(timestamp: datetime | None, half_life_days: int = 30) -> float:
     """Calculate recency score with exponential decay."""
     if not timestamp:
         return 0.0
     
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     age_days = max(0.0, (now - timestamp).total_seconds() / 86400.0)
     return 0.5 ** (age_days / float(half_life_days))
 
-def _calculate_source_credibility(finding: Dict[str, Any]) -> float:
+def _calculate_source_credibility(finding: dict[str, Any]) -> float:
     """Calculate source credibility score based on domain reputation and metadata."""
     domain = finding.get("domain", "")
     meta = finding.get("meta", {})
@@ -101,7 +99,7 @@ def _calculate_source_credibility(finding: Dict[str, Any]) -> float:
     
     return min(1.0, base_score)
 
-def _calculate_content_quality(finding: Dict[str, Any]) -> float:
+def _calculate_content_quality(finding: dict[str, Any]) -> float:
     """Calculate content quality score."""
     excerpt = finding.get("excerpt", "")
     title = finding.get("title", "")
@@ -123,7 +121,7 @@ def _calculate_content_quality(finding: Dict[str, Any]) -> float:
     
     return (length_score * 0.4 + title_score * 0.3 + keyword_score * 0.3)
 
-def _detect_blindspots(findings: List[Dict[str, Any]], config: BALLMScoringConfig) -> List[BlindspotAnalysis]:
+def _detect_blindspots(findings: list[dict[str, Any]], config: BALLMScoringConfig) -> list[BlindspotAnalysis]:
     """Detect blind spots and epistemic gaps in the findings."""
     blindspots = []
     
@@ -132,7 +130,7 @@ def _detect_blindspots(findings: List[Dict[str, Any]], config: BALLMScoringConfi
         blindspots.append(BlindspotAnalysis(
             type="coverage_gap",
             severity=0.8,
-            description="Limited coverage - only {} sources analyzed".format(len(findings)),
+            description=f"Limited coverage - only {len(findings)} sources analyzed",
             evidence=[f"Total findings: {len(findings)}"],
             mitigation_suggestions=["Expand seed sources", "Increase collection depth"],
             epistemic_score=0.7
@@ -144,9 +142,9 @@ def _detect_blindspots(findings: List[Dict[str, Any]], config: BALLMScoringConfi
         if f.get("fetched_at"):
             try:
                 fetched = datetime.fromisoformat(f["fetched_at"].replace('Z', '+00:00'))
-                if (datetime.now(timezone.utc) - fetched).days < 7:
+                if (datetime.now(UTC) - fetched).days < 7:
                     recent_findings += 1
-            except:
+            except Exception:
                 pass
     
     if recent_findings < len(findings) * 0.5:
@@ -190,7 +188,7 @@ def _detect_blindspots(findings: List[Dict[str, Any]], config: BALLMScoringConfi
     
     return blindspots
 
-def _calculate_curiosity_amplification_index(blindspots: List[BlindspotAnalysis]) -> float:
+def _calculate_curiosity_amplification_index(blindspots: list[BlindspotAnalysis]) -> float:
     """Calculate the Curiosity Amplification Index (CAI)."""
     if not blindspots:
         return 0.0
@@ -204,7 +202,7 @@ def _calculate_curiosity_amplification_index(blindspots: List[BlindspotAnalysis]
     
     return cai
 
-def _calculate_epistemic_humility(blindspots: List[BlindspotAnalysis], findings: List[Dict[str, Any]]) -> float:
+def _calculate_epistemic_humility(blindspots: list[BlindspotAnalysis], findings: list[dict[str, Any]]) -> float:
     """Calculate epistemic humility score based on awareness of limitations."""
     if not blindspots:
         return 0.0
@@ -219,9 +217,9 @@ def _calculate_epistemic_humility(blindspots: List[BlindspotAnalysis], findings:
     return min(1.0, humility_base + diversity_bonus)
 
 def score_findings_ballm(
-    findings: List[Dict[str, Any]], 
+    findings: list[dict[str, Any]], 
     config: BALLMScoringConfig = DEFAULT_CONFIG
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Score findings using BALLM-aware approach with dual-layer output.
     
@@ -246,7 +244,7 @@ def score_findings_ballm(
         if finding.get("fetched_at"):
             try:
                 timestamp = datetime.fromisoformat(finding["fetched_at"].replace('Z', '+00:00'))
-            except:
+            except Exception:
                 pass
         
         # Calculate component scores

@@ -13,7 +13,7 @@ LOGGER = get_logger(__name__)
 HASH_LENGTH = 64
 
 def _now() -> datetime.datetime:
-    return datetime.datetime.now(datetime.timezone.utc)
+    return datetime.datetime.now(datetime.UTC)
 
 def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     url = f.get("url") or ""

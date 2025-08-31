@@ -1,55 +1,55 @@
 {
   "type": "bundle",
-  "id": "bundle--069cdb73-bf16-416e-a85e-d601e23d1dbf",
+  "id": "bundle--a3a5c57f-8c2e-496a-92b8-eb9b52e9926d",
   "objects": [
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--d9d402bd-e674-4804-a1c8-0c7cc6c852f6",
-      "created": "2025-08-31T09:00:18.942728Z",
-      "modified": "2025-08-31T09:00:18.942728Z",
+      "id": "indicator--b6cdf6c2-b00b-4907-a73e-fec0f4579d28",
+      "created": "2025-08-31T09:08:31.253091Z",
+      "modified": "2025-08-31T09:08:31.253091Z",
       "name": "Infosecurity Magazine - Information Security & IT Security News and Resources",
       "pattern": "[url:value = 'https://www.infosecurity-magazine.com/']",
       "pattern_type": "stix",
       "pattern_version": "2.1",
-      "valid_from": "2025-08-31T09:00:18.942718Z",
+      "valid_from": "2025-08-31T09:08:31.253082Z",
       "x_ngbse20_domain": "infosecurity-magazine.com",
-      "x_ngbse20_hash": "5e3f03e368ba51a465839d4807cb01f401f478e5e42c888a4c45a5808402212a"
+      "x_ngbse20_hash": "7c54c785495cdfc66437ffad20e6ecc082585b04c4509689aecd75a45915e569"
     },
     {
       "type": "note",
       "spec_version": "2.1",
-      "id": "note--75692fa8-a818-40a6-8f66-43abfe5e1e95",
-      "created": "2025-08-31T09:00:18.946225Z",
-      "modified": "2025-08-31T09:00:18.946225Z",
-      "content": "Source: https://www.infosecurity-magazine.com/\nFetched: 2025-08-31T09:00:13.756037+00:00\nPublished: None",
+      "id": "note--2b3d342a-6b19-4853-aeaf-e8ced09d270e",
+      "created": "2025-08-31T09:08:31.25658Z",
+      "modified": "2025-08-31T09:08:31.25658Z",
+      "content": "Source: https://www.infosecurity-magazine.com/\nFetched: 2025-08-31T09:08:26.781800+00:00\nPublished: 2025-08-29T11:30:00",
       "object_refs": [
-        "indicator--d9d402bd-e674-4804-a1c8-0c7cc6c852f6"
+        "indicator--b6cdf6c2-b00b-4907-a73e-fec0f4579d28"
       ]
     },
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--a4fdf3d7-5938-4a29-9657-adb0a732ebdb",
-      "created": "2025-08-31T09:00:18.946539Z",
-      "modified": "2025-08-31T09:00:18.946539Z",
+      "id": "indicator--9e196d1e-7394-4738-a888-20ab9cfb0b32",
+      "created": "2025-08-31T09:08:31.256898Z",
+      "modified": "2025-08-31T09:08:31.256898Z",
       "name": "Cyber Defense Magazine | Cybersecurity Magazine - Daily News",
       "pattern": "[url:value = 'https://www.cyberdefensemagazine.com/']",
       "pattern_type": "stix",
       "pattern_version": "2.1",
-      "valid_from": "2025-08-31T09:00:18.946533Z",
+      "valid_from": "2025-08-31T09:08:31.256893Z",
       "x_ngbse20_domain": "cyberdefensemagazine.com",
       "x_ngbse20_hash": "7232ac233aa29028b1d7ebd5bc9f5663bd3aad6cb2fa9cc2bd8872b3f358cfd5"
     },
     {
       "type": "note",
       "spec_version": "2.1",
-      "id": "note--e123efde-cfa2-4942-839b-af046762e36d",
-      "created": "2025-08-31T09:00:18.94706Z",
-      "modified": "2025-08-31T09:00:18.94706Z",
-      "content": "Source: https://www.cyberdefensemagazine.com/\nFetched: 2025-08-31T09:00:13.794860+00:00\nPublished: 2021-02-13T03:19:45+00:00",
+      "id": "note--389226fc-5af3-4585-8386-f91909a1f7e8",
+      "created": "2025-08-31T09:08:31.257399Z",
+      "modified": "2025-08-31T09:08:31.257399Z",
+      "content": "Source: https://www.cyberdefensemagazine.com/\nFetched: 2025-08-31T09:08:26.828227+00:00\nPublished: 2021-02-13T03:19:45+00:00",
       "object_refs": [
-        "indicator--a4fdf3d7-5938-4a29-9657-adb0a732ebdb"
+        "indicator--9e196d1e-7394-4738-a888-20ab9cfb0b32"
       ]
     }
   ]

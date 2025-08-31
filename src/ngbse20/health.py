@@ -8,9 +8,9 @@ for production monitoring and alerting.
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .logging import get_logger
 
@@ -24,12 +24,12 @@ class HealthChecker:
         self.start_time = time.time()
         self.health_metrics = {}
     
-    def check_system_health(self) -> Dict[str, Any]:
+    def check_system_health(self) -> dict[str, Any]:
         """Check overall system health."""
         try:
             health_status = {
                 "status": "healthy",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "uptime_seconds": int(time.time() - self.start_time),
                 "checks": {}
             }
@@ -63,12 +63,12 @@ class HealthChecker:
             LOGGER.error("Health check failed: %s", e)
             return {
                 "status": "error",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "error": str(e),
                 "uptime_seconds": int(time.time() - self.start_time)
             }
     
-    def _check_output_directory(self) -> Dict[str, Any]:
+    def _check_output_directory(self) -> dict[str, Any]:
         """Check output directory health."""
         try:
             if not self.output_dir.exists():
@@ -109,7 +109,7 @@ class HealthChecker:
                 "path": str(self.output_dir)
             }
     
-    def _check_recent_activity(self) -> Dict[str, Any]:
+    def _check_recent_activity(self) -> dict[str, Any]:
         """Check recent pipeline activity."""
         try:
             findings_file = self.output_dir / "findings.json"
@@ -130,7 +130,7 @@ class HealthChecker:
                     findings_data = json.loads(findings_file.read_text())
                     recent_activity["findings_count"] = len(findings_data)
                     recent_activity["last_findings_update"] = datetime.fromtimestamp(
-                        findings_file.stat().st_mtime, tz=timezone.utc
+                        findings_file.stat().st_mtime, tz=UTC
                     ).isoformat()
                 except Exception as e:
                     recent_activity["status"] = "error"
@@ -142,7 +142,7 @@ class HealthChecker:
                     stix_data = json.loads(stix_file.read_text())
                     recent_activity["stix_objects"] = len(stix_data.get("objects", []))
                     recent_activity["last_stix_update"] = datetime.fromtimestamp(
-                        stix_file.stat().st_mtime, tz=timezone.utc
+                        stix_file.stat().st_mtime, tz=UTC
                     ).isoformat()
                 except Exception as e:
                     recent_activity["status"] = "error"
@@ -157,7 +157,7 @@ class HealthChecker:
                     # Check most recent history file
                     latest_history = max(history_files, key=lambda f: f.stat().st_mtime)
                     recent_activity["last_history_update"] = datetime.fromtimestamp(
-                        latest_history.stat().st_mtime, tz=timezone.utc
+                        latest_history.stat().st_mtime, tz=UTC
                     ).isoformat()
             
             # Determine activity status
@@ -176,7 +176,7 @@ class HealthChecker:
                 "message": f"Recent activity check failed: {e}"
             }
     
-    def _check_filesystem(self) -> Dict[str, Any]:
+    def _check_filesystem(self) -> dict[str, Any]:
         """Check filesystem health."""
         try:
             # Check disk space
@@ -216,7 +216,7 @@ class HealthChecker:
                 "message": f"Filesystem check failed: {e}"
             }
     
-    def _check_performance(self) -> Dict[str, Any]:
+    def _check_performance(self) -> dict[str, Any]:
         """Check system performance metrics."""
         try:
             import psutil
@@ -267,13 +267,13 @@ class HealthChecker:
                 "message": f"Performance check failed: {e}"
             }
     
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get current performance metrics."""
         try:
             import psutil
             
             return {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "uptime_seconds": int(time.time() - self.start_time),
                 "cpu_percent": psutil.cpu_percent(interval=0.1),
                 "memory_percent": psutil.virtual_memory().percent,
@@ -286,11 +286,11 @@ class HealthChecker:
             }
         except Exception as e:
             return {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "error": str(e)
             }
     
-    def get_pipeline_status(self) -> Dict[str, Any]:
+    def get_pipeline_status(self) -> dict[str, Any]:
         """Get current pipeline status."""
         try:
             # Check for running processes or recent activity
@@ -305,11 +305,11 @@ class HealthChecker:
             
             # Check last modification time
             last_modified = datetime.fromtimestamp(
-                findings_file.stat().st_mtime, tz=timezone.utc
+                findings_file.stat().st_mtime, tz=UTC
             )
             
             # Determine if pipeline is active
-            time_since_last = datetime.now(timezone.utc) - last_modified
+            time_since_last = datetime.now(UTC) - last_modified
             
             if time_since_last.total_seconds() < 300:  # 5 minutes
                 pipeline_status = "active"
@@ -334,17 +334,17 @@ class HealthChecker:
                 "message": f"Pipeline status check failed: {e}"
             }
 
-def get_health_status(output_dir: str = "out") -> Dict[str, Any]:
+def get_health_status(output_dir: str = "out") -> dict[str, Any]:
     """Get comprehensive health status."""
     checker = HealthChecker(output_dir)
     return checker.check_system_health()
 
-def get_metrics(output_dir: str = "out") -> Dict[str, Any]:
+def get_metrics(output_dir: str = "out") -> dict[str, Any]:
     """Get current performance metrics."""
     checker = HealthChecker(output_dir)
     return checker.get_metrics()
 
-def get_pipeline_status(output_dir: str = "out") -> Dict[str, Any]:
+def get_pipeline_status(output_dir: str = "out") -> dict[str, Any]:
     """Get current pipeline status."""
     checker = HealthChecker(output_dir)
     return checker.get_pipeline_status()

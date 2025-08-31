@@ -129,7 +129,7 @@ def metrics_cmd(out: str, output_format: str):
         if output_format == "json":
             click.echo(json.dumps(metrics, indent=2))
         else:
-            click.echo(f"📊 Performance Metrics")
+            click.echo("📊 Performance Metrics")
             click.echo(f"⏰ Timestamp: {metrics['timestamp']}")
             click.echo(f"⏱️  Uptime: {metrics['uptime_seconds']} seconds")
             click.echo()

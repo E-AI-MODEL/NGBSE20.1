@@ -41,7 +41,7 @@ class Finding:
     meta: dict[str, Any]
 
 def _now_iso() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+    return datetime.datetime.now(datetime.UTC).isoformat()
 
 async def _fetch_with_retry(session: aiohttp.ClientSession, url: str, max_retries: int = MAX_RETRIES) -> str | None:
     """Fetch URL with exponential backoff retry logic."""
@@ -62,7 +62,7 @@ async def _fetch_with_retry(session: aiohttp.ClientSession, url: str, max_retrie
                 
                 return await resp.text(errors="ignore")
                 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             LOGGER.warning("Timeout for %s (attempt %d/%d)", url, attempt + 1, max_retries + 1)
             if attempt == max_retries:
                 return None
