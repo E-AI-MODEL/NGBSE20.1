@@ -4,7 +4,7 @@ Order: validate -> collect -> score -> history -> forecast -> propose -> blindsp
 """
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..collectors.http_web import HttpWebCollector
@@ -38,7 +38,7 @@ def run_pipeline(
 
     traces: list[dict[str, Any]] = []
     metrics = metrics or {}
-    now_iso = datetime.now(UTC).isoformat()
+    now_iso = datetime.now(timezone.utc).isoformat()
 
     # 1. Validation Gate
     acts_block = evaluate_rules(

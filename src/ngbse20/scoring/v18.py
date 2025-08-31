@@ -1,7 +1,7 @@
 """Simple scoring engine v18."""
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -27,7 +27,7 @@ class ScoringConfig:
 DEFAULT = ScoringConfig()
 
 def _recency_score(ts: datetime, half_life_days: int) -> float:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     age_days = max(0.0, (now - ts).total_seconds() / 86400.0)
     return 0.5 ** (age_days / float(half_life_days))
 
