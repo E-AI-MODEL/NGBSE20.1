@@ -58,12 +58,12 @@ def synthesize_brief(findings: list[dict[str, Any]], asset_scores: dict[str, dic
     top_assets = sorted(
         asset_scores.items(), key=lambda kv: kv[1].get("avg_e_ai_star", 0.0), reverse=True
     )[:5]
-    bluf = "Belangrijkste bevindingen geconsolideerd. Zie risico's en acties per asset."
+    bluf = "Key findings consolidated. See risks and actions per asset."
     risks = [{"asset": a, "risk": round(v["avg_e_ai_star"], 3)} for a, v in top_assets]
     actions = [
-        "Valideer top-assets handmatig (sign-off vereist)",
-        "Controleer coverage-imbalance en vul ontbrekende bronklassen aan",
-        "Plan nieuwe run binnen 7 dagen voor trendbewaking"
+        "Validate top assets manually (sign-off required)",
+        "Check coverage imbalance and fill missing source classes",
+        "Plan new run within 7 days for trend monitoring"
     ]
     return {"BLUF": bluf, "TopRisks": risks, "Actions": actions}
 
@@ -81,7 +81,7 @@ def synthesize_brief_llm(
         
     top_assets = sorted(asset_scores.items(), key=lambda kv: kv[1].get("avg_e_ai_star", 0.0), reverse=True)[:5]
     payload = {
-        "instruction": "Schrijf een beknopte NL BLUF (2-3 zinnen) + 3 acties. Wees feitelijk, geen geheimen.",
+        "instruction": "Write a concise BLUF (2-3 sentences) + 3 actions. Be factual, no secrets.",
         "top_assets": [{"asset": a, "avg_eai": round(v["avg_e_ai_star"],3)} for a, v in top_assets],
         "examples": [
             {

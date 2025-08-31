@@ -6,7 +6,7 @@ import re
 _WS_RE = re.compile(r"\s+")
 
 def normalize_text(text: str) -> str:
-    """Minimal, deterministic normalisatie voor hashing."""
+    """Minimal, deterministic normalization for hashing."""
     return _WS_RE.sub(" ", (text or "").strip())
 
 def sha256_hex(data: str | bytes) -> str:
@@ -16,7 +16,7 @@ def sha256_hex(data: str | bytes) -> str:
 
 def content_hash(text: str, *, url: str | None = None, title: str | None = None) -> str:
     """
-    Maak een stabiele hash over genormaliseerde inhoud + optionele context.
+    Create a stable hash over normalized content + optional context.
     """
     norm = normalize_text(text)
     ctx = "||".join(x for x in [title or "", url or ""] if x)

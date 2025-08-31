@@ -34,7 +34,7 @@ def validate_config_cmd(seeds: str, rules: str):
 @cli.command()
 @click.option("--seeds", required=True, type=click.Path(exists=True))
 @click.option("--out", required=True, type=click.Path())
-@click.option("--async", "use_async", is_flag=True, help="Gebruik async HTTP collector")
+@click.option("--async", "use_async", is_flag=True, help="Use async HTTP collector")
 @click.option("--concurrency", default=10, show_default=True)
 def collect(seeds: str, out: str, use_async: bool, concurrency: int):
     Path(out).mkdir(parents=True, exist_ok=True)
