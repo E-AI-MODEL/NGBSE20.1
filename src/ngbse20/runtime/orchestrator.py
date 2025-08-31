@@ -4,15 +4,14 @@ Order: validate -> collect -> score -> history -> forecast -> propose -> blindsp
 """
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from ..collectors.http_web import HttpWebCollector
 from ..export.stix import to_stix_bundle
 from ..forecast.engine import aggregate_asset_scores, build_forecast
 from ..rules.engine import evaluate_rules
-from ..scoring.v18 import DEFAULT as SCORE_DEFAULT
-from ..scoring.v18 import compute_cai, score_findings
+from ..scoring.v18 import DEFAULT as SCORE_DEFAULT, compute_cai, score_findings
 from ..seeds.proposer import propose_next_seeds
 from ..synth.reverse_llm import (
     confidence_gap,
@@ -36,7 +35,7 @@ def run_pipeline(
 
     traces: list[dict[str, Any]] = []
     metrics = metrics or {}
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
 
     # 1. Validation Gate
     acts_block = evaluate_rules(
@@ -99,7 +98,7 @@ def run_pipeline(
     asset_scores = aggregate_asset_scores(scored_findings)
     history_dir = os.path.join(output_dir, "history")
     os.makedirs(history_dir, exist_ok=True)
-    ts_filename = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    ts_filename = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
     history_path = os.path.join(history_dir, f"{ts_filename}.asset_scores.json")
     with open(history_path, "w", encoding="utf-8") as f:
         json.dump(asset_scores, f, indent=2)
