@@ -10,6 +10,7 @@ This tool is the practical implementation of the research paper "From Closure to
 - **Asynchronous Collectors**: Efficiently collect data from web sources with respect for robots.txt and per-domain rate limiting
 - **Epistemic Scoring**: Evaluate findings based on source credibility, content, and recency
 - **Blindspot Analysis**: Identify gaps in collected data regarding coverage, recency, and reliability
+- **BALLM Integration**: Blindspot-Aware Large Language Models that interpret blindspots and generate curiosity questions
 - **STIX 2.1 Export**: Export results in a standardized format for cybersecurity applications
 - **Reproducible & Scalable**: Fully containerized with Docker for consistent and easy deployment
 
@@ -17,8 +18,14 @@ This tool is the practical implementation of the research paper "From Closure to
 
 The NGBSE pipeline follows a modular approach:
 ```
-Seeds → Collect → Enrich & Score → Dual Output (Answers + Blindspots) → STIX Export
+Seeds → Collect → Enrich & Score → Dual Output (Answers + Blindspots) → BALLM Meta-Layer → STIX Export
 ```
+
+The BALLM (Blindspot-Aware Large Language Models) layer transforms raw blindspot data into:
+- **Epistemic Insights**: LLM-powered interpretation of knowledge gaps
+- **Curiosity Questions**: Automatically generated questions to explore blind spots
+- **Epistemic Humility**: Quantified awareness of knowledge limitations
+- **Productive Failures**: Identification of learning opportunities from gaps
 
 ## Quickstart
 
@@ -104,6 +111,11 @@ The tool is controlled via `ngbse20.cli`:
 - **export-stix**: Converts JSON findings to a STIX 2.1 bundle
   ```bash
   ngbse20 export-stix --findings <path> --out <path>
+  ```
+
+- **ballm-analyze**: Run BALLM analysis to generate epistemic insights and curiosity questions
+  ```bash
+  ngbse20 ballm-analyze --findings <path> --out <path> [--depth <int>]
   ```
 
 ## Configuration

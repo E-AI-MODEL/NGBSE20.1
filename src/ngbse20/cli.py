@@ -73,5 +73,47 @@ def export_stix(findings: str, out: str):
     Path(out).write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
     click.echo(out)
 
+@cli.command()
+@click.option("--findings", required=True, type=click.Path(exists=True))
+@click.option("--out", required=True, type=click.Path())
+@click.option("--depth", default=3, help="Depth of curiosity questions (1-5)")
+def ballm_analyze(findings: str, out: str, depth: int):
+    """Run BALLM analysis to generate epistemic insights and curiosity questions."""
+    
+    # Load findings
+    data = json.loads(Path(findings).read_text(encoding="utf-8"))
+    
+    # Check if we have the required data structure
+    if isinstance(data, dict):
+        findings_data = data.get("findings", [])
+        blindspots_data = data.get("blindspots", {})
+        asset_scores_data = data.get("asset_scores", {})
+    else:
+        findings_data = data
+        blindspots_data = {}
+        asset_scores_data = {}
+    
+    # Generate BALLM meta-layer
+    from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
+    from ngbse20.llm_client import LLMClient
+    
+    ballm_generator = BALLMMetaLayerGenerator(LLMClient())
+    meta_layer = ballm_generator.generate_meta_layer(
+        findings_data,
+        blindspots_data,
+        asset_scores_data
+    )
+    
+    # Save BALLM output
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(
+        json.dumps(meta_layer, ensure_ascii=False, indent=2), 
+        encoding="utf-8"
+    )
+    
+    click.echo(f"BALLM analysis complete. Output saved to {out}")
+    click.echo(f"Epistemic Humility Score: {meta_layer.get('epistemic_humility_score', 0.0):.3f}")
+    click.echo(f"Curiosity Questions Generated: {len(meta_layer.get('curiosity_questions', []))}")
+
 if __name__ == "__main__":
     cli()

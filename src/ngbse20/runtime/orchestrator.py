@@ -22,6 +22,7 @@ from ..synth.reverse_llm import (
 )
 from ..synth.scenario_engine import build_scenarios
 from ..trace.logger import event
+from ..ballm.meta_layer_generator import BALLMMetaLayerGenerator
 
 LOGGER = get_logger(__name__)
 
@@ -141,6 +142,18 @@ def run_pipeline(
             "analyzed blind spots",
         )
     )
+    
+    # 7.5. BALLM Meta-Layer Generation
+    ballm_generator = BALLMMetaLayerGenerator(LLMClient())
+    meta_layer = ballm_generator.generate_meta_layer(scored_findings, blindspots, asset_scores)
+    traces.append(
+        event(
+            "ballm_meta_layer",
+            {},
+            {"meta_layer_generated": True, "epistemic_humility": meta_layer.get("epistemic_humility_score", 0.0)},
+            "generated BALLM meta-layer with epistemic insights",
+        )
+    )
 
     # 8. Scenario Synthesis (Optional LLM)
     scenarios = build_scenarios(scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none"))
@@ -177,6 +190,7 @@ def run_pipeline(
         "forecast": forecast,
         "next_seeds": next_seeds,
         "blindspots": blindspots,
+        "ballm_meta_layer": meta_layer,
         "scenarios": scenarios,
         "brief": brief
     }
