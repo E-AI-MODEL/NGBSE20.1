@@ -1,8 +1,8 @@
 """CLI entrypoint for NGBSE 20.1."""
 import json
 import argparse
+import os
 from .runtime.orchestrator import run_pipeline
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -24,12 +24,12 @@ def main():
         ap.error("cmd must be 'demo'")
 
     rules = []
-    if args.rules_path:
+    if args.rules_path and os.path.exists(args.rules_path):
         with open(args.rules_path, 'r', encoding='utf-8') as fp:
             rules = json.load(fp)
 
     seeds = []
-    if args.seeds_path:
+    if args.seeds_path and os.path.exists(args.seeds_path):
         with open(args.seeds_path, 'r', encoding='utf-8') as fp:
             for line in fp:
                 if line.strip():
