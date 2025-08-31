@@ -1,1 +1,5 @@
-{"url":"https://example.com","asset_id":"asset-1","tags":["demo"]}
+{"url":"https://www.bleepingcomputer.com/","asset_id":"threat-intel-1","tags":["threat-intel","cybersecurity","news"],"priority":0.9}
+{"url":"https://www.securityweek.com/","asset_id":"threat-intel-2","tags":["threat-intel","cybersecurity","news"],"priority":0.8}
+{"url":"https://www.darkreading.com/","asset_id":"threat-intel-3","tags":["threat-intel","cybersecurity","analysis"],"priority":0.8}
+{"url":"https://www.infosecurity-magazine.com/","asset_id":"threat-intel-4","tags":["threat-intel","cybersecurity","magazine"],"priority":0.7}
+{"url":"https://www.cyberdefensemagazine.com/","asset_id":"threat-intel-5","tags":["threat-intel","cybersecurity","defense"],"priority":0.7}

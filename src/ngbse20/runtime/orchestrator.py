@@ -101,7 +101,7 @@ def run_pipeline(
     asset_scores = aggregate_asset_scores(scored_findings)
     history_dir = os.path.join(output_dir, "history")
     os.makedirs(history_dir, exist_ok=True)
-    ts_filename = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+    ts_filename = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     history_path = os.path.join(history_dir, f"{ts_filename}.asset_scores.json")
     with open(history_path, "w", encoding="utf-8") as f:
         json.dump(asset_scores, f, indent=2)

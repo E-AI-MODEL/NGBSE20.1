@@ -1,0 +1,31 @@
+{
+  "type": "bundle",
+  "id": "bundle--b50139bc-88a4-4ad0-a457-9c86b2f65917",
+  "objects": [
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--29f49b3c-75af-4cb4-9009-3f18b3c5ae0a",
+      "created": "2025-08-31T08:56:56.83824Z",
+      "modified": "2025-08-31T08:56:56.83824Z",
+      "name": "Example Domain",
+      "pattern": "[url:value = 'https://example.com/']",
+      "pattern_type": "stix",
+      "pattern_version": "2.1",
+      "valid_from": "2025-08-31T08:56:56.838231Z",
+      "x_ngbse20_domain": "example.com",
+      "x_ngbse20_hash": "9c32d1f2ab7e64f1ec891032017134e306803aef26350cb11e3f354669cdee2b"
+    },
+    {
+      "type": "note",
+      "spec_version": "2.1",
+      "id": "note--0be7bd2b-cce3-45f5-a662-93484f734696",
+      "created": "2025-08-31T08:56:56.841525Z",
+      "modified": "2025-08-31T08:56:56.841525Z",
+      "content": "Source: https://example.com/\nFetched: 2025-08-31T08:56:53.961471+00:00\nPublished: None",
+      "object_refs": [
+        "indicator--29f49b3c-75af-4cb4-9009-3f18b3c5ae0a"
+      ]
+    }
+  ]
+}

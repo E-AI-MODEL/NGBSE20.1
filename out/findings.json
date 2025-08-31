@@ -1,0 +1,18 @@
+[
+  {
+    "id": "9c32d1f2ab7e64f1",
+    "type": "web Finding",
+    "url": "https://example.com/",
+    "domain": "example.com",
+    "title": "Example Domain",
+    "published": null,
+    "fetched_at": "2025-08-31T08:56:53.961471+00:00",
+    "excerpt": "Example Domain Example Domain This domain is for use in illustrative examples in documents. You may use this\n    domain in literature without prior coordination or asking for permission. More information...",
+    "hash": "9c32d1f2ab7e64f1ec891032017134e306803aef26350cb11e3f354669cdee2b",
+    "meta": {
+      "length": 206,
+      "has_title": true
+    },
+    "content_hash": "9c32d1f2ab7e64f1ec891032017134e306803aef26350cb11e3f354669cdee2b"
+  }
+]
