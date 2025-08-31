@@ -10,7 +10,7 @@ from typing import Dict, Any, List
 from ..rules.engine import evaluate_rules
 from ..scoring.v18 import score_findings, DEFAULT as SCORE_DEFAULT, compute_cai
 from ..trace.logger import event
-from ..export.stix import to_stix
+from ..export.stix import to_stix_bundle
 from ..collectors.http_web import HttpWebCollector
 from ..forecast.engine import build_forecast, aggregate_asset_scores
 from ..seeds.proposer import propose_next_seeds
@@ -94,13 +94,13 @@ def run_pipeline(
 
     # 10. Final Export & Reporting
     cai = compute_cai(traces, {})
-    bundle = to_stix(scored_findings, traces)
-    traces.append(event("export", {"n": len(scored_findings)}, {"bundle_objects": len(bundle.get("objects", []))}, "exported STIX"))
+    bundle = to_stix_bundle(scored_findings)
+    traces.append(event("export", {"n": len(scored_findings)}, {"bundle_objects": len(bundle.objects)}, "exported STIX"))
 
     return {
         "status": "ok",
         "findings": scored_findings,
-        "stix": bundle,
+        "stix": json.loads(bundle.serialize()),
         "traces": traces,
         "cai": cai,
         "forecast": forecast,

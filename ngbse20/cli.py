@@ -1,53 +1,52 @@
-"""CLI entrypoint for NGBSE 20.1."""
-import json
+from __future__ import annotations
 import argparse
-import os
-from .runtime.orchestrator import run_pipeline
+import asyncio
+import json
+from pathlib import Path
+from ngbse20.collectors.http_async import collect_urls
+from ngbse20.export.stix import write_stix
+from ngbse20.runtime.manifest import write_manifest, now_iso
+from ngbse20.logging import get_logger
+
+LOGGER = get_logger(__name__)
+
+def _read_lines(p: Path) -> list[str]:
+    return [x.strip() for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--version", action="store_true", help="Print version and exit")
-    ap.add_argument("cmd", nargs="?", choices=["demo"], help="Command to run")
-    ap.add_argument("--rules", dest="rules_path", default=None)
-    ap.add_argument("--seeds", dest="seeds_path", default=None)
-    ap.add_argument("--metrics", dest="metrics_json", default='{}')
-    ap.add_argument("--outdir", default='out', help="Output directory")
-    ap.add_argument("--allowlist", default='*', help="Comma-separated allowed domains")
+    ap = argparse.ArgumentParser("ngbse20")
+    ap.add_argument("--urls", type=Path, required=True, help="Bestand met URLs (1 per regel)")
+    ap.add_argument("--out-dir", type=Path, default=Path("out"))
+    ap.add_argument("--concurrency", type=int, default=8)
+    ap.add_argument("--user-agent", type=str, default=None)
     args = ap.parse_args()
 
-    if args.version:
-        from . import __version__
-        print(__version__)
-        return
+    urls = _read_lines(args.urls)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.cmd != "demo":
-        ap.error("cmd must be 'demo'")
+    LOGGER.info("Start collection for %d urls", len(urls))
+    findings = asyncio.run(collect_urls(
+        urls,
+        concurrency=args.concurrency,
+        user_agent=args.user_agent or "NGBSE20.1-Collector",
+    ))
 
-    rules = []
-    if args.rules_path and os.path.exists(args.rules_path):
-        with open(args.rules_path, 'r', encoding='utf-8') as fp:
-            rules = json.load(fp)
+    findings_path = args.out_dir / "findings.json"
+    with findings_path.open("w", encoding="utf-8") as fh:
+        json.dump(findings, fh, ensure_ascii=False, indent=2)
+    LOGGER.info("Saved findings: %s", findings_path)
 
-    seeds = []
-    if args.seeds_path and os.path.exists(args.seeds_path):
-        with open(args.seeds_path, 'r', encoding='utf-8') as fp:
-            for line in fp:
-                if line.strip():
-                    seeds.append(json.loads(line))
+    stix_path = args.out_dir / "bundle.stix2.json"
+    write_stix(findings, str(stix_path))
+    LOGGER.info("Saved STIX: %s", stix_path)
 
-    try:
-        metrics = json.loads(args.metrics_json)
-    except Exception:
-        metrics = {}
-
-    config = {
-        "output_dir": args.outdir,
-        "allowlist": [d.strip() for d in args.allowlist.split(',')]
-    }
-
-    result = run_pipeline(seeds=seeds, rules=rules, metrics=metrics, config=config)
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-
+    write_manifest(
+        run_id=now_iso(),
+        inputs={"_started_at": now_iso(), "url_count": len(urls)},
+        outputs={"findings": str(findings_path), "stix": str(stix_path)},
+        stats={"collected": len(findings)},
+        path=str(args.out_dir / "MANIFEST.json"),
+    )
 
 if __name__ == "__main__":
     main()
