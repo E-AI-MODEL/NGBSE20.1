@@ -1,4 +1,9 @@
 from datetime import datetime
+from typing import Any
+
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 try:
     from docx import Document
@@ -10,13 +15,13 @@ except ImportError:
 
 def write_report(
     path: str,
-    brief: dict,
-    blindspots: dict,
-    forecast: dict,
-    scenarios: dict | None = None,
-):
+    brief: dict[str, Any],
+    blindspots: dict[str, Any],
+    forecast: dict[str, Any],
+    scenarios: dict[str, Any] | None = None,
+) -> None:
     if not _DOCX_AVAILABLE:
-        print("WARN: python-docx not installed, skipping .docx report generation.")
+        LOGGER.warning("python-docx not installed, skipping .docx report generation.")
         return
 
     doc = Document()
