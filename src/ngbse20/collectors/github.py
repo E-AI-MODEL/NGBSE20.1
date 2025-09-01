@@ -5,6 +5,11 @@ import requests
 from typing import List, Dict, Any
 from .base import BaseCollector
 from ..utils.hash import content_hash
+from ..utils.security import mask_api_key, sanitize_error_message
+from ..utils.rate_limiter import retry_with_backoff, api_rate_limited
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class GitHubCollector(BaseCollector):
@@ -16,7 +21,7 @@ class GitHubCollector(BaseCollector):
         super().__init__(config, allowlist_domains)
         self.token = os.getenv("GITHUB_TOKEN")
         if not self.token:
-            print("WARN: GitHub collector requires GITHUB_TOKEN env var.")
+            LOGGER.warning("GitHub collector requires GITHUB_TOKEN env var.")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect code repository intelligence from GitHub."""
@@ -56,7 +61,8 @@ class GitHubCollector(BaseCollector):
             code_data = code_response.json()
             
         except Exception as e:
-            print(f"ERROR: GitHub collector failed for query '{query}': {e}")
+            sanitized_error = sanitize_error_message(str(e), {"token": self.token})
+            LOGGER.error(f"GitHub collector failed for query '{query}': {sanitized_error}")
             return []
         
         findings = []

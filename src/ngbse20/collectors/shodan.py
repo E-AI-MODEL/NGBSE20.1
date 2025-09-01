@@ -5,6 +5,11 @@ import requests
 from typing import List, Dict, Any
 from .base import BaseCollector
 from ..utils.hash import content_hash
+from ..utils.security import mask_api_key, sanitize_error_message
+from ..utils.rate_limiter import retry_with_backoff, api_rate_limited
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class ShodanCollector(BaseCollector):
@@ -16,7 +21,9 @@ class ShodanCollector(BaseCollector):
         super().__init__(config, allowlist_domains)
         self.api_key = os.getenv("SHODAN_API_KEY")
         if not self.api_key:
-            print("WARN: Shodan collector requires SHODAN_API_KEY env var.")
+            LOGGER.warning("Shodan collector requires SHODAN_API_KEY env var.")
+        else:
+            LOGGER.debug(f"Shodan collector initialized with API key: {mask_api_key(self.api_key)}")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect IoT and infrastructure intelligence from Shodan."""
@@ -28,18 +35,12 @@ class ShodanCollector(BaseCollector):
             return []
         
         try:
-            params = {"key": self.api_key, "query": query, "limit": 100}
-            
-            response = requests.get(
-                f"{self.API_BASE}/shodan/host/search",
-                params=params,
-                timeout=30
-            )
-            response.raise_for_status()
+            response = self._make_api_request(query)
             data = response.json()
             
         except Exception as e:
-            print(f"ERROR: Shodan collector failed for query '{query}': {e}")
+            sanitized_error = sanitize_error_message(str(e), {"api_key": self.api_key})
+            LOGGER.error(f"Shodan collector failed for query '{query}': {sanitized_error}")
             return []
         
         findings = []
@@ -84,3 +85,17 @@ class ShodanCollector(BaseCollector):
             })
         
         return findings
+    
+    @retry_with_backoff(max_retries=3, base_delay=1.0)
+    @api_rate_limited('shodan')
+    def _make_api_request(self, query: str):
+        """Make rate-limited API request to Shodan."""
+        params = {"key": self.api_key, "query": query, "limit": 100}
+        
+        response = requests.get(
+            f"{self.API_BASE}/shodan/host/search",
+            params=params,
+            timeout=30
+        )
+        response.raise_for_status()
+        return response

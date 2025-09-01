@@ -20,8 +20,8 @@ class PipelineOrchestrator:
         self.config_loader = ConfigLoader(config_dir)
         self.config = self.config_loader.load_config()
         self.credentials = self.config_loader.get_credentials()
-        self.collector_manager = CollectorManager(self.config, self.credentials)
-        self.pipeline_stages = PipelineStages(self.config.get("output_dir", "out"))
+        self.collector_manager = CollectorManager(self.config.__dict__, self.credentials)
+        self.pipeline_stages = PipelineStages(self.config.output_dir)
 
 
     def run_pipeline(
@@ -39,7 +39,7 @@ class PipelineOrchestrator:
         
         metrics = metrics or {}
         traces: List[Dict[str, Any]] = []
-        allowlist = self.config.get("allowlist", ["*"])
+        allowlist = self.config.allowlist
         
         LOGGER.info(f"Starting pipeline with {len(seeds)} seeds and {len(rules)} rules")
         
@@ -139,5 +139,8 @@ def run_pipeline(
     """Backward compatibility function for the old API."""
     orchestrator = PipelineOrchestrator()
     if config:
-        orchestrator.config.update(config)
+        # Update config attributes if provided
+        for key, value in config.items():
+            if hasattr(orchestrator.config, key):
+                setattr(orchestrator.config, key, value)
     return orchestrator.run_pipeline(seeds, rules, metrics)

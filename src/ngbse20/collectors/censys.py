@@ -5,6 +5,11 @@ import requests
 from typing import List, Dict, Any
 from .base import BaseCollector
 from ..utils.hash import content_hash
+from ..utils.security import mask_api_key, sanitize_error_message
+from ..utils.rate_limiter import retry_with_backoff, api_rate_limited
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class CensysCollector(BaseCollector):
@@ -17,7 +22,7 @@ class CensysCollector(BaseCollector):
         self.api_id = os.getenv("CENSYS_API_ID")
         self.api_secret = os.getenv("CENSYS_API_SECRET")
         if not (self.api_id and self.api_secret):
-            print("WARN: Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET env vars.")
+            LOGGER.warning("Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET env vars.")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect network and SSL intelligence from Censys."""
@@ -29,20 +34,12 @@ class CensysCollector(BaseCollector):
             return []
         
         try:
-            auth = (self.api_id, self.api_secret)
-            params = {"q": query, "per_page": 100}
-            
-            response = requests.get(
-                f"{self.API_BASE}/hosts/search",
-                auth=auth,
-                params=params,
-                timeout=30
-            )
-            response.raise_for_status()
+            response = self._make_api_request(query)
             data = response.json()
             
         except Exception as e:
-            print(f"ERROR: Censys collector failed for query '{query}': {e}")
+            sanitized_error = sanitize_error_message(str(e), {"api_id": self.api_id, "api_secret": self.api_secret})
+            LOGGER.error(f"Censys collector failed for query '{query}': {sanitized_error}")
             return []
         
         findings = []
@@ -98,3 +95,18 @@ class CensysCollector(BaseCollector):
             })
         
         return findings
+    
+    @retry_with_backoff(max_retries=3, base_delay=1.0)
+    @api_rate_limited('censys')
+    def _make_api_request(self, query: str):
+        """Make rate-limited API request to Censys."""
+        params = {"q": query, "per_page": 100}
+        
+        response = requests.get(
+            f"{self.API_BASE}/hosts/search",
+            params=params,
+            auth=(self.api_id, self.api_secret),
+            timeout=30
+        )
+        response.raise_for_status()
+        return response

@@ -5,6 +5,11 @@ import requests
 from typing import List, Dict, Any
 from .base import BaseCollector
 from ..utils.hash import content_hash
+from ..utils.security import mask_api_key, sanitize_error_message
+from ..utils.rate_limiter import retry_with_backoff, api_rate_limited
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class URLScanCollector(BaseCollector):
@@ -16,7 +21,7 @@ class URLScanCollector(BaseCollector):
         super().__init__(config, allowlist_domains)
         self.api_key = os.getenv("URLSCAN_API_KEY")
         if not self.api_key:
-            print("WARN: URLScan collector requires URLSCAN_API_KEY env var.")
+            LOGGER.warning("URLScan collector requires URLSCAN_API_KEY env var.")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect threat intelligence from URLScan."""
@@ -41,7 +46,8 @@ class URLScanCollector(BaseCollector):
             data = response.json()
             
         except Exception as e:
-            print(f"ERROR: URLScan collector failed for query '{query}': {e}")
+            sanitized_error = sanitize_error_message(str(e), {"api_key": self.api_key})
+            LOGGER.error(f"URLScan collector failed for query '{query}': {sanitized_error}")
             return []
         
         findings = []

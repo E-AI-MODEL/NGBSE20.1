@@ -14,6 +14,7 @@ from ngbse20.export.stix import findings_to_stix
 from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline
 from ngbse20.collectors.http_web import HttpWebCollector
+from ngbse20.monitoring.health import get_health_status
 
 LOGGER = logging.getLogger(__name__)
 
@@ -201,6 +202,54 @@ def list_collectors():
         if required_envs:
             click.echo(f"{'':15}   Requires: {', '.join(required_envs)}")
         click.echo()
+
+
+@cli.command("health")
+@click.option("--format", "output_format", default="text", type=click.Choice(["text", "json"]), help="Output format")
+def health_check(output_format: str):
+    """Check the health status of NGBSE components."""
+    try:
+        health_data = get_health_status()
+        
+        if output_format == "json":
+            click.echo(json.dumps(health_data, indent=2))
+        else:
+            # Text format
+            status_emoji = {
+                "healthy": "✅",
+                "degraded": "⚠️",
+                "unhealthy": "❌"
+            }
+            
+            overall_status = health_data["status"]
+            click.echo(f"Overall Status: {status_emoji.get(overall_status, '❓')} {overall_status.upper()}")
+            click.echo(f"Uptime: {health_data['uptime_seconds']:.1f} seconds")
+            click.echo()
+            
+            # System metrics
+            metrics = health_data["metrics"]
+            click.echo("System Metrics:")
+            click.echo(f"  CPU: {metrics['cpu_percent']:.1f}%")
+            click.echo(f"  Memory: {metrics['memory_percent']:.1f}%")
+            click.echo(f"  Disk: {metrics['disk_percent']:.1f}%")
+            click.echo()
+            
+            # Health checks
+            click.echo("Component Health:")
+            for check in health_data["checks"]:
+                emoji = status_emoji.get(check["status"], "❓")
+                click.echo(f"  {emoji} {check['name']}: {check['message']}")
+                if check.get("details"):
+                    for key, value in check["details"].items():
+                        if isinstance(value, list):
+                            click.echo(f"    {key}: {', '.join(map(str, value))}")
+                        else:
+                            click.echo(f"    {key}: {value}")
+            
+    except Exception as e:
+        click.echo(f"Health check failed: {e}", err=True)
+        raise click.Abort()
+
 
 if __name__ == "__main__":
     cli()

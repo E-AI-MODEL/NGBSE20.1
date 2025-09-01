@@ -1,12 +1,52 @@
-[
-    {
-        "id": "rule_high_risk",
-        "trigger": {
-            "risk_score": ">= 0.8"
-        },
-        "action": {
-            "type": "warning_flag",
-            "message": "High risk score detected"
-        }
-    }
-]
+# NGBSE 20.2 Configuration
+# Main configuration file for the Next-Generation Business Security Engine
+
+# Output directory for results
+output_dir: "out"
+
+# Domain allowlist (use ["*"] for all domains)
+allowlist: ["*"]
+
+# Collector configuration
+collectors:
+  enabled:
+    - "http_web"
+    - "shodan"
+    - "censys"
+    - "leakix"
+    - "urlscan"
+    - "github"
+    - "news"
+  
+  # Optional: Custom rate limits per collector (requests per minute)
+  rate_limits:
+    shodan: 60
+    censys: 300
+    leakix: 600
+    urlscan: 60
+    github: 600
+    news: 600
+
+# Scoring configuration
+scoring:
+  default_weights:
+    coverage: 0.3    # Breadth of coverage
+    recency: 0.3     # Timeliness
+    confidence: 0.4  # Reliability
+
+# BALLM (Bayesian Analysis and LLM Meta-layer) configuration
+ballm:
+  enabled: true
+  model: "gpt-4"     # LLM model for meta-layer generation
+
+# Optional: Advanced settings
+advanced:
+  # Maximum findings per collector
+  max_findings_per_collector: 100
+  
+  # Timeout settings (seconds)
+  request_timeout: 30
+  collection_timeout: 300
+  
+  # Logging level
+  log_level: "INFO"

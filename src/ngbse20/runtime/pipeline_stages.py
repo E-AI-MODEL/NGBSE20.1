@@ -115,32 +115,53 @@ class PipelineStages:
     
     def forecast_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Forecast stage - generate asset scores and forecasts."""
-        asset_scores = aggregate_asset_scores(scored_findings)
-        
-        # Save history
-        history_dir = os.path.join(self.output_dir, "history")
-        os.makedirs(history_dir, exist_ok=True)
-        ts_filename = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        history_path = os.path.join(history_dir, f"{ts_filename}.asset_scores.json")
-        
-        with open(history_path, "w", encoding="utf-8") as f:
-            json.dump(asset_scores, f, indent=2)
-        
-        forecast = build_forecast(self.output_dir)
-        
-        trace = event(
-            "forecast",
-            {"n_assets": len(asset_scores)},
-            {"n_forecasts": len(forecast)},
-            "generated forecast",
-        )
-        
-        return {
-            "asset_scores": asset_scores,
-            "forecast": forecast,
-            "history_path": history_path,
-            "trace": trace
-        }
+        try:
+            asset_scores = aggregate_asset_scores(scored_findings)
+            
+            # Save history
+            history_dir = os.path.join(self.output_dir, "history")
+            os.makedirs(history_dir, exist_ok=True)
+            ts_filename = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+            history_path = os.path.join(history_dir, f"{ts_filename}.asset_scores.json")
+            
+            with open(history_path, "w", encoding="utf-8") as f:
+                json.dump(asset_scores, f, indent=2)
+            
+            forecast = build_forecast(self.output_dir)
+            
+            trace = event(
+                "forecast",
+                {"n_assets": len(asset_scores)},
+                {"n_forecasts": len(forecast)},
+                "generated forecast",
+            )
+            
+            return {
+                "asset_scores": asset_scores,
+                "forecast": forecast,
+                "history_path": history_path,
+                "trace": trace
+            }
+            
+        except Exception as e:
+            LOGGER.error(f"Forecast stage failed: {e}")
+            # Return empty forecast on failure
+            default_forecast = []
+            default_asset_scores = {}
+            
+            trace = event(
+                "forecast",
+                {"n_assets": 0},
+                {"n_forecasts": 0, "error": str(e)},
+                "forecast generation failed",
+            )
+            
+            return {
+                "asset_scores": default_asset_scores,
+                "forecast": default_forecast,
+                "history_path": None,
+                "trace": trace
+            }
     
     def seed_proposal_stage(self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
         """Seed proposal stage - propose new seeds."""
@@ -157,20 +178,39 @@ class PipelineStages:
     
     def blindspot_analysis_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Blindspot analysis stage - identify coverage gaps."""
-        blindspots = {
-            "coverage": coverage_gap(scored_findings),
-            "recency": recency_gap(scored_findings),
-            "confidence": confidence_gap(scored_findings)
-        }
-        
-        trace = event(
-            "blindspot_analysis",
-            {},
-            {"gaps_identified": len(blindspots)},
-            "analyzed blind spots",
-        )
-        
-        return {"blindspots": blindspots, "trace": trace}
+        try:
+            blindspots = {
+                "coverage": coverage_gap(scored_findings),
+                "recency": recency_gap(scored_findings),
+                "confidence": confidence_gap(scored_findings)
+            }
+            
+            trace = event(
+                "blindspot_analysis",
+                {},
+                {"gaps_identified": len(blindspots)},
+                "analyzed blind spots",
+            )
+            
+            return {"blindspots": blindspots, "trace": trace}
+            
+        except Exception as e:
+            LOGGER.error(f"Blindspot analysis failed: {e}")
+            # Return default blindspots on failure
+            default_blindspots = {
+                "coverage": {"score": 0.0, "description": "Analysis failed"},
+                "recency": {"score": 0.0, "description": "Analysis failed"},
+                "confidence": {"score": 0.0, "description": "Analysis failed"}
+            }
+            
+            trace = event(
+                "blindspot_analysis",
+                {},
+                {"gaps_identified": 0, "error": str(e)},
+                "blindspot analysis failed",
+            )
+            
+            return {"blindspots": default_blindspots, "trace": trace}
     
     def ballm_stage(self, scored_findings: List[Dict[str, Any]], blindspots: Dict[str, Any], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
         """BALLM meta-layer generation stage."""
