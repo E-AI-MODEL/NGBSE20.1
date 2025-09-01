@@ -1,2 +1,0 @@
-[console_scripts]
-ngbse20 = ngbse20.cli:cli

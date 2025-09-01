@@ -27,6 +27,12 @@ security:
 	bandit -r src/ngbse20
 	pip-audit -r requirements.txt || true
 
+sbom:
+	python scripts/generate_sbom.py --output-dir . --formats all --validate
+
+sbom-install:
+	python scripts/generate_sbom.py --install-syft
+
 pre-commit:
 	pre-commit install
 	pre-commit run --all-files

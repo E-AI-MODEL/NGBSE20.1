@@ -1,0 +1,243 @@
+name: NGBSE 20.2 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, '20.2*' ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  lint-and-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black isort flake8 mypy
+
+      - name: Run Black (code formatting)
+        run: black --check --diff src/ tests/
+
+      - name: Run isort (import sorting)
+        run: isort --check-only --diff src/ tests/
+
+      - name: Run Flake8 (linting)
+        run: flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+
+      - name: Run MyPy (type checking)
+        run: mypy src/ --ignore-missing-imports
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit safety
+
+      - name: Run Bandit (security linting)
+        run: bandit -r src/ -f json -o bandit-report.json || true
+
+      - name: Run Safety (dependency vulnerability check)
+        run: safety check --json --output safety-report.json || true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-mock
+
+      - name: Run unit tests
+        run: |
+          pytest tests/unit/ -v --cov=src/ngbse20 --cov-report=xml --cov-report=html
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: matrix.python-version == '3.11'
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-mock
+
+      - name: Run integration tests
+        run: pytest tests/integration/ -v
+
+  sbom-generation:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate Python SBOM
+        run: |
+          syft packages . -o cyclonedx-json > sbom-cyclonedx.json
+          syft packages . -o spdx-json > sbom-spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-reports
+          path: |
+            sbom-cyclonedx.json
+            sbom-spdx.json
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, unit-tests, integration-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t ngbse20:latest .
+          docker build -t ngbse20:${{ github.sha }} .
+
+      - name: Test Docker image
+        run: |
+          docker run --rm ngbse20:latest python -c "import ngbse20; print('Import successful')"
+
+      - name: Save Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker save ngbse20:latest | gzip > ngbse20-latest.tar.gz
+
+      - name: Upload Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-image
+          path: ngbse20-latest.tar.gz
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, unit-tests, integration-tests, security-scan, docker-build]
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download SBOM
+        uses: actions/download-artifact@v3
+        with:
+          name: sbom-reports
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-image
+
+      - name: Create Release Assets
+        run: |
+          mkdir -p release-assets
+          cp sbom-cyclonedx.json release-assets/
+          cp sbom-spdx.json release-assets/
+          cp ngbse20-latest.tar.gz release-assets/
+          
+          # Create release notes
+          echo "# NGBSE 20.2.0-GA Release" > release-assets/RELEASE_NOTES.md
+          echo "" >> release-assets/RELEASE_NOTES.md
+          echo "## Security" >> release-assets/RELEASE_NOTES.md
+          echo "- SBOM included for supply chain security" >> release-assets/RELEASE_NOTES.md
+          echo "- Dependency vulnerability scanning" >> release-assets/RELEASE_NOTES.md
+          echo "" >> release-assets/RELEASE_NOTES.md
+          echo "## Docker" >> release-assets/RELEASE_NOTES.md
+          echo "- Pre-built Docker image available" >> release-assets/RELEASE_NOTES.md
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./release-assets/
+          asset_name: release-assets
+          asset_content_type: application/zip
