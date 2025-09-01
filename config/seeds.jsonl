@@ -1,2 +1,7 @@
-{"id":"s1","query":"https://example.com/page1","type":"web"}
-{"id":"s2","query":"https://example.org/archive","type":"archive"}
+{"id": "web-1", "query": "https://example.com", "type": "web", "asset_id": "asset-1", "tags": ["demo", "web"], "priority": 1}
+{"id": "threat-1", "query": "malware", "type": "leakix", "asset_id": "asset-2", "tags": ["demo", "threat"], "priority": 2}
+{"id": "infra-1", "query": "nginx", "type": "shodan", "asset_id": "asset-3", "tags": ["demo", "infrastructure"], "priority": 3}
+{"id": "network-1", "query": "ssl", "type": "censys", "asset_id": "asset-4", "tags": ["demo", "network"], "priority": 4}
+{"id": "urlscan-1", "query": "phishing", "type": "urlscan", "asset_id": "asset-5", "tags": ["demo", "threat"], "priority": 5}
+{"id": "code-1", "query": "ransomware", "type": "github", "asset_id": "asset-6", "tags": ["demo", "code"], "priority": 6}
+{"id": "news-1", "query": "cyber attack", "type": "news", "asset_id": "asset-7", "tags": ["demo", "news"], "priority": 7}

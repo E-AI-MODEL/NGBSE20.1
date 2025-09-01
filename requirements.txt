@@ -1,4 +1,0 @@
-types-requests
-types-aiohttp
-types-docx
-types-beautifulsoup4
