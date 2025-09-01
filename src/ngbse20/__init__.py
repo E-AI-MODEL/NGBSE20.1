@@ -32,7 +32,7 @@ from .forecast.engine import build_forecast, aggregate_asset_scores
 
 # Export and reporting
 from .export.stix import to_stix_bundle
-from .report.docx_reporter import write_report
+
 from .manifest import write_manifest
 
 __all__ = [
@@ -64,7 +64,6 @@ __all__ = [
     "aggregate_asset_scores",
     # Export
     "to_stix_bundle",
-    "write_report",
     "write_manifest",
 ]
 

@@ -590,24 +590,7 @@ bundle = to_stix_bundle(findings)
 stix_json = bundle.serialize(pretty=True)
 ```
 
-### **DOCX Report Generation**
 
-```python
-def write_report(
-    report_path: str,
-    brief: dict[str, Any],
-    blindspots: dict[str, Any],
-    forecast: list[dict[str, Any]],
-    scenarios: list[dict[str, Any]]
-) -> str:
-    """Generate professional DOCX report."""
-```
-
-**Report Contents:**
-- Executive Summary (BLUF)
-- Findings Overview
-- Blindspot Analysis
-- Trend Forecasts
 - Scenario Analysis
 - BALLM Insights
 - Analyst Recommendations
