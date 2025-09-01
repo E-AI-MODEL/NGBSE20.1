@@ -22,6 +22,8 @@ class GitHubCollector(BaseCollector):
         self.token = os.getenv("GITHUB_TOKEN")
         if not self.token:
             LOGGER.warning("GitHub collector requires GITHUB_TOKEN env var.")
+        else:
+            LOGGER.debug(f"GitHub collector initialized with token: {mask_api_key(self.token)}")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect code repository intelligence from GitHub."""
@@ -33,31 +35,8 @@ class GitHubCollector(BaseCollector):
             return []
         
         try:
-            headers = {
-                "Accept": "application/vnd.github.v3+json",
-                "Authorization": f"token {self.token}"
-            }
-            
-            # Search repositories
-            repo_params = {"q": query, "sort": "updated", "order": "desc", "per_page": 50}
-            repo_response = requests.get(
-                f"{self.API_BASE}/search/repositories",
-                headers=headers,
-                params=repo_params,
-                timeout=30
-            )
-            repo_response.raise_for_status()
+            repo_response, code_response = self._make_api_requests(query)
             repo_data = repo_response.json()
-            
-            # Search code
-            code_params = {"q": query, "sort": "indexed", "order": "desc", "per_page": 50}
-            code_response = requests.get(
-                f"{self.API_BASE}/search/code",
-                headers=headers,
-                params=code_params,
-                timeout=30
-            )
-            code_response.raise_for_status()
             code_data = code_response.json()
             
         except Exception as e:
@@ -124,3 +103,34 @@ class GitHubCollector(BaseCollector):
             })
         
         return findings
+    
+    @retry_with_backoff(max_retries=3, base_delay=1.0)
+    @api_rate_limited('github')
+    def _make_api_requests(self, query: str):
+        """Make rate-limited API requests to GitHub."""
+        headers = {
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": f"token {self.token}"
+        }
+        
+        # Search repositories
+        repo_params = {"q": query, "sort": "updated", "order": "desc", "per_page": 50}
+        repo_response = requests.get(
+            f"{self.API_BASE}/search/repositories",
+            headers=headers,
+            params=repo_params,
+            timeout=30
+        )
+        repo_response.raise_for_status()
+        
+        # Search code
+        code_params = {"q": query, "sort": "indexed", "order": "desc", "per_page": 50}
+        code_response = requests.get(
+            f"{self.API_BASE}/search/code",
+            headers=headers,
+            params=code_params,
+            timeout=30
+        )
+        code_response.raise_for_status()
+        
+        return repo_response, code_response

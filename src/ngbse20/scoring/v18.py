@@ -3,6 +3,9 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 @dataclass
@@ -37,13 +40,15 @@ def _clamp(x: float) -> float:
 def _source_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("source", 0))
-    except Exception:
+    except Exception as e:
+        LOGGER.warning(f"Failed to parse source score: {e}")
         return 0.0
 
 def _keyword_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("keywords", 0))
-    except Exception:
+    except Exception as e:
+        LOGGER.warning(f"Failed to parse keyword score: {e}")
         return 0.0
 
 def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None) -> float:
@@ -82,7 +87,8 @@ def _parse_ts(ts_raw: Any) -> datetime | None:
     if isinstance(ts_raw, str):
         try:
             return datetime.fromisoformat(ts_raw.replace('Z','+00:00'))
-        except Exception:
+        except Exception as e:
+            LOGGER.warning(f"Failed to parse timestamp '{ts_raw}': {e}")
             return None
     return None
 
@@ -90,6 +96,8 @@ def score_findings(
     findings: list[dict[str, Any]], cfg: ScoringConfig = DEFAULT
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
+    LOGGER.debug(f"Scoring {len(findings)} findings with config: {cfg}")
+    
     for f in findings:
         m = dict(f.get("metrics", {}))
         ts_dt = _parse_ts(f.get("timestamp"))
@@ -111,4 +119,6 @@ def score_findings(
         f["score_breakdown"] = {"base": base, "extras": extras, "recency": rec}
         f["score"] = score
         out.append(f)
+    
+    LOGGER.info(f"Successfully scored {len(out)} findings")
     return out

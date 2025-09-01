@@ -6,16 +6,31 @@ services:
     env_file:
       - .env
     volumes:
-      - ./data:/app/data:ro
+      - ./config:/app/config:ro
       - ./out:/app/out
     environment:
-      - SEEDS_PATH=${SEEDS_PATH:-data/seeds.jsonl}
-      - RULES_PATH=${RULES_PATH:-data/rules.json}
+      - SEEDS_PATH=${SEEDS_PATH:-config/seeds.jsonl}
+      - RULES_PATH=${RULES_PATH:-config/rules.json}
       - OUT_DIR=${OUT_DIR:-out}
       - ALLOWLIST=${ALLOWLIST:-*}
     command: >
       run 
-      --seeds ${SEEDS_PATH:-data/seeds.jsonl}
-      --rules ${RULES_PATH:-data/rules.json}
+      --seeds ${SEEDS_PATH:-config/seeds.jsonl}
+      --rules ${RULES_PATH:-config/rules.json}
       --outdir ${OUT_DIR:-out}
       --allowlist ${ALLOWLIST:-*}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-m", "ngbse20.cli", "health", "--format", "json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'

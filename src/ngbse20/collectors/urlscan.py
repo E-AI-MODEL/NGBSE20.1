@@ -22,6 +22,8 @@ class URLScanCollector(BaseCollector):
         self.api_key = os.getenv("URLSCAN_API_KEY")
         if not self.api_key:
             LOGGER.warning("URLScan collector requires URLSCAN_API_KEY env var.")
+        else:
+            LOGGER.debug(f"URLScan collector initialized with API key: {mask_api_key(self.api_key)}")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect threat intelligence from URLScan."""
@@ -33,16 +35,7 @@ class URLScanCollector(BaseCollector):
             return []
         
         try:
-            headers = {"API-Key": self.api_key}
-            params = {"q": query, "size": 100}
-            
-            response = requests.get(
-                f"{self.API_BASE}/search/",
-                headers=headers,
-                params=params,
-                timeout=30
-            )
-            response.raise_for_status()
+            response = self._make_api_request(query)
             data = response.json()
             
         except Exception as e:
@@ -90,3 +83,19 @@ class URLScanCollector(BaseCollector):
             })
         
         return findings
+    
+    @retry_with_backoff(max_retries=3, base_delay=1.0)
+    @api_rate_limited('urlscan')
+    def _make_api_request(self, query: str):
+        """Make rate-limited API request to URLScan."""
+        headers = {"API-Key": self.api_key}
+        params = {"q": query, "size": 100}
+        
+        response = requests.get(
+            f"{self.API_BASE}/search/",
+            headers=headers,
+            params=params,
+            timeout=30
+        )
+        response.raise_for_status()
+        return response

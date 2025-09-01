@@ -23,6 +23,8 @@ class CensysCollector(BaseCollector):
         self.api_secret = os.getenv("CENSYS_API_SECRET")
         if not (self.api_id and self.api_secret):
             LOGGER.warning("Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET env vars.")
+        else:
+            LOGGER.debug(f"Censys collector initialized with API ID: {mask_api_key(self.api_id)}")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect network and SSL intelligence from Censys."""

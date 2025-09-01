@@ -20,6 +20,8 @@ class NewsCollector(BaseCollector):
         self.api_key = os.getenv("NEWS_API_KEY")
         if not self.api_key:
             LOGGER.warning("News collector requires NEWS_API_KEY env var.")
+        else:
+            LOGGER.debug(f"News collector initialized with API key: {mask_api_key(self.api_key)}")
     
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect news and recent developments."""
@@ -55,6 +57,8 @@ class NewsCollector(BaseCollector):
         
         return findings
     
+    @retry_with_backoff(max_retries=3, base_delay=1.0)
+    @api_rate_limited('news')
     def _collect_from_newsapi(self, query: str) -> List[Dict[str, Any]]:
         """Collect from NewsAPI.org."""
         url = "https://newsapi.org/v2/everything"
@@ -98,6 +102,8 @@ class NewsCollector(BaseCollector):
         
         return findings
     
+    @retry_with_backoff(max_retries=3, base_delay=1.0)
+    @api_rate_limited('news')
     def _collect_from_gnews(self, query: str) -> List[Dict[str, Any]]:
         """Collect from GNews (backup)."""
         url = "https://gnews.io/api/v4/search"
