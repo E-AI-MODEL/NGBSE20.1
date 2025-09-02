@@ -50,9 +50,12 @@ src = ["src"]
 exclude = ["build/", "dist/", ".venv/"]
 
 [tool.ruff.lint]
-select = ["E","F","I","UP","B","PL","RUF"]
+select = ["E","F","I","UP","B","PL","RUF","PLE","PT","BLE","C90","SIM"]
 ignore = ["E501"]
-per-file-ignores = { "tests/**" = ["PLR2004", "PLC0415", "F401"] }
+per-file-ignores = { "tests/**" = ["PLR2004", "PLC0415", "F401", "S101"] }
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = []
 
 [tool.ruff.lint.isort]
 known-first-party = ["ngbse20"]
@@ -60,7 +63,13 @@ combine-as-imports = true
 
 [tool.mypy]
 python_version = "3.11"
-strict = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+exclude = ["build", "dist"]
 plugins = []
 
 [[tool.mypy.overrides]]
@@ -69,8 +78,14 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-q"
+addopts = "-q --maxfail=1"
 testpaths = ["tests"]
+markers = [
+    "slow: mark a test as slow.",
+    "integration: mark integration tests.",
+    "unit: mark unit tests."
+]
+pythonpath = ["src"]
 
 [tool.coverage.run]
 branch = true

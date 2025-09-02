@@ -1,0 +1,7 @@
+# filtert alleen Google-site EAI model-links
+exclude = [
+  'https?://[^\s]*google[^\s]*/?.*(EAI|model).*',
+]
+retry = 2
+timeout = 20
+user_agent = "lychee/0.15"

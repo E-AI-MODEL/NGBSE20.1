@@ -1,4 +1,1 @@
-import pathlib
-import sys
-
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "src"))
+"""Make tests a package so pytest can resolve package-relative imports."""

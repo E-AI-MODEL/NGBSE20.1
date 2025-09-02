@@ -40,14 +40,14 @@ def _clamp(x: float) -> float:
 def _source_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("source", 0))
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         LOGGER.warning(f"Failed to parse source score: {e}")
         return 0.0
 
 def _keyword_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("keywords", 0))
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         LOGGER.warning(f"Failed to parse keyword score: {e}")
         return 0.0
 
@@ -87,7 +87,7 @@ def _parse_ts(ts_raw: Any) -> datetime | None:
     if isinstance(ts_raw, str):
         try:
             return datetime.fromisoformat(ts_raw.replace('Z','+00:00'))
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             LOGGER.warning(f"Failed to parse timestamp '{ts_raw}': {e}")
             return None
     return None

@@ -39,7 +39,7 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
         rules_data = json.loads(Path(rules).read_text("utf-8"))
         seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
         metrics_data = json.loads(metrics)
-    except Exception as e:
+    except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading input files: {e}", err=True)
         raise click.Abort()
 
@@ -72,7 +72,7 @@ def validate_config_cmd(seeds: str, rules: str):
     try:
         n_seeds, n_rules = validate_files(seeds, rules)
         click.echo(f"Validation successful: Found {n_seeds} seeds and {n_rules} rules.")
-    except Exception as e:
+    except (FileNotFoundError, json.JSONDecodeError, ValueError) as e:
         click.echo(f"Validation FAILED: {e}", err=True)
         raise click.Abort()
 
@@ -88,7 +88,7 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
     try:
         # Load seeds
         seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
-    except Exception as e:
+    except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading seeds: {e}", err=True)
         raise click.Abort()
     
@@ -112,7 +112,7 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
         try:
             seed_findings = collector_instance.collect(seed, now_iso)
             findings.extend(seed_findings)
-        except Exception as e:
+        except (requests.RequestException, ValueError, KeyError) as e:
             click.echo(f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True)
     
     # Save findings
@@ -249,7 +249,7 @@ def health_check(output_format: str):
                         else:
                             click.echo(f"    {key}: {value}")
             
-    except Exception as e:
+    except (OSError, ImportError, AttributeError) as e:
         click.echo(f"Health check failed: {e}", err=True)
         raise click.Abort()
 

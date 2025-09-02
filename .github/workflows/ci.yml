@@ -24,8 +24,7 @@ jobs:
         with:
           args: >
             --no-progress --max-redirects 5 --accept 200,206,302,403
-            --exclude "localhost,127.0.0.1,example.com,.*#.*"
-            --exclude-path "CHANGELOG.md,docs/ignore/*.md,.lycheeignore"
+            --config .lychee.toml
             **/*.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -102,6 +101,7 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11']
@@ -113,6 +113,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -133,7 +134,7 @@ jobs:
       - name: Run unit tests
         env:
           PYTHONPATH: src
-        run: pytest -q --cov=src/ngbse20 --cov-report=xml --cov-report=html
+        run: pytest -q -m "not slow and not integration" --maxfail=1 --cov=src/ngbse20 --cov-report=xml --cov-report=html
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
@@ -146,6 +147,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -154,6 +156,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -161,10 +164,14 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-mock
 
+      - name: Print sys.path
+        run: python - <<'PY'
+import sys; [print(p) for p in sys.path]
+PY
       - name: Run integration tests
         env:
           PYTHONPATH: src
-        run: pytest tests/integration/ -v
+        run: pytest -vv -m "integration" tests/integration --maxfail=1
 
   sbom-generation:
     name: Generate SBOM

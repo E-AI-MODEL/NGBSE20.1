@@ -86,8 +86,12 @@ class ConfigLoader:
             # Validate and convert to structured config
             return self._validate_and_convert_config(raw_config)
             
-        except Exception as e:
+        except (FileNotFoundError, yaml.YAMLError, json.JSONDecodeError) as e:
             LOGGER.error(f"Failed to load config from {config_path}: {e}")
+            LOGGER.info("Using default configuration")
+            return self._get_default_config()
+        except OSError as e:
+            LOGGER.error(f"I/O error loading config from {config_path}: {e}")
             LOGGER.info("Using default configuration")
             return self._get_default_config()
     
@@ -129,7 +133,7 @@ class ConfigLoader:
                     except json.JSONDecodeError as e:
                         LOGGER.error(f"Invalid JSON in seeds file at line {line_number}: {e}")
                         raise ValueError(f"Invalid JSON in seeds file at line {line_number}")
-                    except Exception as e:
+                    except (ValidationError, TypeError) as e:
                         LOGGER.error(f"Invalid seed data at line {line_number}: {e}")
                         raise ValueError(f"Invalid seed data at line {line_number}: {e}")
         
@@ -211,7 +215,7 @@ class ConfigLoader:
             LOGGER.info("Configuration loaded and validated successfully")
             return config
             
-        except Exception as e:
+        except (ValidationError, TypeError, KeyError) as e:
             LOGGER.error(f"Configuration validation failed: {e}")
             LOGGER.info("Using default configuration")
             return self._get_default_config()
