@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Seed data models for NGBSE 20.2.
 Provides Pydantic models for seed validation.

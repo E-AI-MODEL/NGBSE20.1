@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Pipeline orchestrator for NGBSE 20.2 (GA Version).
 Modularized orchestrator with separated concerns and improved testability.
