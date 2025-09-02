@@ -10,7 +10,9 @@ class Seed(BaseModel):
     query: str = Field(..., description="Query string or URL for collection")
     type: str = Field(
         "web",
-        description="Collector type (web, leakix, shodan, censys, urlscan, github, news)"
+        description=(
+            "Collector type (web, leakix, shodan, censys, urlscan, github, news)"
+        )
     )
     asset_id: Optional[str] = Field(None, description="Optional asset identifier")
     tags: list[str] = Field(default_factory=list, description="Tags for categorization")
@@ -62,26 +64,54 @@ class CollectorConfig(BaseModel):
     """Configuration for individual collectors."""
     name: str = Field(..., description="Collector name")
     enabled: bool = Field(True, description="Whether collector is enabled")
-    api_key: Optional[str] = Field(n        None, description="API key for the collector"n    )
-    rate_limit: Optional[int] = Field(n        None, ge=1, description="Rate limit per minute"n    )
-    timeout: int = Field(n        30, ge=1, description="Request timeout in seconds"n    )
-    max_retries: int = Field(n        3, ge=0, description="Maximum retry attempts"n    )
-    options: dict = Field(n        default_factory=dict, description="Collector-specific options"n    )
+    api_key: Optional[str] = Field(
+        None, description="API key for the collector"
+    )
+    rate_limit: Optional[int] = Field(
+        None, ge=1, description="Rate limit per minute"
+    )
+    timeout: int = Field(
+        30, ge=1, description="Request timeout in seconds"
+    )
+    max_retries: int = Field(
+        3, ge=0, description="Maximum retry attempts"
+    )
+    options: dict = Field(
+        default_factory=dict, description="Collector-specific options"
+    )
 
 
 class Config(BaseModel):
     """Main configuration for NGBSE 20.1."""
-    seeds: list[Seed] = Field(n        default_factory=list, description="List of seeds to process"n    )
-    rules: list[Rule] = Field(n        default_factory=list, description="List of rules to apply"n    )
-    collectors: list[CollectorConfig] = Field(n        default_factory=list, description="Collector configurations"n    )
-    options: dict[str, str] = Field(n        default_factory=dict, description="General options"n    )
+    seeds: list[Seed] = Field(
+        default_factory=list, description="List of seeds to process"
+    )
+    rules: list[Rule] = Field(
+        default_factory=list, description="List of rules to apply"
+    )
+    collectors: list[CollectorConfig] = Field(
+        default_factory=list, description="Collector configurations"
+    )
+    options: dict[str, str] = Field(
+        default_factory=dict, description="General options"
+    )
 
     # Pipeline options
-    max_concurrent_collectors: int = Field(n        5, ge=1, description="Maximum concurrent collectors"n    )
-    output_format: str = Field(n        "json", description="Output format (json, stix, docx)"n    )
-    enable_ballm: bool = Field(n        True, description="Enable BALLM meta-layer generation"n    )
-    enable_forecasting: bool = Field(n        True, description="Enable trend forecasting"n    )
-    enable_scenarios: bool = Field(n        True, description="Enable scenario synthesis"n    )
+    max_concurrent_collectors: int = Field(
+        5, ge=1, description="Maximum concurrent collectors"
+    )
+    output_format: str = Field(
+        "json", description="Output format (json, stix, docx)"
+    )
+    enable_ballm: bool = Field(
+        True, description="Enable BALLM meta-layer generation"
+    )
+    enable_forecasting: bool = Field(
+        True, description="Enable trend forecasting"
+    )
+    enable_scenarios: bool = Field(
+        True, description="Enable scenario synthesis"
+    )
 
     @field_validator("output_format")
     @classmethod

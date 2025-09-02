@@ -5,7 +5,7 @@ Centralizes configuration management and credential handling.
 import os
 import json
 import yaml
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -139,11 +139,19 @@ class ConfigLoader:
                         seeds.append(validated_seed.dict())
 
                     except json.JSONDecodeError as e:
-                        LOGGER.error(f"Invalid JSON in seeds file at line {line_number}: {e}")
-                        raise ValueError(f"Invalid JSON in seeds file at line {line_number}")
+                        LOGGER.error(
+                            f"Invalid JSON in seeds file at line {line_number}: {e}"
+                        )
+                        raise ValueError(
+                            f"Invalid JSON in seeds file at line {line_number}"
+                        )
                     except (ValidationError, TypeError) as e:
-                        LOGGER.error(f"Invalid seed data at line {line_number}: {e}")
-                        raise ValueError(f"Invalid seed data at line {line_number}: {e}")
+                        LOGGER.error(
+                            f"Invalid seed data at line {line_number}: {e}"
+                        )
+                        raise ValueError(
+                            f"Invalid seed data at line {line_number}: {e}"
+                        )
 
         LOGGER.info(f"Loaded and validated {len(seeds)} seeds")
         return seeds
@@ -200,7 +208,9 @@ class ConfigLoader:
             LOGGER.info("Using default configuration")
             return self._get_default_config()
 
-    def _validate_collectors_config(self, raw_config: Dict[str, Any]) -> CollectorConfig:
+    def _validate_collectors_config(
+        self, raw_config: Dict[str, Any]
+    ) -> CollectorConfig:
         """Validate and convert collectors configuration."""
         collectors_config = raw_config.get("collectors", {})
         if not isinstance(collectors_config, dict):
@@ -249,7 +259,9 @@ class ConfigLoader:
 
 
 # Standalone functions for backward compatibility and easier imports
-def load_config(config_file: str = "ngbse.config.yml", config_dir: str = "config") -> NGBSEConfig:
+def load_config(
+    config_file: str = "ngbse.config.yml", config_dir: str = "config"
+) -> NGBSEConfig:
     """Load main configuration file with validation.
 
     Args:
@@ -263,7 +275,9 @@ def load_config(config_file: str = "ngbse.config.yml", config_dir: str = "config
     return loader.load_config(config_file)
 
 
-def load_rules(rules_file: str = "rules.json", config_dir: str = "config") -> List[Dict[str, Any]]:
+def load_rules(
+    rules_file: str = "rules.json", config_dir: str = "config"
+) -> List[Dict[str, Any]]:
     """Load rules configuration.
 
     Args:
@@ -277,7 +291,9 @@ def load_rules(rules_file: str = "rules.json", config_dir: str = "config") -> Li
     return loader.load_rules(rules_file)
 
 
-def load_seeds(seeds_file: str = "seeds.jsonl", config_dir: str = "config") -> List[Dict[str, Any]]:
+def load_seeds(
+    seeds_file: str = "seeds.jsonl", config_dir: str = "config"
+) -> List[Dict[str, Any]]:
     """Load and validate seeds configuration.
 
     Args:
@@ -375,7 +391,9 @@ def _validate_rules_file(rules_file: str) -> int:
             required_fields = ['id', 'name', 'pattern']
             for field in required_fields:
                 if field not in rule_data:
-                    raise ValueError(f"Rule at index {i} missing required field: {field}")
+                    raise ValueError(
+                        f"Rule at index {i} missing required field: {field}"
+                    )
 
             n_rules += 1
 
