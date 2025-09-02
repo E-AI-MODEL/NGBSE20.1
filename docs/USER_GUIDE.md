@@ -519,5 +519,5 @@ For licensing inquiries, please contact the E-AI-MODEL research initiative.
 
 ---
 
-*Last updated: January 2025*
+*Last updated: September 2025*
 *Version: 20.1.1*
