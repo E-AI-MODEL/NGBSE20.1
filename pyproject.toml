@@ -7,7 +7,7 @@ name = "ngbse20"
 version = "20.2.0"
 description = "Next-Gen Breach Scenario Engine 20.2 - GA Release"
 license = {text = "Commercial"}
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
   "requests>=2.31",
   "beautifulsoup4>=4.12",
@@ -45,7 +45,7 @@ exclude = ["tests*", "docs*", "data*"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+target-version = "py39"
 src = ["src"]
 exclude = ["build/", "dist/", ".venv/"]
 
@@ -62,7 +62,7 @@ known-first-party = ["ngbse20"]
 combine-as-imports = true
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.9"
 warn_unused_configs = true
 disallow_untyped_defs = true
 no_implicit_optional = true
