@@ -10,6 +10,8 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from ..logging import get_logger
+from ..utils.validation import validate_allowlist
+from ..models.seed import Seed
 
 LOGGER = get_logger(__name__)
 
@@ -101,7 +103,7 @@ class ConfigLoader:
             return json.load(f)
     
     def load_seeds(self, seeds_file: str = "seeds.jsonl") -> List[Dict[str, Any]]:
-        """Load seeds configuration."""
+        """Load and validate seeds configuration."""
         seeds_path = self.config_dir / seeds_file
         
         if not seeds_path.exists():
@@ -109,12 +111,29 @@ class ConfigLoader:
             return []
         
         seeds = []
+        line_number = 0
+        
         with open(seeds_path, 'r', encoding='utf-8') as f:
             for line in f:
+                line_number += 1
                 line = line.strip()
                 if line:
-                    seeds.append(json.loads(line))
+                    try:
+                        # Parse JSON
+                        raw_seed = json.loads(line)
+                        
+                        # Validate with Pydantic
+                        validated_seed = Seed(**raw_seed)
+                        seeds.append(validated_seed.dict())
+                        
+                    except json.JSONDecodeError as e:
+                        LOGGER.error(f"Invalid JSON in seeds file at line {line_number}: {e}")
+                        raise ValueError(f"Invalid JSON in seeds file at line {line_number}")
+                    except Exception as e:
+                        LOGGER.error(f"Invalid seed data at line {line_number}: {e}")
+                        raise ValueError(f"Invalid seed data at line {line_number}: {e}")
         
+        LOGGER.info(f"Loaded and validated {len(seeds)} seeds")
         return seeds
     
     def get_credentials(self) -> Dict[str, str]:
@@ -176,10 +195,14 @@ class ConfigLoader:
                 model=ballm_config.get("model", "gpt-4")
             )
             
+            # Validate allowlist
+            allowlist = raw_config.get("allowlist", ["*"])
+            validated_allowlist = validate_allowlist(allowlist)
+            
             # Create main config
             config = NGBSEConfig(
                 output_dir=raw_config.get("output_dir", "out"),
-                allowlist=raw_config.get("allowlist", ["*"]),
+                allowlist=validated_allowlist,
                 collectors=collectors,
                 scoring=scoring,
                 ballm=ballm

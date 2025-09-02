@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import re
 from typing import Any
 
 from stix2 import Bundle, Indicator, Note, ThreatActor, Vulnerability, Malware, Tool
@@ -15,50 +16,62 @@ HASH_LENGTH = 64
 def _now() -> datetime.datetime:
     return datetime.datetime.now(datetime.timezone.utc)
 
+def _sanitize_stix_value(value: str) -> str:
+    """Sanitize value for STIX pattern to prevent injection."""
+    if not value:
+        return ""
+    # Remove quotes and other potentially dangerous characters
+    sanitized = re.sub(r'[\"\'\\]', '', str(value))
+    # Limit length to prevent oversized patterns
+    return sanitized[:255]
+
 def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     """Create STIX indicator for a finding based on its type."""
     source_type = f.get("source", {}).get("type", "web")
     
     if source_type == "data_breach":
         # LeakIX findings
-        pattern = f"[domain-name:value = '{f.get('asset', '')}']"
+        asset = _sanitize_stix_value(f.get('asset', ''))
+        pattern = f"[domain-name:value = '{asset}']"
         name = f"Data Breach: {f.get('raw', {}).get('title', 'Unknown')}"
         
     elif source_type == "infrastructure":
         # Shodan findings
-        ip = f.get("raw", {}).get("ip", "")
-        port = f.get("raw", {}).get("port", "")
+        ip = _sanitize_stix_value(f.get("raw", {}).get("ip", ""))
+        port = _sanitize_stix_value(f.get("raw", {}).get("port", ""))
         pattern = f"[ipv4-addr:value = '{ip}' AND network-traffic:dst_port = {port}]"
         name = f"Infrastructure: {f.get('raw', {}).get('product', 'Unknown')} on {ip}:{port}"
         
     elif source_type == "network_intelligence":
         # Censys findings
-        ip = f.get("raw", {}).get("ip", "")
+        ip = _sanitize_stix_value(f.get("raw", {}).get("ip", ""))
         pattern = f"[ipv4-addr:value = '{ip}']"
         name = f"Network: {ip}"
         
     elif source_type == "threat_intelligence":
         # URLScan findings
-        url = f.get("raw", {}).get("url", "")
+        url = _sanitize_stix_value(f.get("raw", {}).get("url", ""))
         pattern = f"[url:value = '{url}']"
         name = f"Threat: {f.get('raw', {}).get('title', 'Unknown')}"
         
     elif source_type in ["code_repository", "code_search"]:
         # GitHub findings
         repo = f.get("asset", "")
-        pattern = f"[url:value = '{f.get('source', {}).get('url', '')}']"
+        url = _sanitize_stix_value(f.get('source', {}).get('url', ''))
+        pattern = f"[url:value = '{url}']"
         name = f"Code: {repo}"
         
     elif source_type == "news":
         # News findings
         title = f.get("raw", {}).get("title", "")
-        pattern = f"[url:value = '{f.get('source', {}).get('url', '')}']"
+        url = _sanitize_stix_value(f.get('source', {}).get('url', ''))
+        pattern = f"[url:value = '{url}']"
         name = f"News: {title[:50]}..."
         
     else:
         # Default web findings
-        url = f.get("source", {}).get("url", "")
-        domain = f.get("asset", "")
+        url = _sanitize_stix_value(f.get("source", {}).get("url", ""))
+        domain = _sanitize_stix_value(f.get("asset", ""))
         pattern = f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
         name = f"Web: {f.get('raw', {}).get('title', 'Unknown')}"
     

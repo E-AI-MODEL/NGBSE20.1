@@ -15,6 +15,7 @@ from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline
 from ngbse20.collectors.http_web import HttpWebCollector
 from ngbse20.monitoring.health import get_health_status
+from ngbse20.utils.validation import validate_allowlist
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,8 +43,9 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
         click.echo(f"Error loading input files: {e}", err=True)
         raise click.Abort()
 
-    # Parse allowlist
-    allowlist_domains = [d.strip() for d in allowlist.split(',')]
+            # Parse and validate allowlist
+        allowlist_domains = [d.strip() for d in allowlist.split(',')]
+        allowlist_domains = validate_allowlist(allowlist_domains)
     
     config = {
         "output_dir": outdir,
@@ -90,8 +92,9 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
         click.echo(f"Error loading seeds: {e}", err=True)
         raise click.Abort()
     
-    # Parse allowlist
-    allowlist_domains = [d.strip() for d in allowlist.split(',')]
+            # Parse and validate allowlist
+        allowlist_domains = [d.strip() for d in allowlist.split(',')]
+        allowlist_domains = validate_allowlist(allowlist_domains)
     
     # Use appropriate collector
     if collector == "web":
