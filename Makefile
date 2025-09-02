@@ -4,12 +4,12 @@
 
 # Format code with isort and black
 format:
-	isort src/ tests/
+	isort --profile=black src/ tests/
 	black src/ tests/
 
 # Check formatting without making changes
 check:
-	isort --check-only src/ tests/
+	isort --check-only --profile=black src/ tests/
 	black --check src/ tests/
 
 # Install dependencies
