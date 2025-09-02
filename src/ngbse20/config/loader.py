@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional
 from pathlib import Path
 from dataclasses import dataclass
 
+from pydantic import ValidationError
+
 from ..logging import get_logger
 from ..utils.validation import validate_allowlist
 from ..models.seed import Seed
@@ -223,3 +225,123 @@ class ConfigLoader:
     def _get_default_config(self) -> NGBSEConfig:
         """Get default configuration."""
         return NGBSEConfig()
+
+
+# Standalone functions for backward compatibility and easier imports
+def load_config(config_file: str = "ngbse.config.yml", config_dir: str = "config") -> NGBSEConfig:
+    """Load main configuration file with validation.
+    
+    Args:
+        config_file: Name of the configuration file
+        config_dir: Directory containing configuration files
+        
+    Returns:
+        NGBSEConfig: Loaded and validated configuration
+    """
+    loader = ConfigLoader(config_dir)
+    return loader.load_config(config_file)
+
+
+def load_rules(rules_file: str = "rules.json", config_dir: str = "config") -> List[Dict[str, Any]]:
+    """Load rules configuration.
+    
+    Args:
+        rules_file: Name of the rules file
+        config_dir: Directory containing configuration files
+        
+    Returns:
+        List[Dict[str, Any]]: Loaded rules configuration
+    """
+    loader = ConfigLoader(config_dir)
+    return loader.load_rules(rules_file)
+
+
+def load_seeds(seeds_file: str = "seeds.jsonl", config_dir: str = "config") -> List[Dict[str, Any]]:
+    """Load and validate seeds configuration.
+    
+    Args:
+        seeds_file: Name of the seeds file
+        config_dir: Directory containing configuration files
+        
+    Returns:
+        List[Dict[str, Any]]: Loaded and validated seeds
+    """
+    loader = ConfigLoader(config_dir)
+    return loader.load_seeds(seeds_file)
+
+
+def validate_files(seeds_file: str, rules_file: str) -> tuple[int, int]:
+    """Validate the syntax and structure of seed and rule files.
+    
+    Args:
+        seeds_file: Path to the seeds file
+        rules_file: Path to the rules file
+        
+    Returns:
+        tuple[int, int]: Number of valid seeds and rules found
+        
+    Raises:
+        FileNotFoundError: If files don't exist
+        json.JSONDecodeError: If files contain invalid JSON
+        ValueError: If validation fails
+    """
+    seeds_path = Path(seeds_file)
+    rules_path = Path(rules_file)
+    
+    # Validate seeds file
+    if not seeds_path.exists():
+        raise FileNotFoundError(f"Seeds file not found: {seeds_file}")
+    
+    n_seeds = 0
+    line_number = 0
+    
+    with open(seeds_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line_number += 1
+            line = line.strip()
+            if line:
+                try:
+                    # Parse JSON
+                    raw_seed = json.loads(line)
+                    
+                    # Validate with Pydantic
+                    Seed(**raw_seed)
+                    n_seeds += 1
+                    
+                except json.JSONDecodeError as e:
+                    raise json.JSONDecodeError(f"Invalid JSON in seeds file at line {line_number}: {e}", e.doc, e.pos)
+                except ValidationError as e:
+                    raise ValueError(f"Invalid seed data at line {line_number}: {e}")
+    
+    # Validate rules file
+    if not rules_path.exists():
+        raise FileNotFoundError(f"Rules file not found: {rules_file}")
+    
+    with open(rules_path, 'r', encoding='utf-8') as f:
+        try:
+            rules_data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(f"Invalid JSON in rules file: {e}", e.doc, e.pos)
+    
+    if not isinstance(rules_data, list):
+        raise ValueError("Rules file must contain a JSON array")
+    
+    n_rules = 0
+    for i, rule_data in enumerate(rules_data):
+        try:
+            # Basic validation - check required fields
+            if not isinstance(rule_data, dict):
+                raise ValueError(f"Rule at index {i} must be a dictionary")
+            
+            required_fields = ['id', 'name', 'pattern']
+            for field in required_fields:
+                if field not in rule_data:
+                    raise ValueError(f"Rule at index {i} missing required field: {field}")
+            
+            n_rules += 1
+            
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid rule data at index {i}: {e}")
+    
+    LOGGER.info(f"Validation successful: {n_seeds} seeds and {n_rules} rules found")
+    return n_seeds, n_rules
