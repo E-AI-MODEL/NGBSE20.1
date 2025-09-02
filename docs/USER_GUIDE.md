@@ -502,7 +502,7 @@ python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json
 ### **Additional Resources**
 
 - **Research Paper**: "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs)"
-- **E-AI Model**: [Research framework](https://sites.google.com/view/eaimodel/the-act-of-learning)
+- **E-AI Model**: [Research framework](https://sites.google.com/view/eaimodel)
 - **Community**: Join discussions and share use cases
 
 ---
@@ -519,5 +519,5 @@ For licensing inquiries, please contact the E-AI-MODEL research initiative.
 
 ---
 
-*Last updated: January 2025*
+*Last updated: September 2025*
 *Version: 20.1.1*
