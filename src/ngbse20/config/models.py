@@ -1,23 +1,23 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
 
 
 class Seed(BaseModel):
     """Seed configuration for data collection."""
+
     id: str = Field(..., description="Unique identifier for the seed")
     query: str = Field(..., description="Query string or URL for collection")
     type: str = Field(
         "web",
         description=(
             "Collector type (web, leakix, shodan, censys, urlscan, github, news)"
-        )
+        ),
     )
-    asset_id: Optional[str] = Field(None, description="Optional asset identifier")
+    asset_id: str | None = Field(None, description="Optional asset identifier")
     tags: list[str] = Field(default_factory=list, description="Tags for categorization")
     priority: int = Field(1, ge=1, le=10, description="Collection priority (1-10)")
-    max_findings: Optional[int] = Field(
+    max_findings: int | None = Field(
         None, ge=1, description="Maximum findings to collect"
     )
 
@@ -39,6 +39,7 @@ class Seed(BaseModel):
 
 class Rule(BaseModel):
     """Rule configuration for data processing."""
+
     id: str = Field(..., description="Unique rule identifier")
     name: str = Field(..., description="Human-readable rule name")
     pattern: str = Field(..., description="Pattern or condition to match")
@@ -62,20 +63,13 @@ class Rule(BaseModel):
 
 class CollectorConfig(BaseModel):
     """Configuration for individual collectors."""
+
     name: str = Field(..., description="Collector name")
     enabled: bool = Field(True, description="Whether collector is enabled")
-    api_key: Optional[str] = Field(
-        None, description="API key for the collector"
-    )
-    rate_limit: Optional[int] = Field(
-        None, ge=1, description="Rate limit per minute"
-    )
-    timeout: int = Field(
-        30, ge=1, description="Request timeout in seconds"
-    )
-    max_retries: int = Field(
-        3, ge=0, description="Maximum retry attempts"
-    )
+    api_key: str | None = Field(None, description="API key for the collector")
+    rate_limit: int | None = Field(None, ge=1, description="Rate limit per minute")
+    timeout: int = Field(30, ge=1, description="Request timeout in seconds")
+    max_retries: int = Field(3, ge=0, description="Maximum retry attempts")
     options: dict = Field(
         default_factory=dict, description="Collector-specific options"
     )
@@ -83,6 +77,7 @@ class CollectorConfig(BaseModel):
 
 class Config(BaseModel):
     """Main configuration for NGBSE 20.1."""
+
     seeds: list[Seed] = Field(
         default_factory=list, description="List of seeds to process"
     )
@@ -92,26 +87,16 @@ class Config(BaseModel):
     collectors: list[CollectorConfig] = Field(
         default_factory=list, description="Collector configurations"
     )
-    options: dict[str, str] = Field(
-        default_factory=dict, description="General options"
-    )
+    options: dict[str, str] = Field(default_factory=dict, description="General options")
 
     # Pipeline options
     max_concurrent_collectors: int = Field(
         5, ge=1, description="Maximum concurrent collectors"
     )
-    output_format: str = Field(
-        "json", description="Output format (json, stix, docx)"
-    )
-    enable_ballm: bool = Field(
-        True, description="Enable BALLM meta-layer generation"
-    )
-    enable_forecasting: bool = Field(
-        True, description="Enable trend forecasting"
-    )
-    enable_scenarios: bool = Field(
-        True, description="Enable scenario synthesis"
-    )
+    output_format: str = Field("json", description="Output format (json, stix, docx)")
+    enable_ballm: bool = Field(True, description="Enable BALLM meta-layer generation")
+    enable_forecasting: bool = Field(True, description="Enable trend forecasting")
+    enable_scenarios: bool = Field(True, description="Enable scenario synthesis")
 
     @field_validator("output_format")
     @classmethod

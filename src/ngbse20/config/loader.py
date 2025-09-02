@@ -2,18 +2,19 @@
 Configuration loader for NGBSE 20.2.
 Centralizes configuration management and credential handling.
 """
-import os
-import json
-import yaml
-from typing import Any, Dict, List
-from pathlib import Path
-from dataclasses import dataclass
 
+import json
+import os
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import yaml
 from pydantic import ValidationError
 
 from ..logging import get_logger
-from ..utils.validation import validate_allowlist
 from ..models.seed import Seed
+from ..utils.validation import validate_allowlist
 
 LOGGER = get_logger(__name__)
 
@@ -21,19 +22,22 @@ LOGGER = get_logger(__name__)
 @dataclass
 class CollectorConfig:
     """Configuration for collectors."""
-    enabled: List[str]
-    rate_limits: Dict[str, int] = None
+
+    enabled: list[str]
+    rate_limits: dict[str, int] = None
 
 
 @dataclass
 class ScoringConfig:
     """Configuration for scoring engine."""
-    default_weights: Dict[str, float]
+
+    default_weights: dict[str, float]
 
 
 @dataclass
 class BALLMConfig:
     """Configuration for BALLM."""
+
     enabled: bool = True
     model: str = "gpt-4"
 
@@ -41,8 +45,9 @@ class BALLMConfig:
 @dataclass
 class NGBSEConfig:
     """Main NGBSE configuration schema."""
+
     output_dir: str = "out"
-    allowlist: List[str] = None
+    allowlist: list[str] = None
     collectors: CollectorConfig = None
     scoring: ScoringConfig = None
     ballm: BALLMConfig = None
@@ -68,7 +73,7 @@ class ConfigLoader:
 
     def __init__(self, config_dir: str = "config"):
         self.config_dir = Path(config_dir)
-        self._config_cache: Dict[str, Any] = {}
+        self._config_cache: dict[str, Any] = {}
 
     def load_config(self, config_file: str = "ngbse.config.yml") -> NGBSEConfig:
         """Load main configuration file with validation."""
@@ -80,10 +85,10 @@ class ConfigLoader:
 
         try:
             # Load based on file extension
-            with open(config_path, 'r', encoding='utf-8') as f:
-                if config_path.suffix in ['.yml', '.yaml']:
+            with open(config_path, encoding="utf-8") as f:
+                if config_path.suffix in [".yml", ".yaml"]:
                     raw_config = yaml.safe_load(f)
-                elif config_path.suffix == '.json':
+                elif config_path.suffix == ".json":
                     raw_config = json.load(f)
                 else:
                     LOGGER.warning(
@@ -103,7 +108,7 @@ class ConfigLoader:
             LOGGER.info("Using default configuration")
             return self._get_default_config()
 
-    def load_rules(self, rules_file: str = "rules.json") -> List[Dict[str, Any]]:
+    def load_rules(self, rules_file: str = "rules.json") -> list[dict[str, Any]]:
         """Load rules configuration."""
         rules_path = self.config_dir / rules_file
 
@@ -111,10 +116,10 @@ class ConfigLoader:
             LOGGER.warning(f"Rules file {rules_path} not found, using empty rules")
             return []
 
-        with open(rules_path, 'r', encoding='utf-8') as f:
+        with open(rules_path, encoding="utf-8") as f:
             return json.load(f)
 
-    def load_seeds(self, seeds_file: str = "seeds.jsonl") -> List[Dict[str, Any]]:
+    def load_seeds(self, seeds_file: str = "seeds.jsonl") -> list[dict[str, Any]]:
         """Load and validate seeds configuration."""
         seeds_path = self.config_dir / seeds_file
 
@@ -125,7 +130,7 @@ class ConfigLoader:
         seeds = []
         line_number = 0
 
-        with open(seeds_path, 'r', encoding='utf-8') as f:
+        with open(seeds_path, encoding="utf-8") as f:
             for line in f:
                 line_number += 1
                 line = line.strip()
@@ -146,9 +151,7 @@ class ConfigLoader:
                             f"Invalid JSON in seeds file at line {line_number}"
                         )
                     except (ValidationError, TypeError) as e:
-                        LOGGER.error(
-                            f"Invalid seed data at line {line_number}: {e}"
-                        )
+                        LOGGER.error(f"Invalid seed data at line {line_number}: {e}")
                         raise ValueError(
                             f"Invalid seed data at line {line_number}: {e}"
                         )
@@ -156,20 +159,21 @@ class ConfigLoader:
         LOGGER.info(f"Loaded and validated {len(seeds)} seeds")
         return seeds
 
-    def get_credentials(self) -> Dict[str, str]:
+    def get_credentials(self) -> dict[str, str]:
         """Extract credentials from environment variables."""
         credentials = {}
 
         # Common API key patterns
         api_keys = [
-            'SHODAN_API_KEY',
-            'CENSYS_API_ID', 'CENSYS_API_SECRET',
-            'LEAKIX_API_KEY',
-            'URLSCAN_API_KEY',
-            'GITHUB_TOKEN',
-            'NEWS_API_KEY',
-            'OPENAI_API_KEY',
-            'ANTHROPIC_API_KEY'
+            "SHODAN_API_KEY",
+            "CENSYS_API_ID",
+            "CENSYS_API_SECRET",
+            "LEAKIX_API_KEY",
+            "URLSCAN_API_KEY",
+            "GITHUB_TOKEN",
+            "NEWS_API_KEY",
+            "OPENAI_API_KEY",
+            "ANTHROPIC_API_KEY",
         ]
 
         for key in api_keys:
@@ -179,7 +183,7 @@ class ConfigLoader:
 
         return credentials
 
-    def _validate_and_convert_config(self, raw_config: Dict[str, Any]) -> NGBSEConfig:
+    def _validate_and_convert_config(self, raw_config: dict[str, Any]) -> NGBSEConfig:
         """Validate and convert raw config to structured config."""
         try:
             # Validate required fields
@@ -197,7 +201,7 @@ class ConfigLoader:
                 allowlist=allowlist,
                 collectors=collectors,
                 scoring=scoring,
-                ballm=ballm
+                ballm=ballm,
             )
 
             LOGGER.info("Configuration loaded and validated successfully")
@@ -209,7 +213,7 @@ class ConfigLoader:
             return self._get_default_config()
 
     def _validate_collectors_config(
-        self, raw_config: Dict[str, Any]
+        self, raw_config: dict[str, Any]
     ) -> CollectorConfig:
         """Validate and convert collectors configuration."""
         collectors_config = raw_config.get("collectors", {})
@@ -220,10 +224,10 @@ class ConfigLoader:
             enabled=collectors_config.get(
                 "enabled", ["http_web", "shodan", "censys", "leakix"]
             ),
-            rate_limits=collectors_config.get("rate_limits")
+            rate_limits=collectors_config.get("rate_limits"),
         )
 
-    def _validate_scoring_config(self, raw_config: Dict[str, Any]) -> ScoringConfig:
+    def _validate_scoring_config(self, raw_config: dict[str, Any]) -> ScoringConfig:
         """Validate and convert scoring configuration."""
         scoring_config = raw_config.get("scoring", {})
         if not isinstance(scoring_config, dict):
@@ -237,7 +241,7 @@ class ConfigLoader:
             )
         )
 
-    def _validate_ballm_config(self, raw_config: Dict[str, Any]) -> BALLMConfig:
+    def _validate_ballm_config(self, raw_config: dict[str, Any]) -> BALLMConfig:
         """Validate and convert BALLM configuration."""
         ballm_config = raw_config.get("ballm", {})
         if not isinstance(ballm_config, dict):
@@ -245,10 +249,10 @@ class ConfigLoader:
 
         return BALLMConfig(
             enabled=ballm_config.get("enabled", True),
-            model=ballm_config.get("model", "gpt-4")
+            model=ballm_config.get("model", "gpt-4"),
         )
 
-    def _validate_allowlist_config(self, raw_config: Dict[str, Any]) -> List[str]:
+    def _validate_allowlist_config(self, raw_config: dict[str, Any]) -> list[str]:
         """Validate and convert allowlist configuration."""
         allowlist = raw_config.get("allowlist", ["*"])
         return validate_allowlist(allowlist)
@@ -277,7 +281,7 @@ def load_config(
 
 def load_rules(
     rules_file: str = "rules.json", config_dir: str = "config"
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Load rules configuration.
 
     Args:
@@ -293,7 +297,7 @@ def load_rules(
 
 def load_seeds(
     seeds_file: str = "seeds.jsonl", config_dir: str = "config"
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Load and validate seeds configuration.
 
     Args:
@@ -339,7 +343,7 @@ def _validate_seeds_file(seeds_file: str) -> int:
     n_seeds = 0
     line_number = 0
 
-    with open(seeds_path, 'r', encoding='utf-8') as f:
+    with open(seeds_path, encoding="utf-8") as f:
         for line in f:
             line_number += 1
             line = line.strip()
@@ -355,7 +359,8 @@ def _validate_seeds_file(seeds_file: str) -> int:
                 except json.JSONDecodeError as e:
                     raise json.JSONDecodeError(
                         f"Invalid JSON in seeds file at line {line_number}: {e}",
-                        e.doc, e.pos
+                        e.doc,
+                        e.pos,
                     )
                 except ValidationError as e:
                     raise ValueError(f"Invalid seed data at line {line_number}: {e}")
@@ -370,13 +375,11 @@ def _validate_rules_file(rules_file: str) -> int:
     if not rules_path.exists():
         raise FileNotFoundError(f"Rules file not found: {rules_file}")
 
-    with open(rules_path, 'r', encoding='utf-8') as f:
+    with open(rules_path, encoding="utf-8") as f:
         try:
             rules_data = json.load(f)
         except json.JSONDecodeError as e:
-            raise json.JSONDecodeError(
-                f"Invalid JSON in rules file: {e}", e.doc, e.pos
-            )
+            raise json.JSONDecodeError(f"Invalid JSON in rules file: {e}", e.doc, e.pos)
 
     if not isinstance(rules_data, list):
         raise ValueError("Rules file must contain a JSON array")
@@ -388,7 +391,7 @@ def _validate_rules_file(rules_file: str) -> int:
             if not isinstance(rule_data, dict):
                 raise ValueError(f"Rule at index {i} must be a dictionary")
 
-            required_fields = ['id', 'name', 'pattern']
+            required_fields = ["id", "name", "pattern"]
             for field in required_fields:
                 if field not in rule_data:
                     raise ValueError(

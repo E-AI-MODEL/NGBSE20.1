@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from ngbse20.logging import get_logger
 
 LOGGER = get_logger(__name__)
+
 
 @dataclass
 class Manifest:
@@ -18,8 +19,10 @@ class Manifest:
     outputs: dict[str, Any]
     stats: dict[str, Any]
 
+
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
+
 
 def write_manifest(
     run_id: str,

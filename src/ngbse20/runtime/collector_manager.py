@@ -2,16 +2,17 @@
 Collector manager for NGBSE 20.2.
 Manages collector lifecycle and credential validation.
 """
-from typing import Any, Dict, List, Type
+
+from typing import Any
 
 from ..collectors.base import BaseCollector
+from ..collectors.censys import CensysCollector
+from ..collectors.github import GitHubCollector
 from ..collectors.http_web import HttpWebCollector
 from ..collectors.leakix import LeakIXCollector
-from ..collectors.shodan import ShodanCollector
-from ..collectors.censys import CensysCollector
-from ..collectors.urlscan import URLScanCollector
-from ..collectors.github import GitHubCollector
 from ..collectors.news import NewsCollector
+from ..collectors.shodan import ShodanCollector
+from ..collectors.urlscan import URLScanCollector
 from ..logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -21,7 +22,7 @@ class CollectorManager:
     """Manages collector instances and credential validation."""
 
     # Registry of available collectors
-    COLLECTOR_REGISTRY: Dict[str, Type[BaseCollector]] = {
+    COLLECTOR_REGISTRY: dict[str, type[BaseCollector]] = {
         "http_web": HttpWebCollector,
         "leakix": LeakIXCollector,
         "shodan": ShodanCollector,
@@ -31,12 +32,12 @@ class CollectorManager:
         "news": NewsCollector,
     }
 
-    def __init__(self, config: Dict[str, Any], credentials: Dict[str, str]):
+    def __init__(self, config: dict[str, Any], credentials: dict[str, str]):
         self.config = config
         self.credentials = credentials
-        self._collectors: List[BaseCollector] = []
+        self._collectors: list[BaseCollector] = []
 
-    def build_collectors(self, allowlist: List[str]) -> List[BaseCollector]:
+    def build_collectors(self, allowlist: list[str]) -> list[BaseCollector]:
         """Build and validate collector instances."""
         enabled_collectors = self.config.get("collectors", {}).get(
             "enabled", list(self.COLLECTOR_REGISTRY.keys())
@@ -77,19 +78,19 @@ class CollectorManager:
 
     def _has_valid_credentials(self, collector: BaseCollector) -> bool:
         """Check if collector has valid credentials."""
-        if hasattr(collector, 'api_key') and collector.api_key:
+        if hasattr(collector, "api_key") and collector.api_key:
             return True
-        if hasattr(collector, 'token') and collector.token:
+        if hasattr(collector, "token") and collector.token:
             return True
-        if hasattr(collector, 'api_id') and collector.api_id:
+        if hasattr(collector, "api_id") and collector.api_id:
             return True
         if isinstance(collector, HttpWebCollector):
             return True
         return False
 
     def collect_all(
-        self, seeds: List[Dict[str, Any]], timestamp: str
-    ) -> List[Dict[str, Any]]:
+        self, seeds: list[dict[str, Any]], timestamp: str
+    ) -> list[dict[str, Any]]:
         """Run collection across all active collectors."""
         findings = []
 

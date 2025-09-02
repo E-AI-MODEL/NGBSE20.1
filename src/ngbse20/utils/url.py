@@ -6,6 +6,7 @@ import tldextract
 
 _UTM_PREFIXES = ("utm_", "icid", "gclid", "fbclid", "mc_cid", "mc_eid")
 
+
 def normalize_url(raw: str) -> str:
     """
     Canonicalize URL: lowercase host, remove fragment, sort query, drop tracking params.
@@ -19,11 +20,15 @@ def normalize_url(raw: str) -> str:
     elif netloc.endswith(":443") and scheme == "https":
         netloc = netloc[:-4]
     path = parts.path or "/"
-    query_pairs = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
-                   if not k.lower().startswith(_UTM_PREFIXES)]
+    query_pairs = [
+        (k, v)
+        for k, v in parse_qsl(parts.query, keep_blank_values=True)
+        if not k.lower().startswith(_UTM_PREFIXES)
+    ]
     query_pairs.sort()
     query = urlencode(query_pairs, doseq=True)
     return urlunsplit((scheme, netloc, path, query, ""))
+
 
 def extract_domain(raw: str) -> str:
     ext = tldextract.extract(raw)

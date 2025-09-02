@@ -12,6 +12,7 @@ def ewma(values: list[float], alpha: float = 0.4) -> float:
         s = alpha * v + (1 - alpha) * s
     return s
 
+
 def build_forecast(out_dir: str) -> dict:
     history_glob = os.path.join(out_dir, "history", "*.asset_scores.json")
     os.makedirs(os.path.join(out_dir, "history"), exist_ok=True)
@@ -36,7 +37,10 @@ def build_forecast(out_dir: str) -> dict:
         }
     return forecast
 
-def aggregate_asset_scores(findings: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+
+def aggregate_asset_scores(
+    findings: list[dict[str, Any]],
+) -> dict[str, dict[str, float]]:
     by_asset: dict[str, dict[str, Any]] = {}
     for f in findings:
         asset = f.get("asset", "")
