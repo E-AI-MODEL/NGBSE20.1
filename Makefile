@@ -25,7 +25,7 @@ test-watch:
 
 security:
 	bandit -r src/ngbse20
-	pip-audit -r requirements.txt || true
+	pip-audit -r requirements.lock || true
 
 sbom:
 	python scripts/generate_sbom.py --output-dir . --formats all --validate
