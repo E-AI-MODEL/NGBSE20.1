@@ -57,6 +57,8 @@ jobs:
         run: flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
 
       - name: Run MyPy (type checking)
+        env:
+          PYTHONPATH: src
         run: mypy src/ --ignore-missing-imports
 
   security-scan:
@@ -78,6 +80,8 @@ jobs:
           pip install bandit safety pip-audit
 
       - name: Run Bandit (security linting)
+        env:
+          PYTHONPATH: src
         run: bandit -r src/ -f json -o bandit-report.json || true
 
       - name: Run Safety (dependency vulnerability check)
@@ -117,9 +121,13 @@ jobs:
           pip install .
 
       - name: Lint (ruff)
+        env:
+          PYTHONPATH: src
         run: ruff check src tests || true
 
       - name: Typecheck (mypy)
+        env:
+          PYTHONPATH: src
         run: mypy src || true
 
       - name: Run unit tests
