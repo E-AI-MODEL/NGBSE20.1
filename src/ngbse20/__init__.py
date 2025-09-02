@@ -1,6 +1,6 @@
 """NGBSE 20.1 package."""
 
-__version__ = "20.1.1"
+__version__ = "20.2.0"
 
 # Core modules
 from .runtime.orchestrator import run_pipeline
