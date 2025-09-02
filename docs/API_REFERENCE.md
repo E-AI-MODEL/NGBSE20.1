@@ -830,7 +830,7 @@ GNEWS_API_KEY=...                       # GNews (backup)
 ### **Additional Resources**
 
 - **Research Paper**: "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs)"
-- **E-AI Model**: [Research framework](https://sites.google.com/view/eaimodel/the-act-of-learning)
+- **E-AI Model**: [Research framework](https://github.com/E-AI-MODEL)
 - **Community**: Join discussions and share use cases
 
 ---

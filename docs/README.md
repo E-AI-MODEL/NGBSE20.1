@@ -120,7 +120,7 @@ NGBSE 20.1 is a comprehensive Open-Source Intelligence (OSINT) engine that:
 
 ### **Research Context**
 - **[Research Paper](https://github.com/E-AI-MODEL/NGBSE20.1)** - "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs)"
-- **[E-AI Model](https://sites.google.com/view/eaimodel/the-act-of-learning)** - Research framework
+- **[E-AI Model](https://github.com/E-AI-MODEL)** - Research framework
 
 ### **Community & Support**
 - **[GitHub Repository](https://github.com/E-AI-MODEL/NGBSE20.1)** - Source code and issues
