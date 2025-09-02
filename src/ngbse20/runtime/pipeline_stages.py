@@ -14,7 +14,8 @@ from ..forecast.engine import aggregate_asset_scores, build_forecast
 from ..llm_client import LLMClient
 from ..logging import get_logger
 from ..rules.engine import evaluate_rules
-from ..scoring.v18 import DEFAULT as SCORE_DEFAULT, compute_cai, score_findings
+from ..scoring.v18 import DEFAULT as SCORE_DEFAULT
+from ..scoring.v18 import compute_cai, score_findings
 from ..seeds.proposer import propose_next_seeds
 from ..synth.reverse_llm import (
     confidence_gap,
