@@ -113,21 +113,14 @@ class TestPipelineStages:
             assert result["meta_layer"] == mock_meta_layer
             assert "trace" in result
     
-    def test_ballm_stage_failure(self):
-        """Test BALLM stage with failure."""
-        stages = PipelineStages("test_output")
-        
-        scored_findings = [{"id": "finding1", "type": "web"}]
-        blindspots = {"coverage": 0.2, "recency": 0.3, "confidence": 0.1}
-        asset_scores = {"asset1": 0.8}
-        
-        with patch('src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator') as mock_generator_class:
-            mock_generator = Mock()
-            mock_generator.generate_meta_layer.side_effect = Exception("BALLM failed")
-            mock_generator_class.return_value = mock_generator
-            
-            result = stages.ballm_stage(scored_findings, blindspots, asset_scores)
-            
-            assert "error" in result["meta_layer"]
-            assert result["meta_layer"]["error"] == "BALLM failed"
-            assert "trace" in result
+def test_ballm_stage_handles_exception(stages, scored_findings, blindspots, asset_scores):
+    with patch("src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator") as mock_generator_class:
+        mock_generator = Mock()
+        mock_generator.generate_meta_layer.side_effect = Exception("BALLM failed")
+        mock_generator_class.return_value = mock_generator
+
+        result = stages.ballm_stage(scored_findings, blindspots, asset_scores)
+
+        assert "error" in result["meta_layer"]
+        assert result["meta_layer"]["error"] == "BALLM failed"
+        assert "trace" in result
