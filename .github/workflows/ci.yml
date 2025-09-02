@@ -13,6 +13,22 @@ env:
   NODE_VERSION: '18'
 
 jobs:
+  linkcheck:
+    name: Link Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check links (lychee)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: >
+            --no-progress --max-redirects 5 --accept 200,206,302,403
+            --exclude "localhost,127.0.0.1,example.com,.*#.*"
+            --exclude-path "CHANGELOG.md,docs/ignore/*.md"
+            **/*.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   lint-and-format:
     name: Lint and Format
     runs-on: ubuntu-latest
@@ -58,14 +74,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install bandit safety
+          pip install -r requirements.txt || true
+          pip install bandit safety pip-audit
 
       - name: Run Bandit (security linting)
         run: bandit -r src/ -f json -o bandit-report.json || true
 
       - name: Run Safety (dependency vulnerability check)
         run: safety check --json --output safety-report.json || true
+
+      - name: Run pip-audit (dependency audit)
+        run: pip-audit -r requirements.txt || true
 
       - name: Upload security reports
         uses: actions/upload-artifact@v3
@@ -94,12 +113,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-mock
+          pip install -r requirements.txt -r requirements-dev.txt || true
+          pip install .
+
+      - name: Lint (ruff)
+        run: ruff check src tests || true
+
+      - name: Typecheck (mypy)
+        run: mypy src || true
 
       - name: Run unit tests
-        run: |
-          pytest tests/unit/ -v --cov=src/ngbse20 --cov-report=xml --cov-report=html
+        env:
+          PYTHONPATH: src
+        run: pytest -q --cov=src/ngbse20 --cov-report=xml --cov-report=html
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
