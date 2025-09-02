@@ -205,7 +205,7 @@ python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --out
 ## 🆘 **Need Help?**
 
 - **GitHub Issues**: [Report problems](https://github.com/E-AI-MODEL/NGBSE20.1/issues)
-- **Documentation**: [Complete guides](docs/)
+- **Documentation**: [Complete guides](.)
 - **Examples**: [Sample configs](../examples/)
 
 ---
