@@ -9,8 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # app deps layer
 COPY pyproject.toml /app/
-# als je ook een requirements.txt hebt voor pip-audit stap:
-COPY requirements.txt /app/ 2>/dev/null || true
 RUN pip install --upgrade pip && pip install .  # runtime deps
 
 # ---- runtime image
