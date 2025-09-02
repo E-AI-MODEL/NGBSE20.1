@@ -165,9 +165,7 @@ jobs:
           pip install pytest pytest-mock
 
       - name: Print sys.path
-        run: python - <<'PY'
-import sys; [print(p) for p in sys.path]
-PY
+        run: python -c "import sys; [print(p) for p in sys.path]"
       - name: Run integration tests
         env:
           PYTHONPATH: src
