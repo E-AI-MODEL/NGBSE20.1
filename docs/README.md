@@ -30,12 +30,11 @@ NGBSE 20.1 is a comprehensive Open-Source Intelligence (OSINT) engine that:
 ### **Examples & Use Cases**
 - **[Examples Directory](../examples/)** - Practical examples and configurations
 - **[Threat Intelligence](../examples/threat_intelligence/)** - Malware tracking, infrastructure assessment
-- **[Custom Configurations](../examples/custom/)** - Advanced usage patterns
 
 ### **Development & Contributing**
-- **[Developer Guide](../DEVELOPER.md)** - Building and extending NGBSE
-- **[Architecture](../ARCHITECTURE.md)** - System design and components
-- **[Testing](../TESTING.md)** - Quality assurance and testing
+- **[Architecture](ARCHITECTURE.md)** - System design and components
+- **[API Reference](API_REFERENCE.md)** - Complete technical API documentation
+- **[User Guide](USER_GUIDE.md)** - Comprehensive user documentation
 
 ---
 
@@ -49,12 +48,12 @@ NGBSE 20.1 is a comprehensive Open-Source Intelligence (OSINT) engine that:
 ### **For Experienced Users**
 1. Reference **[API Reference](API_REFERENCE.md)** for technical details
 2. Explore **[Examples Directory](../examples/)** for advanced patterns
-3. Check **[Developer Guide](../DEVELOPER.md)** for customization
+3. Check **[Architecture](ARCHITECTURE.md)** for customization
 
 ### **For Developers**
-1. Review **[Architecture](../ARCHITECTURE.md)** for system understanding
-2. Read **[Developer Guide](../DEVELOPER.md)** for contribution guidelines
-3. Check **[Testing](../TESTING.md)** for quality standards
+1. Review **[Architecture](ARCHITECTURE.md)** for system understanding
+2. Read **[API Reference](API_REFERENCE.md)** for technical details
+3. Check **[User Guide](USER_GUIDE.md)** for usage patterns
 
 ---
 

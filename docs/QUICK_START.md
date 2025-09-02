@@ -188,7 +188,7 @@ make test-leakix
 ### **Learn More:**
 - **User Guide**: [docs/USER_GUIDE.md](USER_GUIDE.md)
 - **API Reference**: [docs/API_REFERENCE.md](API_REFERENCE.md)
-- **Examples**: [examples/](examples/)
+- **Examples**: [examples/](../examples/)
 
 ### **Advanced Usage:**
 ```bash
@@ -206,7 +206,7 @@ python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --out
 
 - **GitHub Issues**: [Report problems](https://github.com/E-AI-MODEL/NGBSE20.1/issues)
 - **Documentation**: [Complete guides](docs/)
-- **Examples**: [Sample configs](examples/)
+- **Examples**: [Sample configs](../examples/)
 
 ---
 
