@@ -2,6 +2,9 @@
 Integration tests for the complete NGBSE pipeline.
 """
 
+import pytest
+pytestmark = pytest.mark.integration
+
 import json
 import tempfile
 from pathlib import Path
