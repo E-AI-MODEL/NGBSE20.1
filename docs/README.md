@@ -77,7 +77,7 @@ NGBSE 20.1 is a comprehensive Open-Source Intelligence (OSINT) engine that:
 
 ### **Export Formats**
 - **STIX 2.1** for threat intelligence platforms
-- **DOCX reports** for executive presentations
+- **DOCX reports** for executive presentations (includes BALLM insights and operational STIX summary in 20.2.0-GA)
 - **JSON data** for custom analysis
 - **Manifest files** for chain of custody
 
