@@ -3,6 +3,8 @@
 This engine generates curiosity-driven questions based on blindspots and findings.
 """
 
+from __future__ import annotations
+
 from typing import Any, Dict, List
 
 

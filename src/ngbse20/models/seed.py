@@ -3,7 +3,7 @@ Seed data models for NGBSE 20.2.
 Provides Pydantic models for seed validation.
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any
 import re
 
@@ -25,7 +25,8 @@ class Seed(BaseModel):
         default_factory=dict, description="Additional metadata"
     )
 
-    @validator("id")
+    @field_validator("id")
+    @classmethod
     def validate_id(cls, v):
         """Validate seed ID format."""
         if not re.match(r"^[a-zA-Z0-9_-]+$", v):
@@ -35,7 +36,8 @@ class Seed(BaseModel):
             )
         return v
 
-    @validator("query")
+    @field_validator("query")
+    @classmethod
     def validate_query(cls, v):
         """Validate query content."""
         if not v or not v.strip():
@@ -55,7 +57,8 @@ class Seed(BaseModel):
 
         return v.strip()
 
-    @validator("type")
+    @field_validator("type")
+    @classmethod
     def validate_type(cls, v):
         """Validate seed type."""
         allowed_types = [
@@ -80,7 +83,8 @@ class Seed(BaseModel):
 
         return v.lower()
 
-    @validator("metadata")
+    @field_validator("metadata")
+    @classmethod
     def validate_metadata(cls, v):
         """Validate metadata structure."""
         if v is None:
@@ -92,9 +96,8 @@ class Seed(BaseModel):
 
         return v
 
-    class Config:
-        """Pydantic configuration."""
-
-        extra = "forbid"  # Reject extra fields
-        validate_assignment = True  # Validate on assignment
-        use_enum_values = True  # Use enum values
+    model_config = {
+        "extra": "forbid",  # Reject extra fields
+        "validate_assignment": True,  # Validate on assignment
+        "use_enum_values": True,  # Use enum values
+    }

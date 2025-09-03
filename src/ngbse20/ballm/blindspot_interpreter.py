@@ -3,6 +3,8 @@
 This engine uses LLM to interpret blindspots and extract deeper epistemic insights.
 """
 
+from __future__ import annotations
+
 from typing import Any, Dict, List
 
 
