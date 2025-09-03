@@ -45,7 +45,7 @@ def install_syft() -> None:
     
     try:
         # Download and install Syft
-        result = subprocess.run(
+        subprocess.run(
             install_cmd + ["|", "sh", "-s", "--", "-b", "/usr/local/bin"],
             shell=True,
             check=True

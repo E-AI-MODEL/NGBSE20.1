@@ -227,7 +227,7 @@ class HealthChecker:
                     response = requests.get(url, timeout=5)
                     if response.status_code >= 400:
                         failed_urls.append(url)
-                except:
+                except (requests.RequestException, ConnectionError, TimeoutError):
                     failed_urls.append(url)
             
             if len(failed_urls) == len(test_urls):
