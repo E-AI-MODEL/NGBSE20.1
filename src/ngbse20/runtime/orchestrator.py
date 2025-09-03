@@ -100,6 +100,18 @@ class PipelineOrchestrator:
         bundle = export_result["bundle"]
         output_files = export_result["output_files"]
         traces.append(export_result["trace"])
+
+        # 12. Report Stage (DOCX)
+        report_result = self.pipeline_stages.report_stage(
+            brief=brief,
+            blindspots=blindspots,
+            forecast=forecast,
+            scenarios=scenarios,
+            ballm_meta_layer=meta_layer,
+            bundle=bundle,
+            next_seeds=next_seeds,
+        )
+        traces.append(report_result["trace"])
         
         LOGGER.info(f"Pipeline completed successfully with {len(scored_findings)} findings")
         
@@ -115,8 +127,9 @@ class PipelineOrchestrator:
             "output_files": {
                 "findings": output_files["findings"],
                 "stix_bundle": output_files["stix_bundle"],
-                "history": history_path
+                "history": history_path,
             },
+            "report_path": report_result.get("report_path"),
             "findings": scored_findings,
             "stix": bundle.serialize() if hasattr(bundle, 'serialize') else bundle,
             "traces": traces,

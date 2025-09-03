@@ -263,6 +263,134 @@ class PipelineStages:
         )
         
         return {"brief": brief}
+
+    def _extract_stix_summary(self, bundle: Any) -> Dict[str, Any]:
+        """Extract a concise STIX summary for reporting purposes."""
+        try:
+            # Access objects from bundle or serialized json
+            objects = []
+            if hasattr(bundle, "objects"):
+                # bundle from stix2 library
+                try:
+                    # objects may be a list-like of stix2 objects
+                    objects = [getattr(o, "_inner", o) if hasattr(o, "_inner") else o for o in bundle.objects]  # type: ignore[attr-defined]
+                except Exception:
+                    objects = list(bundle.objects)
+            else:
+                raw = bundle.serialize() if hasattr(bundle, "serialize") else str(bundle)
+                data = json.loads(raw)
+                objects = data.get("objects", []) if isinstance(data, dict) else []
+
+            indicators: list[Dict[str, Any]] = []
+            threat_actors: list[str] = []
+            vulnerabilities: list[Dict[str, Any]] = []
+
+            def _get(obj: Any, key: str, default: Any = None) -> Any:
+                if isinstance(obj, dict):
+                    return obj.get(key, default)
+                return getattr(obj, key, default)
+
+            for obj in objects:
+                obj_type = _get(obj, "type", None)
+                if obj_type == "indicator":
+                    indicators.append({
+                        "type": "indicator",
+                        "labels": _get(obj, "labels", []),
+                        "pattern": _get(obj, "pattern", "")
+                    })
+                elif obj_type == "threat-actor":
+                    name = _get(obj, "name", "Unknown")
+                    threat_actors.append(name)
+                elif obj_type == "vulnerability":
+                    vulnerabilities.append({
+                        "name": _get(obj, "name", "Unknown"),
+                        "severity": _get(obj, "severity", "n/a")
+                    })
+
+            top_indicators: list[Dict[str, Any]] = []
+            # Take up to 5 indicators and expose value/pattern
+            for ind in indicators[:5]:
+                pattern = ind.get("pattern", "")
+                # Attempt to extract a compact value from the STIX pattern
+                value = None
+                for token in ["domain-name:value = '", "ipv4-addr:value = '", "file:hashes.MD5 = '", "url:value = '"]:
+                    if token in pattern:
+                        try:
+                            value = pattern.split(token, 1)[1].split("'", 1)[0]
+                            break
+                        except Exception:
+                            value = None
+                top_indicators.append({
+                    "type": "indicator",
+                    "value": value or pattern,
+                    "labels": ind.get("labels", [])
+                })
+
+            return {
+                "top_indicators": top_indicators,
+                "threat_actors": threat_actors[:3],
+                "vulnerabilities": vulnerabilities[:5],
+                "summary_stats": {
+                    "indicators": len(indicators),
+                    "threat_actors": len(threat_actors),
+                    "vulnerabilities": len(vulnerabilities),
+                },
+            }
+        except Exception as e:
+            LOGGER.warning(f"Failed to extract STIX summary: {e}")
+            return {
+                "top_indicators": [],
+                "threat_actors": [],
+                "vulnerabilities": [],
+                "summary_stats": {"error": str(e)},
+            }
+
+    def report_stage(
+        self,
+        brief: Dict[str, Any],
+        blindspots: Dict[str, Any],
+        forecast: Dict[str, Any],
+        scenarios: Dict[str, Any] | None,
+        ballm_meta_layer: Dict[str, Any] | None,
+        bundle: Any,
+        next_seeds: List[Dict[str, Any]] | None,
+    ) -> Dict[str, Any]:
+        """Report generation stage - create DOCX report if python-docx is available."""
+        try:
+            # Import lazily to avoid hard dependency for environments without docx
+            from ...examples.docx_reporter import write_report  # type: ignore
+
+            stix_summary = self._extract_stix_summary(bundle)
+            ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+            report_path = os.path.join(self.output_dir, f"NGBSE_Report_{ts}.docx")
+
+            write_report(
+                path=report_path,
+                brief=brief,
+                blindspots=blindspots,
+                forecast=forecast,
+                scenarios=scenarios,
+                ballm_meta_layer=ballm_meta_layer,
+                stix_summary=stix_summary,
+                next_seeds=next_seeds,
+            )
+
+            trace = event(
+                "report",
+                {"format": "docx"},
+                {"report_path": report_path},
+                "generated docx report",
+            )
+            return {"report_path": report_path, "stix_summary": stix_summary, "trace": trace}
+        except Exception as e:
+            LOGGER.warning(f"Report generation skipped/failed: {e}")
+            trace = event(
+                "report",
+                {"format": "docx"},
+                {"error": str(e)},
+                "report generation failed",
+            )
+            return {"report_path": None, "stix_summary": None, "trace": trace}
     
     def export_stage(self, scored_findings: List[Dict[str, Any]], traces: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Export stage - generate STIX bundle and save outputs."""

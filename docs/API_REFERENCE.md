@@ -1,4 +1,4 @@
-# NGBSE 20.1 API Reference
+# NGBSE 20.2.0-GA API Reference
 ## Complete Technical Documentation
 
 ---
@@ -154,7 +154,7 @@ python -m ngbse20.cli collectors
 
 **Output Example:**
 ```
-Available NGBSE 20.1 Collectors:
+Available NGBSE 20.2.0-GA Collectors:
 ==================================================
 HttpWebCollector ✅ Active
 LeakIX           ❌ Inactive (missing API keys)

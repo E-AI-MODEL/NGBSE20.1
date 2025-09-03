@@ -1,4 +1,4 @@
-# NGBSE 20.1 Quick Start Guide
+# NGBSE 20.2.0-GA Quick Start Guide
 ## Get Up and Running in 5 Minutes
 
 ---
@@ -7,8 +7,8 @@
 
 ### **1. Clone & Setup**
 ```bash
-git clone https://github.com/E-AI-MODEL/NGBSE20.1.git
-cd NGBSE20.1
+git clone https://github.com/E-AI-MODEL/NGBSE20.2.0-GA.git
+cd NGBSE20.2.0-GA
 ```
 
 ### **2. Configure API Keys**

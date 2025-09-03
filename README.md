@@ -1,6 +1,6 @@
-# NGBSE20.1
+# NGBSE20.2.0-GA
 
-NGBSE 20.1 is an engine for epistemic Open-Source Intelligence (OSINT). It's designed not just to find answers, but to expose the "blind spots" in knowledge: assumptions, gaps, and uncertainties. It transforms Large Language Models from "answer machines" into "curiosity partners".
+NGBSE 20.2.0-GA is an engine for epistemic Open-Source Intelligence (OSINT). It's designed not just to find answers, but to expose the "blind spots" in knowledge: assumptions, gaps, and uncertainties. It transforms Large Language Models from "answer machines" into "curiosity partners".
 
 This tool is the practical implementation of the research paper "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs) and the Next-Generation Blind Spot Engine (NGBSE)".
 
@@ -16,7 +16,7 @@ This tool is the practical implementation of the research paper "From Closure to
 
 ## OSINT Collectors
 
-NGBSE 20.1 includes comprehensive OSINT collectors for threat intelligence:
+NGBSE 20.2.0-GA includes comprehensive OSINT collectors for threat intelligence:
 
 ### **Core Collectors**
 - **HttpWebCollector**: Web scraping and content analysis

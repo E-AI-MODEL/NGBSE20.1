@@ -49,18 +49,18 @@ build:
 
 # Run the complete NGBSE pipeline (recommended)
 run:
-	python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --outdir out --allowlist "*"
+	python -m ngbse20.cli run --seeds config/seeds.jsonl --rules config/rules.json --outdir out --allowlist "*"
 
 # Run individual pipeline steps (legacy)
 run-collect:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector web
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector web
 
 export-stix:
 	python -m ngbse20.cli export-stix --findings out/findings.json --out out/stix_bundle.json
 
 # Validate configuration files
 validate:
-	python -m ngbse20.cli validate-config --seeds data/seeds.jsonl --rules data/rules.json
+	python -m ngbse20.cli validate-config --seeds config/seeds.jsonl --rules config/rules.json
 
 # Run BALLM analysis
 ballm-analyze:
@@ -72,22 +72,22 @@ collectors:
 
 # Test individual collectors
 test-leakix:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector leakix
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector leakix
 
 test-shodan:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector shodan
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector shodan
 
 test-censys:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector censys
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector censys
 
 test-urlscan:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector urlscan
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector urlscan
 
 test-github:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector github
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector github
 
 test-news:
-	python -m ngbse20.cli collect --seeds data/seeds.jsonl --out out --collector news
+	python -m ngbse20.cli collect --seeds config/seeds.jsonl --out out --collector news
 
 # Development workflow
 dev-setup: install dev pre-commit
