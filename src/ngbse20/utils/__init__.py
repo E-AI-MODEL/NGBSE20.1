@@ -8,7 +8,7 @@ from .hash import content_hash, sha256_hex
 
 __all__ = [
     "RateLimiter",
-    "retry_with_backoff", 
+    "retry_with_backoff",
     "rate_limited",
     "APIRateLimiter",
     "api_rate_limited",

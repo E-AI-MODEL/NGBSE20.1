@@ -33,7 +33,7 @@ def cli(log_level: str):
 def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str):
     """Run the full NGBSE pipeline from collection to reporting."""
     click.echo("Starting NGBSE 20.1 pipeline...")
-    
+
     try:
         # Load and parse input files
         rules_data = json.loads(Path(rules).read_text("utf-8"))
@@ -46,7 +46,7 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
             # Parse and validate allowlist
         allowlist_domains = [d.strip() for d in allowlist.split(',')]
         allowlist_domains = validate_allowlist(allowlist_domains)
-    
+
     config = {
         "output_dir": outdir,
         "allowlist": allowlist_domains
@@ -54,7 +54,7 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
 
     # Run the complete pipeline
     result = run_pipeline(seeds=seeds_data, rules=rules_data, metrics=metrics_data, config=config)
-    
+
     click.echo(f"Pipeline finished. Results are in '{outdir}'.")
     click.echo(f"Status: {result.get('status', 'unknown')}")
     if 'cai' in result:
@@ -84,18 +84,18 @@ def validate_config_cmd(seeds: str, rules: str):
 def collect(seeds: str, out: str, collector: str, allowlist: str):
     """Collect data from seeds using specified collector."""
     Path(out).mkdir(parents=True, exist_ok=True)
-    
+
     try:
         # Load seeds
         seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
     except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading seeds: {e}", err=True)
         raise click.Abort()
-    
+
             # Parse and validate allowlist
         allowlist_domains = [d.strip() for d in allowlist.split(',')]
         allowlist_domains = validate_allowlist(allowlist_domains)
-    
+
     # Use appropriate collector
     if collector == "web":
         collector_instance = HttpWebCollector(allowlist_domains=allowlist_domains)
@@ -103,22 +103,22 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
         click.echo(f"Collector type '{collector}' not yet implemented for individual collection.", err=True)
         click.echo("Use 'ngbse20 run' for full pipeline with all collectors.", err=True)
         raise click.Abort()
-    
+
     # Collect data
     findings = []
     now_iso = datetime.now(timezone.utc).isoformat()
-    
+
     for seed in seeds_data:
         try:
             seed_findings = collector_instance.collect(seed, now_iso)
             findings.extend(seed_findings)
         except (requests.RequestException, ValueError, KeyError) as e:
             click.echo(f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True)
-    
+
     # Save findings
     findings_path = Path(out, "findings.json")
     findings_path.write_text(json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8")
-    
+
     click.echo(f"Collection complete. Found {len(findings)} items.")
     click.echo(f"Results saved to: {findings_path}")
 
@@ -139,10 +139,10 @@ def export_stix(findings: str, out: str):
 @click.option("--depth", default=3, help="Depth of curiosity questions (1-5)")
 def ballm_analyze(findings: str, out: str, depth: int):
     """Run BALLM analysis to generate epistemic insights and curiosity questions."""
-    
+
     # Load findings
     data = json.loads(Path(findings).read_text(encoding="utf-8"))
-    
+
     # Check if we have the required data structure
     if isinstance(data, dict):
         findings_data = data.get("findings", [])
@@ -152,25 +152,25 @@ def ballm_analyze(findings: str, out: str, depth: int):
         findings_data = data
         blindspots_data = {}
         asset_scores_data = {}
-    
+
     # Generate BALLM meta-layer
     from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
     from ngbse20.llm_client import LLMClient
-    
+
     ballm_generator = BALLMMetaLayerGenerator(LLMClient())
     meta_layer = ballm_generator.generate_meta_layer(
         findings_data,
         blindspots_data,
         asset_scores_data
     )
-    
+
     # Save BALLM output
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(
-        json.dumps(meta_layer, ensure_ascii=False, indent=2), 
+        json.dumps(meta_layer, ensure_ascii=False, indent=2),
         encoding="utf-8"
     )
-    
+
     click.echo(f"BALLM analysis complete. Output saved to {out}")
     click.echo(f"Epistemic Humility Score: {meta_layer.get('epistemic_humility_score', 0.0):.3f}")
     click.echo(f"Curiosity Questions Generated: {len(meta_layer.get('curiosity_questions', []))}")
@@ -182,7 +182,7 @@ def list_collectors():
         HttpWebCollector, LeakIXCollector, ShodanCollector, CensysCollector,
         URLScanCollector, GitHubCollector, NewsCollector
     )
-    
+
     collectors = [
         ("HttpWebCollector", HttpWebCollector, []),
         ("LeakIX", LeakIXCollector, ["LEAKIX_API_KEY"]),
@@ -192,15 +192,15 @@ def list_collectors():
         ("GitHub", GitHubCollector, ["GITHUB_TOKEN"]),
         ("News", NewsCollector, ["NEWS_API_KEY"]),
     ]
-    
+
     click.echo("Available NGBSE 20.1 Collectors:")
     click.echo("=" * 50)
-    
+
     for name, collector_class, required_envs in collectors:
         # Check if required environment variables are set
         env_status = "✅" if all(os.getenv(env) for env in required_envs) else "❌"
         status = "Active" if env_status == "✅" else "Inactive (missing API keys)"
-        
+
         click.echo(f"{name:<15} {env_status} {status}")
         if required_envs:
             click.echo(f"{'':15}   Requires: {', '.join(required_envs)}")
@@ -213,7 +213,7 @@ def health_check(output_format: str):
     """Check the health status of NGBSE components."""
     try:
         health_data = get_health_status()
-        
+
         if output_format == "json":
             click.echo(json.dumps(health_data, indent=2))
         else:
@@ -223,12 +223,12 @@ def health_check(output_format: str):
                 "degraded": "⚠️",
                 "unhealthy": "❌"
             }
-            
+
             overall_status = health_data["status"]
             click.echo(f"Overall Status: {status_emoji.get(overall_status, '❓')} {overall_status.upper()}")
             click.echo(f"Uptime: {health_data['uptime_seconds']:.1f} seconds")
             click.echo()
-            
+
             # System metrics
             metrics = health_data["metrics"]
             click.echo("System Metrics:")
@@ -236,7 +236,7 @@ def health_check(output_format: str):
             click.echo(f"  Memory: {metrics['memory_percent']:.1f}%")
             click.echo(f"  Disk: {metrics['disk_percent']:.1f}%")
             click.echo()
-            
+
             # Health checks
             click.echo("Component Health:")
             for check in health_data["checks"]:
@@ -248,7 +248,7 @@ def health_check(output_format: str):
                             click.echo(f"    {key}: {', '.join(map(str, value))}")
                         else:
                             click.echo(f"    {key}: {value}")
-            
+
     except (OSError, ImportError, AttributeError) as e:
         click.echo(f"Health check failed: {e}", err=True)
         raise click.Abort()

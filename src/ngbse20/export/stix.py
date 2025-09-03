@@ -28,56 +28,56 @@ def _sanitize_stix_value(value: str) -> str:
 def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     """Create STIX indicator for a finding based on its type."""
     source_type = f.get("source", {}).get("type", "web")
-    
+
     if source_type == "data_breach":
         # LeakIX findings
         asset = _sanitize_stix_value(f.get('asset', ''))
         pattern = f"[domain-name:value = '{asset}']"
         name = f"Data Breach: {f.get('raw', {}).get('title', 'Unknown')}"
-        
+
     elif source_type == "infrastructure":
         # Shodan findings
         ip = _sanitize_stix_value(f.get("raw", {}).get("ip", ""))
         port = _sanitize_stix_value(f.get("raw", {}).get("port", ""))
         pattern = f"[ipv4-addr:value = '{ip}' AND network-traffic:dst_port = {port}]"
         name = f"Infrastructure: {f.get('raw', {}).get('product', 'Unknown')} on {ip}:{port}"
-        
+
     elif source_type == "network_intelligence":
         # Censys findings
         ip = _sanitize_stix_value(f.get("raw", {}).get("ip", ""))
         pattern = f"[ipv4-addr:value = '{ip}']"
         name = f"Network: {ip}"
-        
+
     elif source_type == "threat_intelligence":
         # URLScan findings
         url = _sanitize_stix_value(f.get("raw", {}).get("url", ""))
         pattern = f"[url:value = '{url}']"
         name = f"Threat: {f.get('raw', {}).get('title', 'Unknown')}"
-        
+
     elif source_type in ["code_repository", "code_search"]:
         # GitHub findings
         repo = f.get("asset", "")
         url = _sanitize_stix_value(f.get('source', {}).get('url', ''))
         pattern = f"[url:value = '{url}']"
         name = f"Code: {repo}"
-        
+
     elif source_type == "news":
         # News findings
         title = f.get("raw", {}).get("title", "")
         url = _sanitize_stix_value(f.get('source', {}).get('url', ''))
         pattern = f"[url:value = '{url}']"
         name = f"News: {title[:50]}..."
-        
+
     else:
         # Default web findings
         url = _sanitize_stix_value(f.get("source", {}).get("url", ""))
         domain = _sanitize_stix_value(f.get("asset", ""))
         pattern = f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
         name = f"Web: {f.get('raw', {}).get('title', 'Unknown')}"
-    
+
     # Truncate name to STIX limit
     name = name[:128]
-    
+
     return Indicator(
         name=name,
         pattern=pattern,
@@ -127,12 +127,12 @@ def _create_vulnerability(f: dict[str, Any]) -> Vulnerability | None:
 def to_stix_bundle(findings: list[dict[str, Any]]) -> Bundle:
     """Create comprehensive STIX bundle from findings."""
     objects = []
-    
+
     for f in findings:
         # Create indicator
         indicator = _indicator_for_finding(f)
         objects.append(indicator)
-        
+
         # Create note with additional context
         note_content = f"""Source: {f.get('source', {}).get('url', 'N/A')}
 Asset: {f.get('asset', 'N/A')}
@@ -140,29 +140,29 @@ Type: {f.get('source', {}).get('type', 'N/A')}
 Timestamp: {f.get('timestamp', 'N/A')}
 Quality: {f.get('quality', {}).get('q', 0.0)}
 Score: {f.get('score', 0.0)}"""
-        
+
         if f.get("raw", {}).get("description"):
             note_content += f"\nDescription: {f.get('raw', {}).get('description', '')}"
-        
+
         note = Note(
             content=note_content,
             object_refs=[indicator],
         )
         objects.append(note)
-        
+
         # Create additional STIX objects based on finding type
         threat_actor = _create_threat_actor(f)
         if threat_actor:
             objects.append(threat_actor)
             # Link threat actor to indicator
             note.object_refs.append(threat_actor)
-        
+
         vulnerability = _create_vulnerability(f)
         if vulnerability:
             objects.append(vulnerability)
             # Link vulnerability to indicator
             note.object_refs.append(vulnerability)
-    
+
     bundle = Bundle(objects=objects, allow_custom=True)
     LOGGER.info("Built STIX bundle with %d objects", len(objects))
     return bundle

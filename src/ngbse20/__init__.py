@@ -41,7 +41,7 @@ __all__ = [
     "cli",
     # Collectors
     "BaseCollector",
-    "HttpWebCollector", 
+    "HttpWebCollector",
     "LeakIXCollector",
     "ShodanCollector",
     "CensysCollector",
@@ -50,7 +50,7 @@ __all__ = [
     "NewsCollector",
     # BALLM
     "BALLMMetaLayerGenerator",
-    "BlindspotInterpretationEngine", 
+    "BlindspotInterpretationEngine",
     "CuriosityGenerationEngine",
     # Scoring
     "score_findings",
@@ -58,7 +58,7 @@ __all__ = [
     "SCORE_DEFAULT",
     # Analysis
     "coverage_gap",
-    "recency_gap", 
+    "recency_gap",
     "confidence_gap",
     "build_forecast",
     "aggregate_asset_scores",

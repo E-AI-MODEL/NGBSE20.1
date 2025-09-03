@@ -78,7 +78,7 @@ def synthesize_brief_llm(
     mode = (mode or "none").lower()
     if mode == "none":
         return base
-        
+
     top_assets = sorted(asset_scores.items(), key=lambda kv: kv[1].get("avg_e_ai_star", 0.0), reverse=True)[:5]
     payload = {
         "instruction": "Write a concise BLUF (2-3 sentences) + 3 actions. Be factual, no secrets.",
@@ -103,7 +103,7 @@ def synthesize_brief_llm(
         except Exception:
             pass
         return base
-        
+
     if mode == "api":
         client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
         system_prompt = "You are a Dutch security analyst. Produce concise BLUF and 3 concrete actions."

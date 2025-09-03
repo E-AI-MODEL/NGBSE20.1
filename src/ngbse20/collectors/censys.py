@@ -14,9 +14,9 @@ LOGGER = get_logger(__name__)
 
 class CensysCollector(BaseCollector):
     """Collector for Censys network and SSL intelligence."""
-    
+
     API_BASE = "https://search.censys.io/api/v2"
-    
+
     def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
         super().__init__(config, allowlist_domains)
         self.api_id = os.getenv("CENSYS_API_ID")
@@ -25,34 +25,34 @@ class CensysCollector(BaseCollector):
             LOGGER.warning("Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET env vars.")
         else:
             LOGGER.debug(f"Censys collector initialized with API ID: {mask_api_key(self.api_id)}")
-    
+
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect network and SSL intelligence from Censys."""
         query = seed.get("query", "")
         if "censys" not in (seed.get("type", "").lower() or query.lower()):
             return []
-        
+
         if not (self.api_id and self.api_secret):
             return []
-        
+
         try:
             response = self._make_api_request(query)
             data = response.json()
-            
+
         except Exception as e:
             sanitized_error = sanitize_error_message(str(e), {"api_id": self.api_id, "api_secret": self.api_secret})
             LOGGER.error(f"Censys collector failed for query '{query}': {sanitized_error}")
             return []
-        
+
         findings = []
         for item in data.get("result", {}).get("hits", []):
             ip = item.get("ip", "")
             domain = item.get("names", [""])[0] if item.get("names") else ""
-            
+
             # Check if domain is allowed
             if domain and not self._is_allowed(domain):
                 continue
-            
+
             # For IP-based findings, check if any hostname is allowed
             if not domain and item.get("names"):
                 allowed_hostname = None
@@ -63,7 +63,7 @@ class CensysCollector(BaseCollector):
                 if not allowed_hostname:
                     continue
                 domain = allowed_hostname
-            
+
             # Extract SSL certificate info
             ssl_info = {}
             if "services" in item:
@@ -75,7 +75,7 @@ class CensysCollector(BaseCollector):
                             "cipher_suite": service["tls"].get("cipher_suite", {})
                         }
                         break
-            
+
             findings.append({
                 "id": f"censys-{ip}-{item.get('location', {}).get('country', 'unknown')}",
                 "hash": content_hash(f"{ip}{domain}{str(ssl_info)}"),
@@ -95,15 +95,15 @@ class CensysCollector(BaseCollector):
                 "timestamp": item.get("last_updated", now_iso),
                 "quality": {"q": 0.8 if ssl_info else 0.6}
             })
-        
+
         return findings
-    
+
     @retry_with_backoff(max_retries=3, base_delay=1.0)
     @api_rate_limited('censys')
     def _make_api_request(self, query: str):
         """Make rate-limited API request to Censys."""
         params = {"q": query, "per_page": 100}
-        
+
         response = requests.get(
             f"{self.API_BASE}/hosts/search",
             params=params,

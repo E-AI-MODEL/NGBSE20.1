@@ -11,7 +11,7 @@ from .news import NewsCollector
 
 __all__ = [
     "BaseCollector",
-    "HttpWebCollector", 
+    "HttpWebCollector",
     "LeakIXCollector",
     "ShodanCollector",
     "CensysCollector",

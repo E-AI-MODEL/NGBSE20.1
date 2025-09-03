@@ -97,7 +97,7 @@ def score_findings(
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     LOGGER.debug(f"Scoring {len(findings)} findings with config: {cfg}")
-    
+
     for f in findings:
         m = dict(f.get("metrics", {}))
         ts_dt = _parse_ts(f.get("timestamp"))
@@ -119,6 +119,6 @@ def score_findings(
         f["score_breakdown"] = {"base": base, "extras": extras, "recency": rec}
         f["score"] = score
         out.append(f)
-    
+
     LOGGER.info(f"Successfully scored {len(out)} findings")
     return out

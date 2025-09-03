@@ -15,7 +15,7 @@ LOGGER = get_logger(__name__)
 
 class PipelineOrchestrator:
     """Main pipeline orchestrator for NGBSE 20.2."""
-    
+
     def __init__(self, config_dir: str = "config"):
         self.config_loader = ConfigLoader(config_dir)
         self.config = self.config_loader.load_config()
@@ -36,64 +36,64 @@ class PipelineOrchestrator:
             seeds = self.config_loader.load_seeds()
         if rules is None:
             rules = self.config_loader.load_rules()
-        
+
         metrics = metrics or {}
         traces: List[Dict[str, Any]] = []
         allowlist = self.config.allowlist
-        
+
         LOGGER.info(f"Starting pipeline with {len(seeds)} seeds and {len(rules)} rules")
-        
+
         # 1. Validation Stage
         validation_result = self.pipeline_stages.validate_stage(rules, metrics)
         if validation_result["status"] == "blocked":
             return {"status": "blocked", "traces": [validation_result["trace"]]}
-        
+
         # 2. Collection Stage
         collectors = self.collector_manager.build_collectors(allowlist)
         collection_result = self.pipeline_stages.collect_stage(seeds, collectors)
         findings = collection_result["findings"]
         traces.append(collection_result["trace"])
-        
+
         # 3. Rules Stage
         rules_result = self.pipeline_stages.rules_stage(rules, metrics, findings)
         traces.append(rules_result["trace"])
-        
+
         # 4. Scoring Stage
         scoring_result = self.pipeline_stages.scoring_stage(findings)
         scored_findings = scoring_result["scored_findings"]
         traces.append(scoring_result["trace"])
-        
+
         # 5. Forecast Stage
         forecast_result = self.pipeline_stages.forecast_stage(scored_findings)
         asset_scores = forecast_result["asset_scores"]
         forecast = forecast_result["forecast"]
         history_path = forecast_result["history_path"]
         traces.append(forecast_result["trace"])
-        
+
         # 6. Seed Proposal Stage
         seed_proposal_result = self.pipeline_stages.seed_proposal_stage(scored_findings, asset_scores)
         next_seeds = seed_proposal_result["next_seeds"]
         traces.append(seed_proposal_result["trace"])
-        
+
         # 7. Blindspot Analysis Stage
         blindspot_result = self.pipeline_stages.blindspot_analysis_stage(scored_findings)
         blindspots = blindspot_result["blindspots"]
         traces.append(blindspot_result["trace"])
-        
+
         # 8. BALLM Stage
         ballm_result = self.pipeline_stages.ballm_stage(scored_findings, blindspots, asset_scores)
         meta_layer = ballm_result["meta_layer"]
         traces.append(ballm_result["trace"])
-        
+
         # 9. Scenario Stage
         scenario_result = self.pipeline_stages.scenario_stage(scored_findings)
         scenarios = scenario_result["scenarios"]
         traces.append(scenario_result["trace"])
-        
+
         # 10. Brief Stage
         brief_result = self.pipeline_stages.brief_stage(scored_findings, asset_scores)
         brief = brief_result["brief"]
-        
+
         # 11. Export Stage
         export_result = self.pipeline_stages.export_stage(scored_findings, traces)
         cai = export_result["cai"]
@@ -112,9 +112,9 @@ class PipelineOrchestrator:
             next_seeds=next_seeds,
         )
         traces.append(report_result["trace"])
-        
+
         LOGGER.info(f"Pipeline completed successfully with {len(scored_findings)} findings")
-        
+
         return {
             "status": "ok",
             "cai": cai,

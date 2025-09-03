@@ -102,7 +102,7 @@ def generate_sbom() -> bool:
 def check_version_consistency() -> bool:
     """Check that version is consistent across files."""
     print("🔢 Checking version consistency...")
-    
+
     # Read version from pyproject.toml
     with open("pyproject.toml", "r") as f:
         content = f.read()
@@ -111,21 +111,21 @@ def check_version_consistency() -> bool:
             print("❌ Could not find version in pyproject.toml")
             return False
         version = match.group(1)
-    
+
     print(f"Version in pyproject.toml: {version}")
-    
+
     # Check if version follows expected pattern
     if not re.match(r'^\d+\.\d+\.\d+$', version):
         print(f"❌ Version {version} does not follow semantic versioning")
         return False
-    
+
     # Check CHANGELOG.md
     with open("CHANGELOG.md", "r") as f:
         changelog = f.read()
         if f"[{version}]" not in changelog:
             print(f"❌ Version {version} not found in CHANGELOG.md")
             return False
-    
+
     print("✅ Version consistency check passed")
     return True
 
@@ -133,9 +133,9 @@ def check_version_consistency() -> bool:
 def create_release_commit(version: str) -> bool:
     """Create release commit."""
     print(f"📝 Creating release commit for {version}...")
-    
+
     commit_message = f"Release {version}: Complete modular architecture with enhanced security"
-    
+
     try:
         run_command(["git", "add", "."])
         run_command(["git", "commit", "-m", commit_message])
@@ -149,9 +149,9 @@ def create_release_commit(version: str) -> bool:
 def create_release_tag(version: str) -> bool:
     """Create release tag."""
     print(f"🏷️ Creating release tag v{version}...")
-    
+
     tag_message = f"NGBSE {version} Release"
-    
+
     try:
         run_command(["git", "tag", "-a", f"v{version}", "-m", tag_message])
         print("✅ Release tag created")
@@ -164,7 +164,7 @@ def create_release_tag(version: str) -> bool:
 def push_release(branch: str, version: str) -> bool:
     """Push release to remote."""
     print(f"🚀 Pushing release to remote...")
-    
+
     try:
         run_command(["git", "push", "origin", branch])
         run_command(["git", "push", "origin", f"v{version}"])
@@ -178,7 +178,7 @@ def push_release(branch: str, version: str) -> bool:
 def validate_release() -> bool:
     """Run all validation checks."""
     print("🔍 Running release validation...")
-    
+
     checks = [
         ("Git Status", check_git_status),
         ("Tests", run_tests),
@@ -187,13 +187,13 @@ def validate_release() -> bool:
         ("SBOM Generation", generate_sbom),
         ("Version Consistency", check_version_consistency),
     ]
-    
+
     for check_name, check_func in checks:
         print(f"\n--- {check_name} ---")
         if not check_func():
             print(f"❌ {check_name} failed")
             return False
-    
+
     print("\n✅ All validation checks passed!")
     return True
 
@@ -217,17 +217,17 @@ def main():
                        help="Skip validation checks")
     parser.add_argument("--dry-run", action="store_true",
                        help="Show what would be done without executing")
-    
+
     args = parser.parse_args()
-    
+
     version = get_version()
     branch = check_branch()
-    
+
     print(f"🚀 NGBSE Release Process")
     print(f"Version: {version}")
     print(f"Branch: {branch}")
     print(f"Dry run: {args.dry_run}")
-    
+
     if args.dry_run:
         print("\n🔍 DRY RUN - No changes will be made")
         print("Would execute:")
@@ -236,32 +236,32 @@ def main():
         print("3. Create release tag")
         print("4. Push to remote")
         return
-    
+
     # Run validation unless skipped
     if not args.skip_validation:
         if not validate_release():
             print("❌ Validation failed. Release aborted.")
             sys.exit(1)
-    
+
     if args.validate_only:
         print("✅ Validation complete. Use --skip-validation to create release.")
         return
-    
+
     # Create release
     print(f"\n🎯 Creating release {version}...")
-    
+
     if not create_release_commit(version):
         print("❌ Failed to create release commit")
         sys.exit(1)
-    
+
     if not create_release_tag(version):
         print("❌ Failed to create release tag")
         sys.exit(1)
-    
+
     if not push_release(branch, version):
         print("❌ Failed to push release")
         sys.exit(1)
-    
+
     print(f"\n🎉 Release {version} created successfully!")
     print(f"Tag: v{version}")
     print(f"Branch: {branch}")

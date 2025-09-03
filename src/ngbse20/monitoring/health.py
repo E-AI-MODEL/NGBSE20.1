@@ -35,7 +35,7 @@ class SystemMetrics:
 
 class HealthChecker:
     """Health checker for NGBSE components."""
-    
+
     def __init__(self):
         self.start_time = time.time()
         self.checks: List[callable] = [
@@ -44,22 +44,22 @@ class HealthChecker:
             self._check_credentials,
             self._check_network_connectivity
         ]
-    
+
     def check_health(self) -> Dict[str, Any]:
         """Run all health checks and return overall status."""
         results = []
         overall_status = "healthy"
-        
+
         for check in self.checks:
             try:
                 result = check()
                 results.append(result)
-                
+
                 if result.status == "unhealthy":
                     overall_status = "unhealthy"
                 elif result.status == "degraded" and overall_status == "healthy":
                     overall_status = "degraded"
-                    
+
             except Exception as e:
                 error_result = HealthStatus(
                     name=check.__name__,
@@ -69,10 +69,10 @@ class HealthChecker:
                 )
                 results.append(error_result)
                 overall_status = "unhealthy"
-        
+
         # Get system metrics
         metrics = self._get_system_metrics()
-        
+
         return {
             "status": overall_status,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -80,17 +80,17 @@ class HealthChecker:
             "checks": [result.__dict__ for result in results],
             "metrics": metrics.__dict__
         }
-    
+
     def _check_system_resources(self) -> HealthStatus:
         """Check system resource usage."""
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
             disk = psutil.disk_usage('/')
-            
+
             status = "healthy"
             message = "System resources normal"
-            
+
             if cpu_percent > 90:
                 status = "degraded"
                 message = f"High CPU usage: {cpu_percent:.1f}%"
@@ -100,7 +100,7 @@ class HealthChecker:
             elif disk.percent > 90:
                 status = "degraded"
                 message = f"High disk usage: {disk.percent:.1f}%"
-            
+
             return HealthStatus(
                 name="system_resources",
                 status=status,
@@ -112,7 +112,7 @@ class HealthChecker:
                     "disk_percent": disk.percent
                 }
             )
-            
+
         except Exception as e:
             return HealthStatus(
                 name="system_resources",
@@ -120,7 +120,7 @@ class HealthChecker:
                 message=f"Failed to check system resources: {e}",
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
-    
+
     def _check_config_files(self) -> HealthStatus:
         """Check if configuration files exist and are readable."""
         try:
@@ -129,12 +129,12 @@ class HealthChecker:
                 "config/rules.json",
                 "config/seeds.jsonl"
             ]
-            
+
             missing_files = []
             for file_path in config_files:
                 if not os.path.exists(file_path):
                     missing_files.append(file_path)
-            
+
             if missing_files:
                 return HealthStatus(
                     name="config_files",
@@ -150,7 +150,7 @@ class HealthChecker:
                     message="All configuration files present",
                     timestamp=datetime.now(timezone.utc).isoformat()
                 )
-                
+
         except Exception as e:
             return HealthStatus(
                 name="config_files",
@@ -158,7 +158,7 @@ class HealthChecker:
                 message=f"Failed to check config files: {e}",
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
-    
+
     def _check_credentials(self) -> HealthStatus:
         """Check if required credentials are available."""
         try:
@@ -171,12 +171,12 @@ class HealthChecker:
                 "GITHUB_TOKEN",
                 "NEWS_API_KEY"
             ]
-            
+
             missing_creds = []
             for cred in required_creds:
                 if not os.getenv(cred):
                     missing_creds.append(cred)
-            
+
             if len(missing_creds) == len(required_creds):
                 return HealthStatus(
                     name="credentials",
@@ -200,7 +200,7 @@ class HealthChecker:
                     message="All credentials configured",
                     timestamp=datetime.now(timezone.utc).isoformat()
                 )
-                
+
         except Exception as e:
             return HealthStatus(
                 name="credentials",
@@ -208,19 +208,19 @@ class HealthChecker:
                 message=f"Failed to check credentials: {e}",
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
-    
+
     def _check_network_connectivity(self) -> HealthStatus:
         """Check basic network connectivity."""
         try:
             import requests
-            
+
             # Test connectivity to common APIs
             test_urls = [
                 "https://api.shodan.io",
                 "https://search.censys.io",
                 "https://leakix.net"
             ]
-            
+
             failed_urls = []
             for url in test_urls:
                 try:
@@ -229,7 +229,7 @@ class HealthChecker:
                         failed_urls.append(url)
                 except (requests.RequestException, ConnectionError, TimeoutError):
                     failed_urls.append(url)
-            
+
             if len(failed_urls) == len(test_urls):
                 return HealthStatus(
                     name="network_connectivity",
@@ -253,7 +253,7 @@ class HealthChecker:
                     message="All API endpoints reachable",
                     timestamp=datetime.now(timezone.utc).isoformat()
                 )
-                
+
         except Exception as e:
             return HealthStatus(
                 name="network_connectivity",
@@ -261,7 +261,7 @@ class HealthChecker:
                 message=f"Failed to check network connectivity: {e}",
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
-    
+
     def _get_system_metrics(self) -> SystemMetrics:
         """Get current system metrics."""
         try:

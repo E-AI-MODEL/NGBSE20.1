@@ -49,7 +49,7 @@ def build_scenarios(
         if mode == "api"
         else None
     )
-    
+
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))
         prob = _estimate_probability(avg, len(items))
