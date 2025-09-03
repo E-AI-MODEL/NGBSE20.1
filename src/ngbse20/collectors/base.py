@@ -63,9 +63,7 @@ class BaseCollector(ABC):
         return {
             "name": self.__class__.__name__,
             "description": self.__class__.__doc__ or "No description available",
-            "requires_api_key": hasattr(self, "api_key")
-            or hasattr(self, "token")
-            or hasattr(self, "api_id"),
+            "requires_api_key": hasattr(self, "api_key") or hasattr(self, "token") or hasattr(self, "api_id"),
             "active": self._is_active(),
         }
 

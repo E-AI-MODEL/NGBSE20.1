@@ -32,16 +32,12 @@ class TestCollectorManager:
         config = {"collectors": {"enabled": ["http_web", "shodan"]}}
         credentials = {"SHODAN_API_KEY": "test_key"}
 
-        with patch(
-            "src.ngbse20.runtime.collector_manager.ShodanCollector"
-        ) as mock_shodan:
+        with patch("src.ngbse20.runtime.collector_manager.ShodanCollector") as mock_shodan:
             mock_instance = Mock()
             mock_instance.api_key = "test_key"
             mock_shodan.return_value = mock_instance
 
-            with patch(
-                "src.ngbse20.runtime.collector_manager.HttpWebCollector"
-            ) as mock_http:
+            with patch("src.ngbse20.runtime.collector_manager.HttpWebCollector") as mock_http:
                 mock_http_instance = Mock()
                 mock_http.return_value = mock_http_instance
 

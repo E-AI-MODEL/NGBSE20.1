@@ -39,9 +39,7 @@ class CollectorManager:
 
     def build_collectors(self, allowlist: List[str]) -> List[BaseCollector]:
         """Build and validate collector instances."""
-        enabled_collectors = self.config.get("collectors", {}).get(
-            "enabled", list(self.COLLECTOR_REGISTRY.keys())
-        )
+        enabled_collectors = self.config.get("collectors", {}).get("enabled", list(self.COLLECTOR_REGISTRY.keys()))
         active_collectors = []
 
         for collector_name in enabled_collectors:
@@ -63,17 +61,13 @@ class CollectorManager:
                     active_collectors.append(collector)
                     LOGGER.info(f"Activated collector: {collector_name}")
                 else:
-                    LOGGER.warning(
-                        f"Collector {collector_name} disabled - missing credentials"
-                    )
+                    LOGGER.warning(f"Collector {collector_name} disabled - missing credentials")
 
             except Exception as e:
                 LOGGER.error(f"Failed to initialize collector {collector_name}: {e}")
 
         self._collectors = active_collectors
-        LOGGER.info(
-            f"Active collectors: {[c.__class__.__name__ for c in active_collectors]}"
-        )
+        LOGGER.info(f"Active collectors: {[c.__class__.__name__ for c in active_collectors]}")
         return active_collectors
 
     def _has_valid_credentials(self, collector: BaseCollector) -> bool:
@@ -88,9 +82,7 @@ class CollectorManager:
             return True
         return False
 
-    def collect_all(
-        self, seeds: List[Dict[str, Any]], timestamp: str
-    ) -> List[Dict[str, Any]]:
+    def collect_all(self, seeds: List[Dict[str, Any]], timestamp: str) -> List[Dict[str, Any]]:
         """Run collection across all active collectors."""
         findings = []
 
@@ -106,10 +98,7 @@ class CollectorManager:
                         f"{len(collector_findings)} items for seed {seed.get('id')}"
                     )
                 except Exception as e:
-                    LOGGER.error(
-                        f"Collector {collector.__class__.__name__} failed for "
-                        f"seed {seed.get('id')}: {e}"
-                    )
+                    LOGGER.error(f"Collector {collector.__class__.__name__} failed for " f"seed {seed.get('id')}: {e}")
 
             findings.extend(seed_findings)
 

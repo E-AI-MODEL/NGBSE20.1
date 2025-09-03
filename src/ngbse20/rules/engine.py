@@ -55,9 +55,7 @@ def trigger_matches(trigger: dict[str, str], metrics: dict[str, Any]) -> bool:
     return True
 
 
-def evaluate_rules(
-    rules: list[dict[str, Any]], metrics: dict[str, Any]
-) -> list[dict[str, Any]]:
+def evaluate_rules(rules: list[dict[str, Any]], metrics: dict[str, Any]) -> list[dict[str, Any]]:
     actions = []
     for r in rules:
         if trigger_matches(r.get("trigger", {}), metrics):

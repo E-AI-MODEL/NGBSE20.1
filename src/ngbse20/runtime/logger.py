@@ -43,10 +43,7 @@ def configure_logging(level: str = "INFO") -> None:
         debug_override = os.getenv("ALLOW_DEBUG_IN_PROD", "false").lower()
         if debug_override not in ["true", "1", "yes"]:
             level = "INFO"
-            print(
-                "WARNING: DEBUG logging disabled in production. "
-                "Set ALLOW_DEBUG_IN_PROD=true to override."
-            )
+            print("WARNING: DEBUG logging disabled in production. " "Set ALLOW_DEBUG_IN_PROD=true to override.")
 
     lvl = getattr(logging, level.upper(), logging.INFO)
 

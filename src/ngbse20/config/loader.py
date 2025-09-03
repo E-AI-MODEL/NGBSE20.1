@@ -57,13 +57,9 @@ class NGBSEConfig:
         if self.allowlist is None:
             self.allowlist = ["*"]
         if self.collectors is None:
-            self.collectors = CollectorConfig(
-                enabled=["http_web", "shodan", "censys", "leakix"]
-            )
+            self.collectors = CollectorConfig(enabled=["http_web", "shodan", "censys", "leakix"])
         if self.scoring is None:
-            self.scoring = ScoringConfig(
-                default_weights={"coverage": 0.3, "recency": 0.3, "confidence": 0.4}
-            )
+            self.scoring = ScoringConfig(default_weights={"coverage": 0.3, "recency": 0.3, "confidence": 0.4})
         if self.ballm is None:
             self.ballm = BALLMConfig()
 
@@ -91,9 +87,7 @@ class ConfigLoader:
                 elif config_path.suffix == ".json":
                     raw_config = json.load(f)
                 else:
-                    LOGGER.warning(
-                        f"Unknown config file format: {config_path.suffix}, trying YAML"
-                    )
+                    LOGGER.warning(f"Unknown config file format: {config_path.suffix}, trying YAML")
                     raw_config = yaml.safe_load(f)
 
             # Validate and convert to structured config
@@ -144,17 +138,11 @@ class ConfigLoader:
                         seeds.append(validated_seed.dict())
 
                     except json.JSONDecodeError as e:
-                        LOGGER.error(
-                            f"Invalid JSON in seeds file at line {line_number}: {e}"
-                        )
-                        raise ValueError(
-                            f"Invalid JSON in seeds file at line {line_number}"
-                        )
+                        LOGGER.error(f"Invalid JSON in seeds file at line {line_number}: {e}")
+                        raise ValueError(f"Invalid JSON in seeds file at line {line_number}")
                     except (ValidationError, TypeError) as e:
                         LOGGER.error(f"Invalid seed data at line {line_number}: {e}")
-                        raise ValueError(
-                            f"Invalid seed data at line {line_number}: {e}"
-                        )
+                        raise ValueError(f"Invalid seed data at line {line_number}: {e}")
 
         LOGGER.info(f"Loaded and validated {len(seeds)} seeds")
         return seeds
@@ -212,18 +200,14 @@ class ConfigLoader:
             LOGGER.info("Using default configuration")
             return self._get_default_config()
 
-    def _validate_collectors_config(
-        self, raw_config: Dict[str, Any]
-    ) -> CollectorConfig:
+    def _validate_collectors_config(self, raw_config: Dict[str, Any]) -> CollectorConfig:
         """Validate and convert collectors configuration."""
         collectors_config = raw_config.get("collectors", {})
         if not isinstance(collectors_config, dict):
             collectors_config = {"enabled": ["http_web", "shodan", "censys", "leakix"]}
 
         return CollectorConfig(
-            enabled=collectors_config.get(
-                "enabled", ["http_web", "shodan", "censys", "leakix"]
-            ),
+            enabled=collectors_config.get("enabled", ["http_web", "shodan", "censys", "leakix"]),
             rate_limits=collectors_config.get("rate_limits"),
         )
 
@@ -231,14 +215,10 @@ class ConfigLoader:
         """Validate and convert scoring configuration."""
         scoring_config = raw_config.get("scoring", {})
         if not isinstance(scoring_config, dict):
-            scoring_config = {
-                "default_weights": {"coverage": 0.3, "recency": 0.3, "confidence": 0.4}
-            }
+            scoring_config = {"default_weights": {"coverage": 0.3, "recency": 0.3, "confidence": 0.4}}
 
         return ScoringConfig(
-            default_weights=scoring_config.get(
-                "default_weights", {"coverage": 0.3, "recency": 0.3, "confidence": 0.4}
-            )
+            default_weights=scoring_config.get("default_weights", {"coverage": 0.3, "recency": 0.3, "confidence": 0.4})
         )
 
     def _validate_ballm_config(self, raw_config: Dict[str, Any]) -> BALLMConfig:
@@ -263,9 +243,7 @@ class ConfigLoader:
 
 
 # Standalone functions for backward compatibility and easier imports
-def load_config(
-    config_file: str = "ngbse.config.yml", config_dir: str = "config"
-) -> NGBSEConfig:
+def load_config(config_file: str = "ngbse.config.yml", config_dir: str = "config") -> NGBSEConfig:
     """Load main configuration file with validation.
 
     Args:
@@ -279,9 +257,7 @@ def load_config(
     return loader.load_config(config_file)
 
 
-def load_rules(
-    rules_file: str = "rules.json", config_dir: str = "config"
-) -> List[Dict[str, Any]]:
+def load_rules(rules_file: str = "rules.json", config_dir: str = "config") -> List[Dict[str, Any]]:
     """Load rules configuration.
 
     Args:
@@ -295,9 +271,7 @@ def load_rules(
     return loader.load_rules(rules_file)
 
 
-def load_seeds(
-    seeds_file: str = "seeds.jsonl", config_dir: str = "config"
-) -> List[Dict[str, Any]]:
+def load_seeds(seeds_file: str = "seeds.jsonl", config_dir: str = "config") -> List[Dict[str, Any]]:
     """Load and validate seeds configuration.
 
     Args:
@@ -394,9 +368,7 @@ def _validate_rules_file(rules_file: str) -> int:
             required_fields = ["id", "name", "pattern"]
             for field in required_fields:
                 if field not in rule_data:
-                    raise ValueError(
-                        f"Rule at index {i} missing required field: {field}"
-                    )
+                    raise ValueError(f"Rule at index {i} missing required field: {field}")
 
             n_rules += 1
 

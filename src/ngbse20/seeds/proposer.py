@@ -3,9 +3,7 @@ from typing import Any
 MIN_SCORE = 0.6
 
 
-def _seed_row(
-    query: str, seed_type: str, priority: float, reason: str
-) -> dict[str, Any]:
+def _seed_row(query: str, seed_type: str, priority: float, reason: str) -> dict[str, Any]:
     priority = max(0.1, min(1.0, float(priority)))
     return {
         "id": "S-PROPOSED",
@@ -49,18 +47,10 @@ def propose_next_seeds(
             q = f'site:github.com "{asset}" token'
             if q not in seen_queries:
                 seen_queries.add(q)
-                proposals.append(
-                    _seed_row(
-                        q, "code", 0.65, f"Follow-up on code finding for asset {asset}"
-                    )
-                )
+                proposals.append(_seed_row(q, "code", 0.65, f"Follow-up on code finding for asset {asset}"))
         elif st in {"infra", "leak"} and asset:
             q = f'"{asset}" port:1883 MQTT'
             if q not in seen_queries:
                 seen_queries.add(q)
-                proposals.append(
-                    _seed_row(
-                        q, "infra", 0.6, f"Follow-up on infra finding for asset {asset}"
-                    )
-                )
+                proposals.append(_seed_row(q, "infra", 0.6, f"Follow-up on infra finding for asset {asset}"))
     return proposals

@@ -27,12 +27,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(
-                    json.dumps(
-                        {"id": "test_seed", "type": "domain", "value": "example.com"}
-                    )
-                    + "\n"
-                )
+                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
 
             # Test rules
             rules_file = config_dir / "rules.json"
@@ -52,13 +47,9 @@ class TestPipelineIntegration:
                 )
 
             # Mock collectors to avoid external API calls
-            with patch(
-                "src.ngbse20.runtime.collector_manager.HttpWebCollector"
-            ) as mock_http:
+            with patch("src.ngbse20.runtime.collector_manager.HttpWebCollector") as mock_http:
                 mock_instance = Mock()
-                mock_instance.collect.return_value = [
-                    {"id": "finding1", "type": "web", "confidence": 0.8}
-                ]
+                mock_instance.collect.return_value = [{"id": "finding1", "type": "web", "confidence": 0.8}]
                 mock_http.return_value = mock_instance
 
                 orchestrator = PipelineOrchestrator(str(config_dir))
@@ -79,12 +70,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(
-                    json.dumps(
-                        {"id": "test_seed", "type": "domain", "value": "example.com"}
-                    )
-                    + "\n"
-                )
+                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
 
             # Test rules with hard block
             rules_file = config_dir / "rules.json"
@@ -129,12 +115,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(
-                    json.dumps(
-                        {"id": "test_seed", "type": "domain", "value": "example.com"}
-                    )
-                    + "\n"
-                )
+                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
 
             # Test rules
             rules_file = config_dir / "rules.json"
@@ -154,13 +135,9 @@ class TestPipelineIntegration:
                 )
 
             # Mock collectors
-            with patch(
-                "src.ngbse20.runtime.collector_manager.HttpWebCollector"
-            ) as mock_http:
+            with patch("src.ngbse20.runtime.collector_manager.HttpWebCollector") as mock_http:
                 mock_instance = Mock()
-                mock_instance.collect.return_value = [
-                    {"id": "finding1", "type": "web", "confidence": 0.8}
-                ]
+                mock_instance.collect.return_value = [{"id": "finding1", "type": "web", "confidence": 0.8}]
                 mock_http.return_value = mock_instance
 
                 orchestrator = PipelineOrchestrator(str(config_dir))
@@ -186,12 +163,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(
-                    json.dumps(
-                        {"id": "test_seed", "type": "domain", "value": "example.com"}
-                    )
-                    + "\n"
-                )
+                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
 
             # Test rules
             rules_file = config_dir / "rules.json"
@@ -221,36 +193,24 @@ class TestPipelineIntegration:
             ):
                 # Mock collectors
                 with (
-                    patch(
-                        "src.ngbse20.runtime.collector_manager.HttpWebCollector"
-                    ) as mock_http,
-                    patch(
-                        "src.ngbse20.runtime.collector_manager.ShodanCollector"
-                    ) as mock_shodan,
-                    patch(
-                        "src.ngbse20.runtime.collector_manager.CensysCollector"
-                    ) as mock_censys,
+                    patch("src.ngbse20.runtime.collector_manager.HttpWebCollector") as mock_http,
+                    patch("src.ngbse20.runtime.collector_manager.ShodanCollector") as mock_shodan,
+                    patch("src.ngbse20.runtime.collector_manager.CensysCollector") as mock_censys,
                 ):
 
                     # Setup mock instances
                     mock_http_instance = Mock()
-                    mock_http_instance.collect.return_value = [
-                        {"id": "http_finding", "type": "web"}
-                    ]
+                    mock_http_instance.collect.return_value = [{"id": "http_finding", "type": "web"}]
                     mock_http.return_value = mock_http_instance
 
                     mock_shodan_instance = Mock()
                     mock_shodan_instance.api_key = "test_shodan_key"
-                    mock_shodan_instance.collect.return_value = [
-                        {"id": "shodan_finding", "type": "shodan"}
-                    ]
+                    mock_shodan_instance.collect.return_value = [{"id": "shodan_finding", "type": "shodan"}]
                     mock_shodan.return_value = mock_shodan_instance
 
                     mock_censys_instance = Mock()
                     mock_censys_instance.api_id = "test_censys_id"
-                    mock_censys_instance.collect.return_value = [
-                        {"id": "censys_finding", "type": "censys"}
-                    ]
+                    mock_censys_instance.collect.return_value = [{"id": "censys_finding", "type": "censys"}]
                     mock_censys.return_value = mock_censys_instance
 
                     orchestrator = PipelineOrchestrator(str(config_dir))

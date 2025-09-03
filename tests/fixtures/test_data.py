@@ -86,9 +86,7 @@ def get_sample_config() -> Dict[str, Any]:
         "output_dir": "test_output",
         "allowlist": ["*"],
         "collectors": {"enabled": ["http_web", "shodan", "censys", "leakix"]},
-        "scoring": {
-            "default_weights": {"coverage": 0.3, "recency": 0.3, "confidence": 0.4}
-        },
+        "scoring": {"default_weights": {"coverage": 0.3, "recency": 0.3, "confidence": 0.4}},
         "ballm": {"enabled": True, "model": "gpt-4"},
     }
 

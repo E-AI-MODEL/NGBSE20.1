@@ -31,21 +31,13 @@ class BALLMMetaLayerGenerator:
         """Generate the complete BALLM meta-layer output."""
 
         # 1. Interpret blindspots with LLM
-        blindspot_interpretation = (
-            self.blindspot_interpreter.interpret_blindspots_with_llm(
-                blindspots, findings
-            )
-        )
+        blindspot_interpretation = self.blindspot_interpreter.interpret_blindspots_with_llm(blindspots, findings)
 
         # 2. Generate curiosity questions
-        curiosity_questions = self.curiosity_generator.generate_curiosity_questions(
-            findings, blindspots
-        )
+        curiosity_questions = self.curiosity_generator.generate_curiosity_questions(findings, blindspots)
 
         # 3. Extract epistemic insights
-        epistemic_insights = self.blindspot_interpreter.extract_epistemic_insights(
-            blindspots, findings
-        )
+        epistemic_insights = self.blindspot_interpreter.extract_epistemic_insights(blindspots, findings)
 
         # 4. Calculate epistemic humility
         epistemic_humility = self._calculate_epistemic_humility(findings, blindspots)
@@ -64,9 +56,7 @@ class BALLMMetaLayerGenerator:
             "generation_timestamp": self._get_timestamp(),
         }
 
-    def _calculate_epistemic_humility(
-        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
-    ) -> float:
+    def _calculate_epistemic_humility(self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]) -> float:
         """Calculate epistemic humility score based on blindspot awareness."""
         # Base score starts at 0.5 (neutral)
         base_score = 0.5
@@ -97,10 +87,7 @@ class BALLMMetaLayerGenerator:
             productive_failures.append(
                 {
                     "type": "coverage_gap",
-                    "description": (
-                        f"High source imbalance "
-                        f"({coverage.get('max_category', 'Unknown')} dominates)"
-                    ),
+                    "description": (f"High source imbalance " f"({coverage.get('max_category', 'Unknown')} dominates)"),
                     "learning_opportunity": "Diversify source types to reduce bias",
                     "productive_value": "High - reveals source bias",
                 }
@@ -113,9 +100,7 @@ class BALLMMetaLayerGenerator:
                 {
                     "type": "confidence_gap",
                     "description": f"{confidence.get('n', 0)} risky assets identified",
-                    "learning_opportunity": (
-                        "Investigate why high-score assets have low quality"
-                    ),
+                    "learning_opportunity": ("Investigate why high-score assets have low quality"),
                     "productive_value": "High - reveals scoring inconsistencies",
                 }
             )

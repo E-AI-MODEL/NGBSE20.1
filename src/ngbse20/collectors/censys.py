@@ -24,15 +24,9 @@ class CensysCollector(BaseCollector):
         self.api_id = os.getenv("CENSYS_API_ID")
         self.api_secret = os.getenv("CENSYS_API_SECRET")
         if not (self.api_id and self.api_secret):
-            LOGGER.warning(
-                "Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET "
-                "env vars."
-            )
+            LOGGER.warning("Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET " "env vars.")
         else:
-            LOGGER.debug(
-                f"Censys collector initialized with API ID: "
-                f"{mask_api_key(self.api_id)}"
-            )
+            LOGGER.debug(f"Censys collector initialized with API ID: " f"{mask_api_key(self.api_id)}")
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect network and SSL intelligence from Censys."""
@@ -48,12 +42,8 @@ class CensysCollector(BaseCollector):
             data = response.json()
 
         except Exception as e:
-            sanitized_error = sanitize_error_message(
-                str(e), {"api_id": self.api_id, "api_secret": self.api_secret}
-            )
-            LOGGER.error(
-                f"Censys collector failed for query '{query}': {sanitized_error}"
-            )
+            sanitized_error = sanitize_error_message(str(e), {"api_id": self.api_id, "api_secret": self.api_secret})
+            LOGGER.error(f"Censys collector failed for query '{query}': {sanitized_error}")
             return []
 
         findings = []
@@ -82,9 +72,7 @@ class CensysCollector(BaseCollector):
                 for service in item["services"]:
                     if "tls" in service:
                         ssl_info = {
-                            "certificate": service["tls"]
-                            .get("certificates", {})
-                            .get("leaf_data", {}),
+                            "certificate": service["tls"].get("certificates", {}).get("leaf_data", {}),
                             "version": service["tls"].get("version", ""),
                             "cipher_suite": service["tls"].get("cipher_suite", {}),
                         }
@@ -92,10 +80,7 @@ class CensysCollector(BaseCollector):
 
             findings.append(
                 {
-                    "id": (
-                        f"censys-{ip}-"
-                        f"{item.get('location', {}).get('country', 'unknown')}"
-                    ),
+                    "id": (f"censys-{ip}-" f"{item.get('location', {}).get('country', 'unknown')}"),
                     "hash": content_hash(f"{ip}{domain}{str(ssl_info)}"),
                     "asset": domain.lower() if domain else ip,
                     "raw": {
@@ -103,10 +88,7 @@ class CensysCollector(BaseCollector):
                         "location": item.get("location", {}),
                         "ssl_info": ssl_info,
                         "ports": [s.get("port") for s in item.get("services", [])],
-                        "protocols": [
-                            s.get("transport_protocol")
-                            for s in item.get("services", [])
-                        ],
+                        "protocols": [s.get("transport_protocol") for s in item.get("services", [])],
                     },
                     "source": {
                         "type": "network_intelligence",

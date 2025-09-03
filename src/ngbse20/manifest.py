@@ -14,9 +14,7 @@ def sha256_file(path: str) -> str | None:
         return None
 
 
-def write_manifest(
-    out_dir: str, version: str, seeds_path: str, config_path: str, findings_path: str
-) -> None:
+def write_manifest(out_dir: str, version: str, seeds_path: str, config_path: str, findings_path: str) -> None:
     start_time = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     time.sleep(1)  # Simulate work
     end_time = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

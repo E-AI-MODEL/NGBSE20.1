@@ -12,29 +12,20 @@ from pydantic import BaseModel, Field, field_validator
 class Seed(BaseModel):
     """Seed model for validation."""
 
-    id: str = Field(
-        ..., min_length=1, max_length=100, description="Unique seed identifier"
-    )
+    id: str = Field(..., min_length=1, max_length=100, description="Unique seed identifier")
     query: str = Field(..., min_length=1, max_length=1000, description="Search query")
     type: str = Field(..., min_length=1, max_length=50, description="Seed type")
 
     # Optional fields
-    priority: Optional[int] = Field(
-        default=1, ge=1, le=10, description="Priority level (1-10)"
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    priority: Optional[int] = Field(default=1, ge=1, le=10, description="Priority level (1-10)")
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
 
     @field_validator("id")
     @classmethod
     def validate_id(cls, v):
         """Validate seed ID format."""
         if not re.match(r"^[a-zA-Z0-9_-]+$", v):
-            raise ValueError(
-                "Seed ID must contain only alphanumeric characters, "
-                "underscores, and hyphens"
-            )
+            raise ValueError("Seed ID must contain only alphanumeric characters, " "underscores, and hyphens")
         return v
 
     @field_validator("query")
@@ -78,9 +69,7 @@ class Seed(BaseModel):
         ]
 
         if v.lower() not in allowed_types:
-            raise ValueError(
-                f'Invalid seed type: {v}. Allowed types: {", ".join(allowed_types)}'
-            )
+            raise ValueError(f'Invalid seed type: {v}. Allowed types: {", ".join(allowed_types)}')
 
         return v.lower()
 

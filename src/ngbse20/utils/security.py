@@ -50,17 +50,12 @@ def mask_credentials_in_dict(data: Dict[str, Any]) -> Dict[str, Any]:
     ]
 
     for key, value in masked_data.items():
-        if isinstance(value, str) and any(
-            cred_field in key.lower() for cred_field in credential_fields
-        ):
+        if isinstance(value, str) and any(cred_field in key.lower() for cred_field in credential_fields):
             masked_data[key] = mask_api_key(value)
         elif isinstance(value, dict):
             masked_data[key] = mask_credentials_in_dict(value)
         elif isinstance(value, list):
-            masked_data[key] = [
-                mask_credentials_in_dict(item) if isinstance(item, dict) else item
-                for item in value
-            ]
+            masked_data[key] = [mask_credentials_in_dict(item) if isinstance(item, dict) else item for item in value]
 
     return masked_data
 

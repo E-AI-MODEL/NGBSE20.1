@@ -58,9 +58,7 @@ def _keyword_score(f: dict[str, Any]) -> float:
         return 0.0
 
 
-def compute_cai(
-    traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None
-) -> float:
+def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None) -> float:
     if not traces:
         return 0.0
     w = {"trace": 0.4, "transparency": 0.3, "blindspot": 0.3}
@@ -83,11 +81,7 @@ def compute_cai(
     def mean(xs: list[float]) -> float:
         return (sum(xs) / len(xs)) if xs else 0.0
 
-    return _clamp(
-        w["trace"] * mean(trs)
-        + w["transparency"] * mean(trp)
-        + w["blindspot"] * blind_rate
-    )
+    return _clamp(w["trace"] * mean(trs) + w["transparency"] * mean(trp) + w["blindspot"] * blind_rate)
 
 
 def _parse_ts(ts_raw: Any) -> datetime | None:
@@ -104,9 +98,7 @@ def _parse_ts(ts_raw: Any) -> datetime | None:
     return None
 
 
-def score_findings(
-    findings: list[dict[str, Any]], cfg: ScoringConfig = DEFAULT
-) -> list[dict[str, Any]]:
+def score_findings(findings: list[dict[str, Any]], cfg: ScoringConfig = DEFAULT) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     LOGGER.debug(f"Scoring {len(findings)} findings with config: {cfg}")
 
@@ -121,10 +113,8 @@ def score_findings(
         )
         extras = (
             cfg.extras.get("novelty", 0) * _clamp(m.get("novelty", 0))
-            + cfg.extras.get("symbolic_consistency", 0)
-            * _clamp(m.get("symbolic_consistency", 0))
-            - cfg.extras.get("contradiction_penalty", 0)
-            * _clamp(m.get("contradiction_penalty", 0))
+            + cfg.extras.get("symbolic_consistency", 0) * _clamp(m.get("symbolic_consistency", 0))
+            - cfg.extras.get("contradiction_penalty", 0) * _clamp(m.get("contradiction_penalty", 0))
             + cfg.extras.get("abduction_value", 0) * _clamp(m.get("abduction_value", 0))
         )
         score = _clamp(base + extras)

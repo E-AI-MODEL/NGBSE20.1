@@ -56,15 +56,11 @@ class LLMClient:
     ) -> dict[str, Any] | None:
         for attempt in range(retries + 1):
             try:
-                r = requests.post(
-                    url, headers=headers, data=json.dumps(payload), timeout=timeout
-                )
+                r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=timeout)
                 r.raise_for_status()
                 return r.json()
             except RequestException as e:
-                LOGGER.warning(
-                    f"llm_request_error, url={url}, attempt={attempt + 1}, err={e!s}"
-                )
+                LOGGER.warning(f"llm_request_error, url={url}, attempt={attempt + 1}, err={e!s}")
                 if attempt == retries:
                     return None
                 time.sleep(2**attempt)
@@ -72,9 +68,7 @@ class LLMClient:
                 LOGGER.warning(f"llm_json_error, url={url}, err={e!s}")
                 return None
 
-    def _call_openai(
-        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
-    ) -> str | None:
+    def _call_openai(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("OPENAI_API_KEY")
         model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         if not api_key:
@@ -92,11 +86,7 @@ class LLMClient:
                 "temperature": temperature,
             },
         )
-        return (
-            data["choices"][0]["message"]["content"]
-            if data and data.get("choices")
-            else None
-        )
+        return data["choices"][0]["message"]["content"] if data and data.get("choices") else None
 
     def _call_azure_openai(
         self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
@@ -106,10 +96,7 @@ class LLMClient:
         deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini")
         if not api_key or not endpoint:
             return None
-        url = (
-            f"{endpoint}/openai/deployments/{deployment}/chat/completions"
-            f"?api-version=2024-02-15-preview"
-        )
+        url = f"{endpoint}/openai/deployments/{deployment}/chat/completions" f"?api-version=2024-02-15-preview"
         data = self._post_json(
             url,
             {"api-key": api_key, "Content-Type": "application/json"},
@@ -122,15 +109,9 @@ class LLMClient:
                 "temperature": temperature,
             },
         )
-        return (
-            data["choices"][0]["message"]["content"]
-            if data and data.get("choices")
-            else None
-        )
+        return data["choices"][0]["message"]["content"] if data and data.get("choices") else None
 
-    def _call_anthropic(
-        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
-    ) -> str | None:
+    def _call_anthropic(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("ANTHROPIC_API_KEY")
         model = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
         if not api_key:
@@ -151,30 +132,19 @@ class LLMClient:
             },
         )
         parts = data.get("content", []) if data else []
-        return (
-            "\n".join([p.get("text", "") for p in parts if p.get("type") == "text"])
-            if parts
-            else None
-        )
+        return "\n".join([p.get("text", "") for p in parts if p.get("type") == "text"]) if parts else None
 
-    def _call_google(
-        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
-    ) -> str | None:
+    def _call_google(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("GOOGLE_API_KEY")
         model = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
         if not api_key:
             return None
-        url = (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{model}:generateContent?key={api_key}"
-        )
+        url = "https://generativelanguage.googleapis.com/v1beta/models/" f"{model}:generateContent?key={api_key}"
         payload = {
             "contents": [
                 {
                     "role": "user",
-                    "parts": [
-                        {"text": f"System:\n{system_prompt}\n\nUser:\n{user_prompt}"}
-                    ],
+                    "parts": [{"text": f"System:\n{system_prompt}\n\nUser:\n{user_prompt}"}],
                 }
             ],
             "generationConfig": {
@@ -183,14 +153,5 @@ class LLMClient:
             },
         }
         data = self._post_json(url, {"Content-Type": "application/json"}, payload)
-        parts = (
-            ((data.get("candidates", [{}])[0] or {}).get("content", {}) or {}).get(
-                "parts", []
-            )
-            if data
-            else []
-        )
-        return (
-            "\n".join([p.get("text", "") for p in parts if isinstance(p, dict)]).strip()
-            or None
-        )
+        parts = ((data.get("candidates", [{}])[0] or {}).get("content", {}) or {}).get("parts", []) if data else []
+        return "\n".join([p.get("text", "") for p in parts if isinstance(p, dict)]).strip() or None

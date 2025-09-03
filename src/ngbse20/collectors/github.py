@@ -25,9 +25,7 @@ class GitHubCollector(BaseCollector):
         if not self.token:
             LOGGER.warning("GitHub collector requires GITHUB_TOKEN env var.")
         else:
-            LOGGER.debug(
-                f"GitHub collector initialized with token: {mask_api_key(self.token)}"
-            )
+            LOGGER.debug(f"GitHub collector initialized with token: {mask_api_key(self.token)}")
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect code repository intelligence from GitHub."""
@@ -45,9 +43,7 @@ class GitHubCollector(BaseCollector):
 
         except Exception as e:
             sanitized_error = sanitize_error_message(str(e), {"token": self.token})
-            LOGGER.error(
-                f"GitHub collector failed for query '{query}': {sanitized_error}"
-            )
+            LOGGER.error(f"GitHub collector failed for query '{query}': {sanitized_error}")
             return []
 
         findings = []
@@ -61,10 +57,7 @@ class GitHubCollector(BaseCollector):
             findings.append(
                 {
                     "id": f"github-repo-{repo.get('id', 'unknown')}",
-                    "hash": content_hash(
-                        f"{repo_name}{repo.get('description', '')}"
-                        f"{repo.get('language', '')}"
-                    ),
+                    "hash": content_hash(f"{repo_name}{repo.get('description', '')}" f"{repo.get('language', '')}"),
                     "asset": f"github.com/{repo_name}",
                     "raw": {
                         "name": repo_name,
@@ -95,9 +88,7 @@ class GitHubCollector(BaseCollector):
             findings.append(
                 {
                     "id": f"github-code-{code.get('sha', 'unknown')}",
-                    "hash": content_hash(
-                        f"{code.get('path', '')}{code.get('sha', '')}{repo_name}"
-                    ),
+                    "hash": content_hash(f"{code.get('path', '')}{code.get('sha', '')}{repo_name}"),
                     "asset": f"github.com/{repo_name}",
                     "raw": {
                         "path": code.get("path", ""),

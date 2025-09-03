@@ -100,9 +100,7 @@ class TestPipelineStages:
             "insights": ["test insight"],
         }
 
-        with patch(
-            "src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator"
-        ) as mock_generator_class:
+        with patch("src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator") as mock_generator_class:
             mock_generator = Mock()
             mock_generator.generate_meta_layer.return_value = mock_meta_layer
             mock_generator_class.return_value = mock_generator
@@ -120,9 +118,7 @@ class TestPipelineStages:
         blindspots = {"coverage": 0.2, "recency": 0.3, "confidence": 0.1}
         asset_scores = {"asset1": 0.8}
 
-        with patch(
-            "src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator"
-        ) as mock_generator_class:
+        with patch("src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator") as mock_generator_class:
             mock_generator = Mock()
             mock_generator.generate_meta_layer.side_effect = Exception("BALLM failed")
             mock_generator_class.return_value = mock_generator

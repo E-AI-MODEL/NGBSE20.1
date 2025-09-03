@@ -29,9 +29,7 @@ class TestBALLMMetaLayerGenerator:
         generator.blindspot_interpreter.interpret_blindspots_with_llm = Mock(
             return_value={"interpretation": "test", "confidence": 0.8}
         )
-        generator.curiosity_generator.generate_curiosity_questions = Mock(
-            return_value=[{"question": "test question"}]
-        )
+        generator.curiosity_generator.generate_curiosity_questions = Mock(return_value=[{"question": "test question"}])
         generator.blindspot_interpreter.extract_epistemic_insights = Mock(
             return_value={"assumptions": [], "confidence": 0.7}
         )

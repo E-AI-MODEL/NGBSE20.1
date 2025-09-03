@@ -69,9 +69,7 @@ class HttpWebCollector:
             return True
         if d in self.allow_domains:
             return True
-        return any(
-            entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains
-        )
+        return any(entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains)
 
     def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         query = seed.get("query", "")

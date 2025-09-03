@@ -6,9 +6,7 @@ from ..llm_client import LLMClient
 HIGH_RISK_THRESHOLD = 0.75
 
 
-def _estimate_probability(
-    avg_score: float, evidence_count: int, prior: float = 0.10
-) -> float:
+def _estimate_probability(avg_score: float, evidence_count: int, prior: float = 0.10) -> float:
     lr = 1 + 9 * max(0.0, (avg_score - 0.5) / 0.5)
     odds = (prior / (1 - prior)) * lr * max(1.0, min(5.0, evidence_count / 3.0))
     return odds / (1 + odds)
@@ -48,11 +46,7 @@ def build_scenarios(
 ) -> dict[str, dict[str, Any]]:
     groups = group_by_themes(findings)
     out: dict[str, dict[str, Any]] = {}
-    client = (
-        LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
-        if mode == "api"
-        else None
-    )
+    client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"]) if mode == "api" else None
 
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))
@@ -71,21 +65,12 @@ def build_scenarios(
                     }
                     for it in items[:8]
                 ],
-                "instructions": (
-                    "Make a concise summary (2-3 sentences), without secrets."
-                ),
+                "instructions": ("Make a concise summary (2-3 sentences), without secrets."),
             }
             if mode == "api" and client:
-                system_prompt = (
-                    "You are a security analyst. Write concise, factual risk summaries."
-                )
+                system_prompt = "You are a security analyst. Write concise, factual risk summaries."
                 user_prompt = json.dumps(payload, ensure_ascii=False)
-                summary = (
-                    client.call(
-                        system_prompt, user_prompt, max_tokens=300, temperature=0.2
-                    )
-                    or ""
-                )
+                summary = client.call(system_prompt, user_prompt, max_tokens=300, temperature=0.2) or ""
             else:
                 try:
                     with open("out/prompt.scenarios.json", "w", encoding="utf-8") as h:

@@ -60,6 +60,27 @@ extend-immutable-calls = []
 [tool.ruff.lint.isort]
 known-first-party = ["ngbse20"]
 combine-as-imports = true
+force-single-line = false
+multi-line-output = 3
+line-length = 120
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
 
 [tool.mypy]
 python_version = "3.9"

@@ -25,10 +25,7 @@ class LeakIXCollector(BaseCollector):
         if not self.api_key:
             LOGGER.warning("LeakIX collector requires LEAKIX_API_KEY env var.")
         else:
-            LOGGER.debug(
-                f"LeakIX collector initialized with API key: "
-                f"{mask_api_key(self.api_key)}"
-            )
+            LOGGER.debug(f"LeakIX collector initialized with API key: " f"{mask_api_key(self.api_key)}")
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect data breach intelligence from LeakIX."""
@@ -45,9 +42,7 @@ class LeakIXCollector(BaseCollector):
 
         except Exception as e:
             sanitized_error = sanitize_error_message(str(e), {"api_key": self.api_key})
-            LOGGER.error(
-                f"LeakIX collector failed for query '{query}': {sanitized_error}"
-            )
+            LOGGER.error(f"LeakIX collector failed for query '{query}': {sanitized_error}")
             return []
 
         findings = []
@@ -59,9 +54,7 @@ class LeakIXCollector(BaseCollector):
             findings.append(
                 {
                     "id": f"leakix-{item.get('id', 'unknown')}",
-                    "hash": content_hash(
-                        f"{domain}{item.get('title', '')}{item.get('content', '')}"
-                    ),
+                    "hash": content_hash(f"{domain}{item.get('title', '')}{item.get('content', '')}"),
                     "asset": domain.lower(),
                     "raw": {
                         "title": item.get("title", ""),
@@ -88,8 +81,6 @@ class LeakIXCollector(BaseCollector):
         headers = {"Authorization": f"Bearer {self.api_key}"}
         params = {"q": query, "size": 50}
 
-        response = requests.get(
-            f"{self.API_BASE}/search", headers=headers, params=params, timeout=30
-        )
+        response = requests.get(f"{self.API_BASE}/search", headers=headers, params=params, timeout=30)
         response.raise_for_status()
         return response

@@ -39,9 +39,7 @@ def cli(log_level: str):
     type=click.Path(exists=True),
     help="Path to rules.json file",
 )
-@click.option(
-    "--outdir", default="out", show_default=True, help="Output directory for results"
-)
+@click.option("--outdir", default="out", show_default=True, help="Output directory for results")
 @click.option(
     "--allowlist",
     default="*",
@@ -56,11 +54,7 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
     try:
         # Load and parse input files
         rules_data = json.loads(Path(rules).read_text("utf-8"))
-        seeds_data = [
-            json.loads(line)
-            for line in Path(seeds).read_text("utf-8").splitlines()
-            if line.strip()
-        ]
+        seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
         metrics_data = json.loads(metrics)
     except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading input files: {e}", err=True)
@@ -73,9 +67,7 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
     config = {"output_dir": outdir, "allowlist": allowlist_domains}
 
     # Run the complete pipeline
-    result = run_pipeline(
-        seeds=seeds_data, rules=rules_data, metrics=metrics_data, config=config
-    )
+    result = run_pipeline(seeds=seeds_data, rules=rules_data, metrics=metrics_data, config=config)
 
     click.echo(f"Pipeline finished. Results are in '{outdir}'.")
     click.echo(f"Status: {result.get('status', 'unknown')}")
@@ -108,20 +100,14 @@ def validate_config_cmd(seeds: str, rules: str):
     default="web",
     help="Collector type to use (web, leakix, shodan, censys, urlscan, github, news)",
 )
-@click.option(
-    "--allowlist", default="*", help="Comma-separated list of allowed domains"
-)
+@click.option("--allowlist", default="*", help="Comma-separated list of allowed domains")
 def collect(seeds: str, out: str, collector: str, allowlist: str):
     """Collect data from seeds using specified collector."""
     Path(out).mkdir(parents=True, exist_ok=True)
 
     try:
         # Load seeds
-        seeds_data = [
-            json.loads(line)
-            for line in Path(seeds).read_text("utf-8").splitlines()
-            if line.strip()
-        ]
+        seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
     except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading seeds: {e}", err=True)
         raise click.Abort()
@@ -135,8 +121,7 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
         collector_instance = HttpWebCollector(allowlist_domains=allowlist_domains)
     else:
         click.echo(
-            f"Collector type '{collector}' not yet implemented for "
-            f"individual collection.",
+            f"Collector type '{collector}' not yet implemented for " f"individual collection.",
             err=True,
         )
         click.echo("Use 'ngbse20 run' for full pipeline with all collectors.", err=True)
@@ -151,15 +136,11 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
             seed_findings = collector_instance.collect(seed, now_iso)
             findings.extend(seed_findings)
         except (requests.RequestException, ValueError, KeyError) as e:
-            click.echo(
-                f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True
-            )
+            click.echo(f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True)
 
     # Save findings
     findings_path = Path(out, "findings.json")
-    findings_path.write_text(
-        json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    findings_path.write_text(json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8")
 
     click.echo(f"Collection complete. Found {len(findings)} items.")
     click.echo(f"Results saved to: {findings_path}")
@@ -173,9 +154,7 @@ def export_stix(findings: str, out: str):
     data = json.loads(Path(findings).read_text(encoding="utf-8"))
     bundle = findings_to_stix(data, score_lookup=None)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
-    Path(out).write_text(
-        json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    Path(out).write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
     click.echo(out)
 
 
@@ -204,34 +183,29 @@ def ballm_analyze(findings: str, out: str, depth: int):
     from ngbse20.llm_client import LLMClient
 
     ballm_generator = BALLMMetaLayerGenerator(LLMClient())
-    meta_layer = ballm_generator.generate_meta_layer(
-        findings_data, blindspots_data, asset_scores_data
-    )
+    meta_layer = ballm_generator.generate_meta_layer(findings_data, blindspots_data, asset_scores_data)
 
     # Save BALLM output
     Path(out).parent.mkdir(parents=True, exist_ok=True)
-    Path(out).write_text(
-        json.dumps(meta_layer, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    Path(out).write_text(json.dumps(meta_layer, ensure_ascii=False, indent=2), encoding="utf-8")
 
     click.echo(f"BALLM analysis complete. Output saved to {out}")
-    click.echo(
-        f"Epistemic Humility Score: "
-        f"{meta_layer.get('epistemic_humility_score', 0.0):.3f}"
-    )
-    click.echo(
-        f"Curiosity Questions Generated: "
-        f"{len(meta_layer.get('curiosity_questions', []))}"
-    )
+    click.echo(f"Epistemic Humility Score: " f"{meta_layer.get('epistemic_humility_score', 0.0):.3f}")
+    click.echo(f"Curiosity Questions Generated: " f"{len(meta_layer.get('curiosity_questions', []))}")
 
 
 @cli.command("collectors")
 def list_collectors():
     """List all available collectors and their status."""
-    from ngbse20.collectors import (CensysCollector, GitHubCollector,
-                                    HttpWebCollector, LeakIXCollector,
-                                    NewsCollector, ShodanCollector,
-                                    URLScanCollector)
+    from ngbse20.collectors import (
+        CensysCollector,
+        GitHubCollector,
+        HttpWebCollector,
+        LeakIXCollector,
+        NewsCollector,
+        ShodanCollector,
+        URLScanCollector,
+    )
 
     collectors = [
         ("HttpWebCollector", HttpWebCollector, []),
@@ -277,10 +251,7 @@ def health_check(output_format: str):
             status_emoji = {"healthy": "✅", "degraded": "⚠️", "unhealthy": "❌"}
 
             overall_status = health_data["status"]
-            click.echo(
-                f"Overall Status: {status_emoji.get(overall_status, '❓')} "
-                f"{overall_status.upper()}"
-            )
+            click.echo(f"Overall Status: {status_emoji.get(overall_status, '❓')} " f"{overall_status.upper()}")
             click.echo(f"Uptime: {health_data['uptime_seconds']:.1f} seconds")
             click.echo()
 

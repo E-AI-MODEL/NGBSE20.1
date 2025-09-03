@@ -17,8 +17,12 @@ from ..rules.engine import evaluate_rules
 from ..scoring.v18 import DEFAULT as SCORE_DEFAULT
 from ..scoring.v18 import compute_cai, score_findings
 from ..seeds.proposer import propose_next_seeds
-from ..synth.reverse_llm import (confidence_gap, coverage_gap, recency_gap,
-                                 synthesize_brief_llm)
+from ..synth.reverse_llm import (
+    confidence_gap,
+    coverage_gap,
+    recency_gap,
+    synthesize_brief_llm,
+)
 from ..synth.scenario_engine import build_scenarios
 from ..trace.logger import event
 
@@ -32,9 +36,7 @@ class PipelineStages:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
 
-    def validate_stage(
-        self, rules: List[Dict[str, Any]], metrics: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def validate_stage(self, rules: List[Dict[str, Any]], metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Validation stage - check for hard blocks."""
         acts_block = evaluate_rules(
             [r for r in rules if r.get("action", {}).get("type") == "hard_block"],
@@ -53,9 +55,7 @@ class PipelineStages:
 
         return {"status": "ok"}
 
-    def collect_stage(
-        self, seeds: List[Dict[str, Any]], collectors: List[Any]
-    ) -> Dict[str, Any]:
+    def collect_stage(self, seeds: List[Dict[str, Any]], collectors: List[Any]) -> Dict[str, Any]:
         """Collection stage - gather findings from all collectors."""
         findings = []
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -71,10 +71,7 @@ class PipelineStages:
                         f"{len(collector_findings)} items for seed {seed.get('id')}"
                     )
                 except Exception as e:
-                    LOGGER.error(
-                        f"Collector {collector.__class__.__name__} failed for seed "
-                        f"{seed.get('id')}: {e}"
-                    )
+                    LOGGER.error(f"Collector {collector.__class__.__name__} failed for seed " f"{seed.get('id')}: {e}")
 
             findings.extend(seed_findings)
 
@@ -193,9 +190,7 @@ class PipelineStages:
 
         return {"next_seeds": next_seeds, "trace": trace}
 
-    def blindspot_analysis_stage(
-        self, scored_findings: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def blindspot_analysis_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Blindspot analysis stage - identify coverage gaps."""
         try:
             blindspots = {
@@ -240,18 +235,14 @@ class PipelineStages:
         """BALLM meta-layer generation stage."""
         try:
             ballm_generator = BALLMMetaLayerGenerator(LLMClient())
-            meta_layer = ballm_generator.generate_meta_layer(
-                scored_findings, blindspots, asset_scores
-            )
+            meta_layer = ballm_generator.generate_meta_layer(scored_findings, blindspots, asset_scores)
 
             trace = event(
                 "ballm_meta_layer",
                 {},
                 {
                     "meta_layer_generated": True,
-                    "epistemic_humility": meta_layer.get(
-                        "epistemic_humility_score", 0.0
-                    ),
+                    "epistemic_humility": meta_layer.get("epistemic_humility_score", 0.0),
                 },
                 "generated BALLM meta-layer with epistemic insights",
             )
@@ -273,9 +264,7 @@ class PipelineStages:
 
     def scenario_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Scenario synthesis stage."""
-        scenarios = build_scenarios(
-            scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none")
-        )
+        scenarios = build_scenarios(scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none"))
 
         trace = event(
             "scenario_synthesis",
@@ -286,9 +275,7 @@ class PipelineStages:
 
         return {"scenarios": scenarios, "trace": trace}
 
-    def brief_stage(
-        self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def brief_stage(self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
         """Brief synthesis stage."""
         brief = synthesize_brief_llm(
             scored_findings,
@@ -309,15 +296,12 @@ class PipelineStages:
                 try:
                     # objects may be a list-like of stix2 objects
                     objects = [
-                        getattr(o, "_inner", o) if hasattr(o, "_inner") else o
-                        for o in bundle.objects
+                        getattr(o, "_inner", o) if hasattr(o, "_inner") else o for o in bundle.objects
                     ]  # type: ignore[attr-defined]
                 except Exception:
                     objects = list(bundle.objects)
             else:
-                raw = (
-                    bundle.serialize() if hasattr(bundle, "serialize") else str(bundle)
-                )
+                raw = bundle.serialize() if hasattr(bundle, "serialize") else str(bundle)
                 data = json.loads(raw)
                 objects = data.get("objects", []) if isinstance(data, dict) else []
 
@@ -447,9 +431,7 @@ class PipelineStages:
             )
             return {"report_path": None, "stix_summary": None, "trace": trace}
 
-    def export_stage(
-        self, scored_findings: List[Dict[str, Any]], traces: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def export_stage(self, scored_findings: List[Dict[str, Any]], traces: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Export stage - generate STIX bundle and save outputs."""
         cai = compute_cai(traces, {})
         bundle = to_stix_bundle(scored_findings)

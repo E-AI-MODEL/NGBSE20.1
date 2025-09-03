@@ -22,9 +22,7 @@ class PipelineOrchestrator:
         self.config_loader = ConfigLoader(config_dir)
         self.config = self.config_loader.load_config()
         self.credentials = self.config_loader.get_credentials()
-        self.collector_manager = CollectorManager(
-            self.config.__dict__, self.credentials
-        )
+        self.collector_manager = CollectorManager(self.config.__dict__, self.credentials)
         self.pipeline_stages = PipelineStages(self.config.output_dir)
 
     def run_pipeline(
@@ -74,23 +72,17 @@ class PipelineOrchestrator:
         traces.append(forecast_result["trace"])
 
         # 6. Seed Proposal Stage
-        seed_proposal_result = self.pipeline_stages.seed_proposal_stage(
-            scored_findings, asset_scores
-        )
+        seed_proposal_result = self.pipeline_stages.seed_proposal_stage(scored_findings, asset_scores)
         next_seeds = seed_proposal_result["next_seeds"]
         traces.append(seed_proposal_result["trace"])
 
         # 7. Blindspot Analysis Stage
-        blindspot_result = self.pipeline_stages.blindspot_analysis_stage(
-            scored_findings
-        )
+        blindspot_result = self.pipeline_stages.blindspot_analysis_stage(scored_findings)
         blindspots = blindspot_result["blindspots"]
         traces.append(blindspot_result["trace"])
 
         # 8. BALLM Stage
-        ballm_result = self.pipeline_stages.ballm_stage(
-            scored_findings, blindspots, asset_scores
-        )
+        ballm_result = self.pipeline_stages.ballm_stage(scored_findings, blindspots, asset_scores)
         meta_layer = ballm_result["meta_layer"]
         traces.append(ballm_result["trace"])
 
@@ -122,9 +114,7 @@ class PipelineOrchestrator:
         )
         traces.append(report_result["trace"])
 
-        LOGGER.info(
-            f"Pipeline completed successfully with {len(scored_findings)} findings"
-        )
+        LOGGER.info(f"Pipeline completed successfully with {len(scored_findings)} findings")
 
         return {
             "status": "ok",

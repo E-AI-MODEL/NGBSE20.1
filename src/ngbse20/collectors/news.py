@@ -23,9 +23,7 @@ class NewsCollector(BaseCollector):
         if not self.api_key:
             LOGGER.warning("News collector requires NEWS_API_KEY env var.")
         else:
-            LOGGER.debug(
-                f"News collector initialized with API key: {mask_api_key(self.api_key)}"
-            )
+            LOGGER.debug(f"News collector initialized with API key: {mask_api_key(self.api_key)}")
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect news and recent developments."""
@@ -56,9 +54,7 @@ class NewsCollector(BaseCollector):
 
         except Exception as e:
             sanitized_error = sanitize_error_message(str(e), {"api_key": self.api_key})
-            LOGGER.error(
-                f"News collector failed for query '{query}': {sanitized_error}"
-            )
+            LOGGER.error(f"News collector failed for query '{query}': {sanitized_error}")
             return []
 
         return findings
@@ -89,9 +85,7 @@ class NewsCollector(BaseCollector):
             findings.append(
                 {
                     "id": f"newsapi-{article.get('url', '').split('/')[-1][:20]}",
-                    "hash": content_hash(
-                        f"{article.get('title', '')}{article.get('description', '')}"
-                    ),
+                    "hash": content_hash(f"{article.get('title', '')}{article.get('description', '')}"),
                     "asset": source_name.lower(),
                     "raw": {
                         "title": article.get("title", ""),
@@ -132,9 +126,7 @@ class NewsCollector(BaseCollector):
             findings.append(
                 {
                     "id": f"gnews-{article.get('url', '').split('/')[-1][:20]}",
-                    "hash": content_hash(
-                        f"{article.get('title', '')}{article.get('description', '')}"
-                    ),
+                    "hash": content_hash(f"{article.get('title', '')}{article.get('description', '')}"),
                     "asset": source_name.lower(),
                     "raw": {
                         "title": article.get("title", ""),

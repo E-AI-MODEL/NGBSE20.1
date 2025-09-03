@@ -32,9 +32,7 @@ class RateLimiter:
         """Check if a request can be made without exceeding rate limit."""
         now = time.time()
         # Remove requests outside the time window
-        self.requests = [
-            req_time for req_time in self.requests if now - req_time < self.time_window
-        ]
+        self.requests = [req_time for req_time in self.requests if now - req_time < self.time_window]
 
         return len(self.requests) < self.max_requests
 
@@ -83,10 +81,7 @@ def retry_with_backoff(
                     last_exception = e
 
                     if attempt == max_retries:
-                        LOGGER.error(
-                            f"Function {func.__name__} failed after {max_retries} "
-                            f"retries: {e}"
-                        )
+                        LOGGER.error(f"Function {func.__name__} failed after {max_retries} " f"retries: {e}")
                         raise e
 
                     # Calculate delay with exponential backoff
@@ -125,9 +120,7 @@ def rate_limited(rate_limiter: RateLimiter):
             # Wait if necessary
             wait_time = rate_limiter.wait_time()
             if wait_time > 0:
-                LOGGER.debug(
-                    f"Rate limiting: waiting {wait_time:.2f}s before {func.__name__}"
-                )
+                LOGGER.debug(f"Rate limiting: waiting {wait_time:.2f}s before {func.__name__}")
                 time.sleep(wait_time)
 
             # Record the request
@@ -146,27 +139,13 @@ class APIRateLimiter:
 
     def __init__(self):
         self.limiters: Dict[str, RateLimiter] = {
-            "shodan": RateLimiter(
-                max_requests=1, time_window=1
-            ),  # 1 request per second
-            "censys": RateLimiter(
-                max_requests=5, time_window=1
-            ),  # 5 requests per second
-            "leakix": RateLimiter(
-                max_requests=10, time_window=1
-            ),  # 10 requests per second
-            "urlscan": RateLimiter(
-                max_requests=1, time_window=1
-            ),  # 1 request per second
-            "github": RateLimiter(
-                max_requests=10, time_window=1
-            ),  # 10 requests per second
-            "news": RateLimiter(
-                max_requests=100, time_window=1
-            ),  # 100 requests per second
-            "default": RateLimiter(
-                max_requests=10, time_window=1
-            ),  # Default: 10 requests per second
+            "shodan": RateLimiter(max_requests=1, time_window=1),  # 1 request per second
+            "censys": RateLimiter(max_requests=5, time_window=1),  # 5 requests per second
+            "leakix": RateLimiter(max_requests=10, time_window=1),  # 10 requests per second
+            "urlscan": RateLimiter(max_requests=1, time_window=1),  # 1 request per second
+            "github": RateLimiter(max_requests=10, time_window=1),  # 10 requests per second
+            "news": RateLimiter(max_requests=100, time_window=1),  # 100 requests per second
+            "default": RateLimiter(max_requests=10, time_window=1),  # Default: 10 requests per second
         }
 
     def get_limiter(self, service: str) -> RateLimiter:

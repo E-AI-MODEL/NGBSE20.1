@@ -43,10 +43,7 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
         ip = _sanitize_stix_value(f.get("raw", {}).get("ip", ""))
         port = _sanitize_stix_value(f.get("raw", {}).get("port", ""))
         pattern = f"[ipv4-addr:value = '{ip}' AND network-traffic:dst_port = {port}]"
-        name = (
-            f"Infrastructure: {f.get('raw', {}).get('product', 'Unknown')} "
-            f"on {ip}:{port}"
-        )
+        name = f"Infrastructure: {f.get('raw', {}).get('product', 'Unknown')} " f"on {ip}:{port}"
 
     elif source_type == "network_intelligence":
         # Censys findings
@@ -78,9 +75,7 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
         # Default web findings
         url = _sanitize_stix_value(f.get("source", {}).get("url", ""))
         domain = _sanitize_stix_value(f.get("asset", ""))
-        pattern = (
-            f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
-        )
+        pattern = f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
         name = f"Web: {f.get('raw', {}).get('title', 'Unknown')}"
 
     # Truncate name to STIX limit
@@ -111,9 +106,7 @@ def _create_threat_actor(f: dict[str, Any]) -> ThreatActor | None:
                 threat_level="medium",
                 custom_properties={
                     "x_ngbse20_threat_indicators": threat_indicators,
-                    "x_ngbse20_malicious_score": f.get("raw", {}).get(
-                        "malicious_score", 0
-                    ),
+                    "x_ngbse20_malicious_score": f.get("raw", {}).get("malicious_score", 0),
                 },
             )
     return None
@@ -189,9 +182,7 @@ def write_stix(findings: list[dict[str, Any]], path: str) -> str:
     return path
 
 
-def findings_to_stix(
-    findings: list[dict[str, Any]], score_lookup=None
-) -> dict[str, Any]:
+def findings_to_stix(findings: list[dict[str, Any]], score_lookup=None) -> dict[str, Any]:
     """Return STIX bundle as Python dict for given findings."""
     bundle = to_stix_bundle(findings)
     return json.loads(bundle.serialize())

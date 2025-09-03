@@ -21,9 +21,7 @@ def normalize_url(raw: str) -> str:
         netloc = netloc[:-4]
     path = parts.path or "/"
     query_pairs = [
-        (k, v)
-        for k, v in parse_qsl(parts.query, keep_blank_values=True)
-        if not k.lower().startswith(_UTM_PREFIXES)
+        (k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if not k.lower().startswith(_UTM_PREFIXES)
     ]
     query_pairs.sort()
     query = urlencode(query_pairs, doseq=True)

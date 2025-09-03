@@ -24,9 +24,7 @@ def coverage_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
         return {"ratios": {}, "max_category": "", "imbalance": 0.0}
     ratios = {k: v / total for k, v in c.items()}
     max_cat = max(ratios, key=ratios.get) if ratios else ""
-    imbalance = (
-        (max(ratios.values()) - min(ratios.values())) if len(ratios) > 1 else 0.0
-    )
+    imbalance = (max(ratios.values()) - min(ratios.values())) if len(ratios) > 1 else 0.0
     return {"ratios": ratios, "max_category": max_cat, "imbalance": imbalance}
 
 
@@ -59,9 +57,7 @@ def confidence_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
     return {"risky_assets": risky, "n": len(risky)}
 
 
-def synthesize_brief(
-    findings: list[dict[str, Any]], asset_scores: dict[str, dict[str, float]]
-) -> dict[str, Any]:
+def synthesize_brief(findings: list[dict[str, Any]], asset_scores: dict[str, dict[str, float]]) -> dict[str, Any]:
     top_assets = sorted(
         asset_scores.items(),
         key=lambda kv: kv[1].get("avg_e_ai_star", 0.0),
@@ -95,12 +91,8 @@ def synthesize_brief_llm(
         reverse=True,
     )[:5]
     payload = {
-        "instruction": (
-            "Write a concise BLUF (2-3 sentences) + 3 actions. Be factual, no secrets."
-        ),
-        "top_assets": [
-            {"asset": a, "avg_eai": round(v["avg_e_ai_star"], 3)} for a, v in top_assets
-        ],
+        "instruction": ("Write a concise BLUF (2-3 sentences) + 3 actions. Be factual, no secrets."),
+        "top_assets": [{"asset": a, "avg_eai": round(v["avg_e_ai_star"], 3)} for a, v in top_assets],
         "examples": [
             {
                 "asset": f.get("asset"),
@@ -114,9 +106,7 @@ def synthesize_brief_llm(
     if mode == "prompt":
         try:
             if out_dir:
-                with open(
-                    os.path.join(out_dir, "prompt.brief.json"), "w", encoding="utf-8"
-                ) as h:
+                with open(os.path.join(out_dir, "prompt.brief.json"), "w", encoding="utf-8") as h:
                     json.dump(payload, h, ensure_ascii=False, indent=2)
         except Exception:
             pass
@@ -124,10 +114,7 @@ def synthesize_brief_llm(
 
     if mode == "api":
         client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
-        system_prompt = (
-            "You are a Dutch security analyst. Produce concise BLUF and "
-            "3 concrete actions."
-        )
+        system_prompt = "You are a Dutch security analyst. Produce concise BLUF and " "3 concrete actions."
         user_prompt = json.dumps(payload, ensure_ascii=False)
         txt = client.call(system_prompt, user_prompt, max_tokens=400, temperature=0.2)
         if isinstance(txt, str) and txt.strip():
