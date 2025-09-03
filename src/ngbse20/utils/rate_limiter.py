@@ -3,10 +3,11 @@ Rate limiting utilities for NGBSE 20.2.
 Provides rate limiting and retry logic for API calls.
 """
 
-import time
 import random
-from typing import Dict, Callable, Any
+import time
 from functools import wraps
+from typing import Any, Callable, Dict
+
 from ..logging import get_logger
 
 LOGGER = get_logger(__name__)

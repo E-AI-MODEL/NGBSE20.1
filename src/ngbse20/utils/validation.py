@@ -4,7 +4,8 @@ Provides validation for user inputs to prevent security issues.
 """
 
 import re
-from typing import List, Any
+from typing import Any, List
+
 from ..logging import get_logger
 
 LOGGER = get_logger(__name__)

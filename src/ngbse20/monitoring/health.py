@@ -3,12 +3,13 @@ Health monitoring for NGBSE 20.2.
 Provides health checks and monitoring capabilities.
 """
 
-import time
-import psutil
 import os
-from typing import Dict, Any, List
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Any, Dict, List
+
+import psutil
 
 from ..logging import get_logger
 

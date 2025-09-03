@@ -7,6 +7,7 @@ epistemic insights and curiosity-generating questions using Large Language Model
 from __future__ import annotations
 
 from typing import Any, Dict, List
+
 from .blindspot_interpreter import BlindspotInterpretationEngine
 from .curiosity_generator import CuriosityGenerationEngine
 

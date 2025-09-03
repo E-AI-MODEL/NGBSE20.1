@@ -1,10 +1,12 @@
 """Tests for BALLM functionality."""
 
-import pytest
 from unittest.mock import Mock
-from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
+
+import pytest
+
 from ngbse20.ballm.blindspot_interpreter import BlindspotInterpretationEngine
 from ngbse20.ballm.curiosity_generator import CuriosityGenerationEngine
+from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
 
 
 class TestBALLMMetaLayerGenerator:

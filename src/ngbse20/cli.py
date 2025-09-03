@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import json
 import logging
-from pathlib import Path
-from datetime import datetime, timezone
 import os
-import requests
+from datetime import datetime, timezone
+from pathlib import Path
 
 import click
+import requests
 
+from ngbse20.collectors.http_web import HttpWebCollector
 from ngbse20.config.loader import validate_files
 from ngbse20.export.stix import findings_to_stix
+from ngbse20.monitoring.health import get_health_status
 from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline
-from ngbse20.collectors.http_web import HttpWebCollector
-from ngbse20.monitoring.health import get_health_status
 from ngbse20.utils.validation import validate_allowlist
 
 LOGGER = logging.getLogger(__name__)
@@ -228,15 +228,10 @@ def ballm_analyze(findings: str, out: str, depth: int):
 @cli.command("collectors")
 def list_collectors():
     """List all available collectors and their status."""
-    from ngbse20.collectors import (
-        HttpWebCollector,
-        LeakIXCollector,
-        ShodanCollector,
-        CensysCollector,
-        URLScanCollector,
-        GitHubCollector,
-        NewsCollector,
-    )
+    from ngbse20.collectors import (CensysCollector, GitHubCollector,
+                                    HttpWebCollector, LeakIXCollector,
+                                    NewsCollector, ShodanCollector,
+                                    URLScanCollector)
 
     collectors = [
         ("HttpWebCollector", HttpWebCollector, []),

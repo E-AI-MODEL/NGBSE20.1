@@ -8,22 +8,19 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
+from ..ballm.meta_layer_generator import BALLMMetaLayerGenerator
 from ..export.stix import to_stix_bundle
 from ..forecast.engine import aggregate_asset_scores, build_forecast
+from ..llm_client import LLMClient
 from ..logging import get_logger
 from ..rules.engine import evaluate_rules
-from ..scoring.v18 import DEFAULT as SCORE_DEFAULT, compute_cai, score_findings
+from ..scoring.v18 import DEFAULT as SCORE_DEFAULT
+from ..scoring.v18 import compute_cai, score_findings
 from ..seeds.proposer import propose_next_seeds
-from ..synth.reverse_llm import (
-    confidence_gap,
-    coverage_gap,
-    recency_gap,
-    synthesize_brief_llm,
-)
+from ..synth.reverse_llm import (confidence_gap, coverage_gap, recency_gap,
+                                 synthesize_brief_llm)
 from ..synth.scenario_engine import build_scenarios
 from ..trace.logger import event
-from ..ballm.meta_layer_generator import BALLMMetaLayerGenerator
-from ..llm_client import LLMClient
 
 LOGGER = get_logger(__name__)
 

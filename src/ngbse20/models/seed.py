@@ -3,9 +3,10 @@ Seed data models for NGBSE 20.2.
 Provides Pydantic models for seed validation.
 """
 
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Dict, Any
 import re
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class Seed(BaseModel):

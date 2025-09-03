@@ -6,13 +6,13 @@ Manages collector lifecycle and credential validation.
 from typing import Any, Dict, List, Type
 
 from ..collectors.base import BaseCollector
+from ..collectors.censys import CensysCollector
+from ..collectors.github import GitHubCollector
 from ..collectors.http_web import HttpWebCollector
 from ..collectors.leakix import LeakIXCollector
-from ..collectors.shodan import ShodanCollector
-from ..collectors.censys import CensysCollector
-from ..collectors.urlscan import URLScanCollector
-from ..collectors.github import GitHubCollector
 from ..collectors.news import NewsCollector
+from ..collectors.shodan import ShodanCollector
+from ..collectors.urlscan import URLScanCollector
 from ..logging import get_logger
 
 LOGGER = get_logger(__name__)

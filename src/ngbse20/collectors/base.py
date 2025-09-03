@@ -1,7 +1,8 @@
 """Base collector class for NGBSE 20.1."""
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 import tldextract
 
 
