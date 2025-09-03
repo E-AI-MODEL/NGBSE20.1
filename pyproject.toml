@@ -62,7 +62,6 @@ known-first-party = ["ngbse20"]
 combine-as-imports = true
 force-single-line = false
 multi-line-output = 3
-line-length = 120
 
 [tool.black]
 line-length = 120

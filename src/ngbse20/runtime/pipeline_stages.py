@@ -3,6 +3,8 @@ Pipeline stages for NGBSE 20.2.
 Separates pipeline logic into distinct, testable stages.
 """
 
+from __future__ import annotations
+
 import json
 import os
 from datetime import datetime, timezone

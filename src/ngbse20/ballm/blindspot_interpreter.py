@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 class BlindspotInterpretationEngine:
     """Interprets blindspots using LLM to extract epistemic insights."""
 
-    def __init__(self, llm_client):
+    def __init__(self, llm_client: Any) -> None:
         """Initialize with LLM client."""
         self.llm_client = llm_client
 

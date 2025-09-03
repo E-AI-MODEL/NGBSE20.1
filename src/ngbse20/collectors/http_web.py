@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import urllib.parse
 import urllib.request
@@ -119,3 +121,48 @@ class HttpWebCollector:
             except Exception as e:
                 LOGGER.error(f"Collector failed for {url}: {e}")
         return findings
+
+
+def parse_html(url: str, html: str, timestamp: str) -> Any:
+    """Parse HTML content and return a finding object."""
+    from ..models.seed import Seed
+    
+    # Extract title
+    title_match = TITLE_RE.search(html)
+    title = title_match.group(1).strip() if title_match else ""
+    
+    # Extract published date
+    published = parse_published(html)
+    
+    # Extract domain
+    domain = extract_domain(url)
+    
+    # Generate hash
+    hash_value = content_hash(html, url=url, title=title)
+    
+    # Create finding object
+    finding = {
+        "id": f"finding-{hash_value[:8]}",
+        "hash": hash_value,
+        "asset": domain.lower(),
+        "raw": {"url": url, "title": title},
+        "source": {
+            "type": "web",
+            "url": url,
+            "domain": domain,
+        },
+        "timestamp": published or timestamp,
+        "quality": {"q": 0.8},
+    }
+    
+    # Create a simple object with attributes for the test
+    class Finding:
+        def __init__(self, data):
+            self.title = title
+            self.published = published or timestamp
+            self.domain = domain
+            self.hash = hash_value
+            self.url = url
+            self.__dict__.update(data)
+    
+    return Finding(finding)

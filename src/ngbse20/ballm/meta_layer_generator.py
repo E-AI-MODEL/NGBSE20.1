@@ -17,7 +17,7 @@ class BALLMMetaLayerGenerator:
     Generates the BALLM meta-layer that transforms blindspots into epistemic insights.
     """
 
-    def __init__(self, llm_client):
+    def __init__(self, llm_client: Any) -> None:
         """Initialize BALLM generator with LLM client."""
         self.blindspot_interpreter = BlindspotInterpretationEngine(llm_client)
         self.curiosity_generator = CuriosityGenerationEngine(llm_client)

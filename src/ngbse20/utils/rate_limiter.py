@@ -26,7 +26,7 @@ class RateLimiter:
         """
         self.max_requests = max_requests
         self.time_window = time_window
-        self.requests = []
+        self.requests: List[float] = []
 
     def can_make_request(self) -> bool:
         """Check if a request can be made without exceeding rate limit."""
@@ -36,7 +36,7 @@ class RateLimiter:
 
         return len(self.requests) < self.max_requests
 
-    def record_request(self):
+    def record_request(self) -> None:
         """Record a request timestamp."""
         self.requests.append(time.time())
 

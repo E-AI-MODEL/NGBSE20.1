@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 class CuriosityGenerationEngine:
     """Generates curiosity-driven questions based on blindspots and findings."""
 
-    def __init__(self, llm_client):
+    def __init__(self, llm_client: Any) -> None:
         """Initialize with LLM client."""
         self.llm_client = llm_client
 

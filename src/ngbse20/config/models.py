@@ -29,7 +29,7 @@ class Seed(BaseModel):
 
     @field_validator("tags", mode="before")
     @classmethod
-    def _coerce_tags(cls, v):
+    def _coerce_tags(cls, v: Optional[List[str]]) -> List[str]:
         return v or []
 
 

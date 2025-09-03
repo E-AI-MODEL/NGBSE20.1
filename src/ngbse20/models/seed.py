@@ -22,7 +22,7 @@ class Seed(BaseModel):
 
     @field_validator("id")
     @classmethod
-    def validate_id(cls, v):
+    def validate_id(cls, v: str) -> str:
         """Validate seed ID format."""
         if not re.match(r"^[a-zA-Z0-9_-]+$", v):
             raise ValueError("Seed ID must contain only alphanumeric characters, " "underscores, and hyphens")
@@ -30,7 +30,7 @@ class Seed(BaseModel):
 
     @field_validator("query")
     @classmethod
-    def validate_query(cls, v):
+    def validate_query(cls, v: str) -> str:
         """Validate query content."""
         if not v or not v.strip():
             raise ValueError("Query cannot be empty")
@@ -51,7 +51,7 @@ class Seed(BaseModel):
 
     @field_validator("type")
     @classmethod
-    def validate_type(cls, v):
+    def validate_type(cls, v: str) -> str:
         """Validate seed type."""
         allowed_types = [
             "web",
@@ -75,7 +75,7 @@ class Seed(BaseModel):
 
     @field_validator("metadata")
     @classmethod
-    def validate_metadata(cls, v):
+    def validate_metadata(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         """Validate metadata structure."""
         if v is None:
             return {}
