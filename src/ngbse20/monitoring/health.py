@@ -192,7 +192,10 @@ class HealthChecker:
                 return HealthStatus(
                     name="credentials",
                     status="degraded",
-                    message=f"Some credentials missing: {len(missing_creds)}/{len(required_creds)}",
+                    message=(
+                        f"Some credentials missing: {len(missing_creds)}/"
+                        f"{len(required_creds)}"
+                    ),
                     timestamp=datetime.now(timezone.utc).isoformat(),
                     details={"missing_credentials": missing_creds},
                 )
@@ -245,7 +248,10 @@ class HealthChecker:
                 return HealthStatus(
                     name="network_connectivity",
                     status="degraded",
-                    message=f"Some API endpoints unreachable: {len(failed_urls)}/{len(test_urls)}",
+                    message=(
+                        f"Some API endpoints unreachable: {len(failed_urls)}/"
+                        f"{len(test_urls)}"
+                    ),
                     timestamp=datetime.now(timezone.utc).isoformat(),
                     details={"failed_urls": failed_urls},
                 )

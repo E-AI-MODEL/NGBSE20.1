@@ -42,8 +42,13 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
         # Shodan findings
         ip = _sanitize_stix_value(f.get("raw", {}).get("ip", ""))
         port = _sanitize_stix_value(f.get("raw", {}).get("port", ""))
-        pattern = f"[ipv4-addr:value = '{ip}' AND network-traffic:dst_port = {port}]"
-        name = f"Infrastructure: {f.get('raw', {}).get('product', 'Unknown')} on {ip}:{port}"
+        pattern = (
+            f"[ipv4-addr:value = '{ip}' AND network-traffic:dst_port = {port}]"
+        )
+        name = (
+            f"Infrastructure: {f.get('raw', {}).get('product', 'Unknown')} "
+            f"on {ip}:{port}"
+        )
 
     elif source_type == "network_intelligence":
         # Censys findings

@@ -106,7 +106,10 @@ class LLMClient:
         deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini")
         if not api_key or not endpoint:
             return None
-        url = f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-02-15-preview"
+        url = (
+            f"{endpoint}/openai/deployments/{deployment}/chat/completions"
+            f"?api-version=2024-02-15-preview"
+        )
         data = self._post_json(
             url,
             {"api-key": api_key, "Content-Type": "application/json"},

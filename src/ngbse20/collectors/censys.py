@@ -23,11 +23,13 @@ class CensysCollector(BaseCollector):
         self.api_secret = os.getenv("CENSYS_API_SECRET")
         if not (self.api_id and self.api_secret):
             LOGGER.warning(
-                "Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET env vars."
+                "Censys collector requires CENSYS_API_ID and CENSYS_API_SECRET "
+                "env vars."
             )
         else:
             LOGGER.debug(
-                f"Censys collector initialized with API ID: {mask_api_key(self.api_id)}"
+                f"Censys collector initialized with API ID: "
+                f"{mask_api_key(self.api_id)}"
             )
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
@@ -88,7 +90,10 @@ class CensysCollector(BaseCollector):
 
             findings.append(
                 {
-                    "id": f"censys-{ip}-{item.get('location', {}).get('country', 'unknown')}",
+                    "id": (
+                        f"censys-{ip}-"
+                        f"{item.get('location', {}).get('country', 'unknown')}"
+                    ),
                     "hash": content_hash(f"{ip}{domain}{str(ssl_info)}"),
                     "asset": domain.lower() if domain else ip,
                     "raw": {

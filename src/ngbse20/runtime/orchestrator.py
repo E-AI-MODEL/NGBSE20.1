@@ -1,7 +1,8 @@
 """
 Pipeline orchestrator for NGBSE 20.2 (GA Version).
 Modularized orchestrator with separated concerns and improved testability.
-Order: validate -> collect -> score -> history -> forecast -> propose -> blindspots -> BALLM -> scenarios -> export.
+Order: validate -> collect -> score -> history -> forecast -> propose -> blindspots
+-> BALLM -> scenarios -> export.
 """
 
 from typing import Any, Dict, List
@@ -43,7 +44,9 @@ class PipelineOrchestrator:
         traces: List[Dict[str, Any]] = []
         allowlist = self.config.allowlist
 
-        LOGGER.info(f"Starting pipeline with {len(seeds)} seeds and {len(rules)} rules")
+        LOGGER.info(
+            f"Starting pipeline with {len(seeds)} seeds and {len(rules)} rules"
+        )
 
         # 1. Validation Stage
         validation_result = self.pipeline_stages.validate_stage(rules, metrics)

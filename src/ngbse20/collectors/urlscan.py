@@ -24,7 +24,8 @@ class URLScanCollector(BaseCollector):
             LOGGER.warning("URLScan collector requires URLSCAN_API_KEY env var.")
         else:
             LOGGER.debug(
-                f"URLScan collector initialized with API key: {mask_api_key(self.api_key)}"
+                f"URLScan collector initialized with API key: "
+                f"{mask_api_key(self.api_key)}"
             )
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:

@@ -135,10 +135,13 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
         collector_instance = HttpWebCollector(allowlist_domains=allowlist_domains)
     else:
         click.echo(
-            f"Collector type '{collector}' not yet implemented for individual collection.",
+            f"Collector type '{collector}' not yet implemented for "
+            f"individual collection.",
             err=True,
         )
-        click.echo("Use 'ngbse20 run' for full pipeline with all collectors.", err=True)
+        click.echo(
+            "Use 'ngbse20 run' for full pipeline with all collectors.", err=True
+        )
         raise click.Abort()
 
     # Collect data
@@ -215,10 +218,12 @@ def ballm_analyze(findings: str, out: str, depth: int):
 
     click.echo(f"BALLM analysis complete. Output saved to {out}")
     click.echo(
-        f"Epistemic Humility Score: {meta_layer.get('epistemic_humility_score', 0.0):.3f}"
+        f"Epistemic Humility Score: "
+        f"{meta_layer.get('epistemic_humility_score', 0.0):.3f}"
     )
     click.echo(
-        f"Curiosity Questions Generated: {len(meta_layer.get('curiosity_questions', []))}"
+        f"Curiosity Questions Generated: "
+        f"{len(meta_layer.get('curiosity_questions', []))}"
     )
 
 
@@ -280,7 +285,8 @@ def health_check(output_format: str):
 
             overall_status = health_data["status"]
             click.echo(
-                f"Overall Status: {status_emoji.get(overall_status, '❓')} {overall_status.upper()}"
+                f"Overall Status: {status_emoji.get(overall_status, '❓')} "
+                f"{overall_status.upper()}"
             )
             click.echo(f"Uptime: {health_data['uptime_seconds']:.1f} seconds")
             click.echo()

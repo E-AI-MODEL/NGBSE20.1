@@ -30,7 +30,8 @@ class Seed(BaseModel):
         """Validate seed ID format."""
         if not re.match(r"^[a-zA-Z0-9_-]+$", v):
             raise ValueError(
-                "Seed ID must contain only alphanumeric characters, underscores, and hyphens"
+                "Seed ID must contain only alphanumeric characters, "
+                "underscores, and hyphens"
             )
         return v
 

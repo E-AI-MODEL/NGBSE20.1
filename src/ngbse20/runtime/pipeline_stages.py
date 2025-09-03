@@ -70,11 +70,13 @@ class PipelineStages:
                     collector_findings = collector.collect(seed, timestamp)
                     seed_findings.extend(collector_findings)
                     LOGGER.debug(
-                        f"Collector {collector.__class__.__name__} found {len(collector_findings)} items for seed {seed.get('id')}"
+                        f"Collector {collector.__class__.__name__} found "
+                        f"{len(collector_findings)} items for seed {seed.get('id')}"
                     )
                 except Exception as e:
                     LOGGER.error(
-                        f"Collector {collector.__class__.__name__} failed for seed {seed.get('id')}: {e}"
+                        f"Collector {collector.__class__.__name__} failed for seed "
+                        f"{seed.get('id')}: {e}"
                     )
 
             findings.extend(seed_findings)
@@ -309,7 +311,10 @@ class PipelineStages:
                 # bundle from stix2 library
                 try:
                     # objects may be a list-like of stix2 objects
-                    objects = [getattr(o, "_inner", o) if hasattr(o, "_inner") else o for o in bundle.objects]  # type: ignore[attr-defined]
+                    objects = [
+                        getattr(o, "_inner", o) if hasattr(o, "_inner") else o
+                        for o in bundle.objects
+                    ]  # type: ignore[attr-defined]
                 except Exception:
                     objects = list(bundle.objects)
             else:

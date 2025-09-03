@@ -24,7 +24,10 @@ def validate_domain_name(domain: str) -> bool:
         return True  # Allow wildcard
 
     # Basic domain validation regex
-    domain_pattern = r"^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$"
+    domain_pattern = (
+        r"^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?"
+        r"(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$"
+    )
 
     # Check for suspicious patterns
     suspicious_patterns = [

@@ -95,7 +95,9 @@ def synthesize_brief_llm(
         reverse=True,
     )[:5]
     payload = {
-        "instruction": "Write a concise BLUF (2-3 sentences) + 3 actions. Be factual, no secrets.",
+        "instruction": (
+            "Write a concise BLUF (2-3 sentences) + 3 actions. Be factual, no secrets."
+        ),
         "top_assets": [
             {"asset": a, "avg_eai": round(v["avg_e_ai_star"], 3)} for a, v in top_assets
         ],
@@ -122,7 +124,10 @@ def synthesize_brief_llm(
 
     if mode == "api":
         client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
-        system_prompt = "You are a Dutch security analyst. Produce concise BLUF and 3 concrete actions."
+        system_prompt = (
+            "You are a Dutch security analyst. Produce concise BLUF and "
+            "3 concrete actions."
+        )
         user_prompt = json.dumps(payload, ensure_ascii=False)
         txt = client.call(system_prompt, user_prompt, max_tokens=400, temperature=0.2)
         if isinstance(txt, str) and txt.strip():

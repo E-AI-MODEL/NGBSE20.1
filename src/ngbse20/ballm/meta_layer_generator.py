@@ -10,7 +10,9 @@ from .curiosity_generator import CuriosityGenerationEngine
 
 
 class BALLMMetaLayerGenerator:
-    """Generates the BALLM meta-layer that transforms blindspots into epistemic insights."""
+    """
+    Generates the BALLM meta-layer that transforms blindspots into epistemic insights.
+    """
 
     def __init__(self, llm_client):
         """Initialize BALLM generator with LLM client."""
@@ -92,7 +94,10 @@ class BALLMMetaLayerGenerator:
             productive_failures.append(
                 {
                     "type": "coverage_gap",
-                    "description": f"High source imbalance ({coverage.get('max_category', 'Unknown')} dominates)",
+                    "description": (
+                        f"High source imbalance "
+                        f"({coverage.get('max_category', 'Unknown')} dominates)"
+                    ),
                     "learning_opportunity": "Diversify source types to reduce bias",
                     "productive_value": "High - reveals source bias",
                 }
@@ -105,7 +110,9 @@ class BALLMMetaLayerGenerator:
                 {
                     "type": "confidence_gap",
                     "description": f"{confidence.get('n', 0)} risky assets identified",
-                    "learning_opportunity": "Investigate why high-score assets have low quality",
+                    "learning_opportunity": (
+                        "Investigate why high-score assets have low quality"
+                    ),
                     "productive_value": "High - reveals scoring inconsistencies",
                 }
             )

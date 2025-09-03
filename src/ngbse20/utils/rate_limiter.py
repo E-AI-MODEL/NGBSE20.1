@@ -83,7 +83,8 @@ def retry_with_backoff(
 
                     if attempt == max_retries:
                         LOGGER.error(
-                            f"Function {func.__name__} failed after {max_retries} retries: {e}"
+                            f"Function {func.__name__} failed after {max_retries} "
+                            f"retries: {e}"
                         )
                         raise e
 
@@ -95,7 +96,9 @@ def retry_with_backoff(
                         delay *= 0.5 + random.random() * 0.5
 
                     LOGGER.warning(
-                        f"Function {func.__name__} failed (attempt {attempt + 1}/{max_retries + 1}): {e}. Retrying in {delay:.2f}s"
+                        f"Function {func.__name__} failed (attempt "
+                        f"{attempt + 1}/{max_retries + 1}): {e}. "
+                        f"Retrying in {delay:.2f}s"
                     )
                     time.sleep(delay)
 

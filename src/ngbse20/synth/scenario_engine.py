@@ -71,7 +71,9 @@ def build_scenarios(
                     }
                     for it in items[:8]
                 ],
-                "instructions": "Make a concise summary (2-3 sentences), without secrets.",
+                "instructions": (
+                    "Make a concise summary (2-3 sentences), without secrets."
+                ),
             }
             if mode == "api" and client:
                 system_prompt = (

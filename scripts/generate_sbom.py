@@ -3,6 +3,7 @@
 SBOM (Software Bill of Materials) generation script for NGBSE 20.2.
 Generates CycloneDX and SPDX format SBOMs for supply chain security.
 """
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -252,7 +253,7 @@ def main():
     summary_file = output_dir / "sbom-summary.json"
     generate_sbom_summary(sbom_files, str(summary_file))
 
-    print(f"\n✓ SBOM generation complete!")
+    print("\n✓ SBOM generation complete!")
     print(f"Generated {len(sbom_files)} SBOM files in {output_dir}")
     print(f"Summary: {summary_file}")
 

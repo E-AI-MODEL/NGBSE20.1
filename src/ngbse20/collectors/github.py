@@ -60,7 +60,8 @@ class GitHubCollector(BaseCollector):
                 {
                     "id": f"github-repo-{repo.get('id', 'unknown')}",
                     "hash": content_hash(
-                        f"{repo_name}{repo.get('description', '')}{repo.get('language', '')}"
+                        f"{repo_name}{repo.get('description', '')}"
+                        f"{repo.get('language', '')}"
                     ),
                     "asset": f"github.com/{repo_name}",
                     "raw": {

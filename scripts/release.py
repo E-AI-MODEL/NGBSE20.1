@@ -164,7 +164,7 @@ def create_release_tag(version: str) -> bool:
 
 def push_release(branch: str, version: str) -> bool:
     """Push release to remote."""
-    print(f"🚀 Pushing release to remote...")
+    print("🚀 Pushing release to remote...")
 
     try:
         run_command(["git", "push", "origin", branch])
@@ -231,7 +231,7 @@ def main():
     version = get_version()
     branch = check_branch()
 
-    print(f"🚀 NGBSE Release Process")
+    print("🚀 NGBSE Release Process")
     print(f"Version: {version}")
     print(f"Branch: {branch}")
     print(f"Dry run: {args.dry_run}")

@@ -57,7 +57,10 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "coverage_gap",
-                    "question": f"What are we missing by relying heavily on {max_category} sources?",
+                    "question": (
+                        f"What are we missing by relying heavily on "
+                        f"{max_category} sources?"
+                    ),
                     "curiosity_level": "high",
                     "exploration_value": "High - reveals source bias",
                     "category": "source_diversity",
@@ -70,7 +73,10 @@ class CuriosityGenerationEngine:
                 questions.append(
                     {
                         "type": "coverage_gap",
-                        "question": f"What insights might {cat} sources provide that we're missing?",
+                        "question": (
+                            f"What insights might {cat} sources provide "
+                            f"that we're missing?"
+                        ),
                         "curiosity_level": "medium",
                         "exploration_value": "Medium - diversifies perspective",
                         "category": "source_diversity",
@@ -93,7 +99,10 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "recency_gap",
-                    "question": "What event or development caused this temporal spike in findings?",
+                    "question": (
+                        "What event or development caused this temporal "
+                        "spike in findings?"
+                    ),
                     "curiosity_level": "high",
                     "exploration_value": "High - reveals causal factors",
                     "category": "temporal_analysis",
@@ -107,7 +116,9 @@ class CuriosityGenerationEngine:
                 questions.append(
                     {
                         "type": "recency_gap",
-                        "question": "What happened during the periods with no findings?",
+                        "question": (
+                            "What happened during the periods with no findings?"
+                        ),
                         "curiosity_level": "medium",
                         "exploration_value": "Medium - reveals temporal gaps",
                         "category": "temporal_analysis",
@@ -130,7 +141,9 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "confidence_gap",
-                    "question": f"Why do {n_risky} assets have high scores but low quality?",
+                    "question": (
+                        f"Why do {n_risky} assets have high scores but low quality?"
+                    ),
                     "curiosity_level": "high",
                     "exploration_value": "High - reveals scoring inconsistencies",
                     "category": "quality_assessment",
@@ -141,7 +154,10 @@ class CuriosityGenerationEngine:
                 questions.append(
                     {
                         "type": "confidence_gap",
-                        "question": f"What makes {risky_assets[0]} both high-risk and low-quality?",
+                        "question": (
+                            f"What makes {risky_assets[0]} both high-risk "
+                            f"and low-quality?"
+                        ),
                         "curiosity_level": "medium",
                         "exploration_value": "Medium - investigates specific cases",
                         "category": "quality_assessment",
@@ -176,14 +192,17 @@ class CuriosityGenerationEngine:
         self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> str:
         """Create prompt for LLM curiosity generation."""
+        min_score = min([f.get('score', 0.0) for f in findings], default=0.0)
+        max_score = max([f.get('score', 0.0) for f in findings], default=0.0)
+        asset_types = list(set(f.get('asset', '') for f in findings))
 
         return f"""
         Based on these findings and blindspots, generate 3 curiosity-driven questions:
 
         FINDINGS SUMMARY:
         - Total findings: {len(findings)}
-        - Asset types: {list(set(f.get('asset', '') for f in findings))}
-        - Score range: {min([f.get('score', 0.0) for f in findings], default=0.0):.2f} - {max([f.get('score', 0.0) for f in findings], default=0.0):.2f}
+        - Asset types: {asset_types}
+        - Score range: {min_score:.2f} - {max_score:.2f}
 
         BLINDSPOTS IDENTIFIED:
         - Coverage gaps: {blindspots.get('coverage', {}).get('imbalance', 0.0):.3f}
@@ -197,7 +216,8 @@ class CuriosityGenerationEngine:
         4. Challenge our assumptions
         5. Lead to productive failure and learning
 
-        Format each question to start with "What if..." or "How might..." or "Why does..."
+        Format each question to start with "What if..." or "How might..." or
+        "Why does..."
         Make them specific and actionable for further investigation.
         """
 
@@ -237,7 +257,10 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "productive_failure",
-                    "question": "How can we use this source bias to improve our collection strategy?",
+                    "question": (
+                        "How can we use this source bias to improve our "
+                        "collection strategy?"
+                    ),
                     "curiosity_level": "high",
                     "exploration_value": "High - turns bias into improvement",
                     "category": "learning_opportunity",
@@ -250,7 +273,10 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "productive_failure",
-                    "question": "What can we learn from the mismatch between scores and quality?",
+                    "question": (
+                        "What can we learn from the mismatch between scores "
+                        "and quality?"
+                    ),
                     "curiosity_level": "high",
                     "exploration_value": "High - improves scoring methodology",
                     "category": "learning_opportunity",
@@ -263,7 +289,10 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "productive_failure",
-                    "question": "How can we use temporal patterns to predict future information needs?",
+                    "question": (
+                        "How can we use temporal patterns to predict future "
+                        "information needs?"
+                    ),
                     "curiosity_level": "medium",
                     "exploration_value": "Medium - improves temporal planning",
                     "category": "learning_opportunity",

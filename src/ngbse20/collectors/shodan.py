@@ -24,7 +24,8 @@ class ShodanCollector(BaseCollector):
             LOGGER.warning("Shodan collector requires SHODAN_API_KEY env var.")
         else:
             LOGGER.debug(
-                f"Shodan collector initialized with API key: {mask_api_key(self.api_key)}"
+                f"Shodan collector initialized with API key: "
+                f"{mask_api_key(self.api_key)}"
             )
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
