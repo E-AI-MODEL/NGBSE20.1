@@ -21,13 +21,15 @@ class BALLMMetaLayerGenerator:
         self,
         findings: List[Dict[str, Any]],
         blindspots: Dict[str, Any],
-        asset_scores: Dict[str, Any]
+        asset_scores: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Generate the complete BALLM meta-layer output."""
 
         # 1. Interpret blindspots with LLM
-        blindspot_interpretation = self.blindspot_interpreter.interpret_blindspots_with_llm(
-            blindspots, findings
+        blindspot_interpretation = (
+            self.blindspot_interpreter.interpret_blindspots_with_llm(
+                blindspots, findings
+            )
         )
 
         # 2. Generate curiosity questions
@@ -54,13 +56,11 @@ class BALLMMetaLayerGenerator:
             "productive_failure_insights": productive_failures,
             "epistemic_humility_score": epistemic_humility,
             "meta_layer_version": "1.0",
-            "generation_timestamp": self._get_timestamp()
+            "generation_timestamp": self._get_timestamp(),
         }
 
     def _calculate_epistemic_humility(
-        self,
-        findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any]
+        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> float:
         """Calculate epistemic humility score based on blindspot awareness."""
         # Base score starts at 0.5 (neutral)
@@ -81,9 +81,7 @@ class BALLMMetaLayerGenerator:
         return min(1.0, base_score + coverage_bonus + confidence_bonus + recency_bonus)
 
     def _identify_productive_failures(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Identify areas where 'failures' lead to productive learning."""
         productive_failures = []
@@ -91,36 +89,43 @@ class BALLMMetaLayerGenerator:
         # Coverage gaps as productive failures
         coverage = blindspots.get("coverage", {})
         if coverage.get("imbalance", 0.0) > 0.5:
-            productive_failures.append({
-                "type": "coverage_gap",
-                "description": f"High source imbalance ({coverage.get('max_category', 'Unknown')} dominates)",
-                "learning_opportunity": "Diversify source types to reduce bias",
-                "productive_value": "High - reveals source bias"
-            })
+            productive_failures.append(
+                {
+                    "type": "coverage_gap",
+                    "description": f"High source imbalance ({coverage.get('max_category', 'Unknown')} dominates)",
+                    "learning_opportunity": "Diversify source types to reduce bias",
+                    "productive_value": "High - reveals source bias",
+                }
+            )
 
         # Confidence gaps as productive failures
         confidence = blindspots.get("confidence", {})
         if confidence.get("n", 0) > 0:
-            productive_failures.append({
-                "type": "confidence_gap",
-                "description": f"{confidence.get('n', 0)} risky assets identified",
-                "learning_opportunity": "Investigate why high-score assets have low quality",
-                "productive_value": "High - reveals scoring inconsistencies"
-            })
+            productive_failures.append(
+                {
+                    "type": "confidence_gap",
+                    "description": f"{confidence.get('n', 0)} risky assets identified",
+                    "learning_opportunity": "Investigate why high-score assets have low quality",
+                    "productive_value": "High - reveals scoring inconsistencies",
+                }
+            )
 
         # Recency gaps as productive failures
         recency = blindspots.get("recency", {})
         if recency.get("spike", False):
-            productive_failures.append({
-                "type": "recency_gap",
-                "description": "Temporal spike detected in findings",
-                "learning_opportunity": "Investigate what caused the spike",
-                "productive_value": "Medium - reveals temporal patterns"
-            })
+            productive_failures.append(
+                {
+                    "type": "recency_gap",
+                    "description": "Temporal spike detected in findings",
+                    "learning_opportunity": "Investigate what caused the spike",
+                    "productive_value": "Medium - reveals temporal patterns",
+                }
+            )
 
         return productive_failures
 
     def _get_timestamp(self) -> str:
         """Get current timestamp in ISO format."""
         from datetime import datetime, timezone
+
         return datetime.now(timezone.utc).isoformat()

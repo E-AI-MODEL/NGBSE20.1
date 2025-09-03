@@ -1,6 +1,7 @@
 """
 Unit tests for PipelineStages.
 """
+
 from unittest.mock import Mock, patch
 
 from src.ngbse20.runtime.pipeline_stages import PipelineStages
@@ -17,12 +18,12 @@ class TestPipelineStages:
             {
                 "rule_id": "block1",
                 "action": {"type": "hard_block"},
-                "condition": "always_true"
+                "condition": "always_true",
             }
         ]
         metrics = {}
 
-        with patch('src.ngbse20.runtime.pipeline_stages.evaluate_rules') as mock_eval:
+        with patch("src.ngbse20.runtime.pipeline_stages.evaluate_rules") as mock_eval:
             mock_eval.return_value = [{"rule_id": "block1"}]
 
             result = stages.validate_stage(rules, metrics)
@@ -38,12 +39,12 @@ class TestPipelineStages:
             {
                 "rule_id": "warn1",
                 "action": {"type": "warning"},
-                "condition": "always_true"
+                "condition": "always_true",
             }
         ]
         metrics = {}
 
-        with patch('src.ngbse20.runtime.pipeline_stages.evaluate_rules') as mock_eval:
+        with patch("src.ngbse20.runtime.pipeline_stages.evaluate_rules") as mock_eval:
             mock_eval.return_value = []  # No blocks
 
             result = stages.validate_stage(rules, metrics)
@@ -54,14 +55,12 @@ class TestPipelineStages:
         """Test collection stage."""
         stages = PipelineStages("test_output")
 
-        seeds = [
-            {"id": "seed1", "type": "domain", "value": "example.com"}
-        ]
+        seeds = [{"id": "seed1", "type": "domain", "value": "example.com"}]
 
         mock_collector = Mock()
         mock_collector.collect.return_value = [
             {"id": "finding1", "type": "web"},
-            {"id": "finding2", "type": "web"}
+            {"id": "finding2", "type": "web"},
         ]
         collectors = [mock_collector]
 
@@ -77,10 +76,10 @@ class TestPipelineStages:
 
         findings = [
             {"id": "finding1", "type": "web", "confidence": 0.8},
-            {"id": "finding2", "type": "web", "confidence": 0.6}
+            {"id": "finding2", "type": "web", "confidence": 0.6},
         ]
 
-        with patch('src.ngbse20.runtime.pipeline_stages.score_findings') as mock_score:
+        with patch("src.ngbse20.runtime.pipeline_stages.score_findings") as mock_score:
             mock_score.return_value = findings  # Assume no changes for simplicity
 
             result = stages.scoring_stage(findings)
@@ -98,10 +97,12 @@ class TestPipelineStages:
 
         mock_meta_layer = {
             "epistemic_humility_score": 0.7,
-            "insights": ["test insight"]
+            "insights": ["test insight"],
         }
 
-        with patch('src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator') as mock_generator_class:
+        with patch(
+            "src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator"
+        ) as mock_generator_class:
             mock_generator = Mock()
             mock_generator.generate_meta_layer.return_value = mock_meta_layer
             mock_generator_class.return_value = mock_generator
@@ -119,7 +120,9 @@ class TestPipelineStages:
         blindspots = {"coverage": 0.2, "recency": 0.3, "confidence": 0.1}
         asset_scores = {"asset1": 0.8}
 
-        with patch('src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator') as mock_generator_class:
+        with patch(
+            "src.ngbse20.runtime.pipeline_stages.BALLMMetaLayerGenerator"
+        ) as mock_generator_class:
             mock_generator = Mock()
             mock_generator.generate_meta_layer.side_effect = Exception("BALLM failed")
             mock_generator_class.return_value = mock_generator

@@ -2,6 +2,7 @@
 Configuration loader for NGBSE 20.2.
 Centralizes configuration management and credential handling.
 """
+
 import os
 import json
 import yaml
@@ -21,6 +22,7 @@ LOGGER = get_logger(__name__)
 @dataclass
 class CollectorConfig:
     """Configuration for collectors."""
+
     enabled: List[str]
     rate_limits: Dict[str, int] = None
 
@@ -28,12 +30,14 @@ class CollectorConfig:
 @dataclass
 class ScoringConfig:
     """Configuration for scoring engine."""
+
     default_weights: Dict[str, float]
 
 
 @dataclass
 class BALLMConfig:
     """Configuration for BALLM."""
+
     enabled: bool = True
     model: str = "gpt-4"
 
@@ -41,6 +45,7 @@ class BALLMConfig:
 @dataclass
 class NGBSEConfig:
     """Main NGBSE configuration schema."""
+
     output_dir: str = "out"
     allowlist: List[str] = None
     collectors: CollectorConfig = None
@@ -80,10 +85,10 @@ class ConfigLoader:
 
         try:
             # Load based on file extension
-            with open(config_path, 'r', encoding='utf-8') as f:
-                if config_path.suffix in ['.yml', '.yaml']:
+            with open(config_path, "r", encoding="utf-8") as f:
+                if config_path.suffix in [".yml", ".yaml"]:
                     raw_config = yaml.safe_load(f)
-                elif config_path.suffix == '.json':
+                elif config_path.suffix == ".json":
                     raw_config = json.load(f)
                 else:
                     LOGGER.warning(
@@ -111,7 +116,7 @@ class ConfigLoader:
             LOGGER.warning(f"Rules file {rules_path} not found, using empty rules")
             return []
 
-        with open(rules_path, 'r', encoding='utf-8') as f:
+        with open(rules_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
     def load_seeds(self, seeds_file: str = "seeds.jsonl") -> List[Dict[str, Any]]:
@@ -125,7 +130,7 @@ class ConfigLoader:
         seeds = []
         line_number = 0
 
-        with open(seeds_path, 'r', encoding='utf-8') as f:
+        with open(seeds_path, "r", encoding="utf-8") as f:
             for line in f:
                 line_number += 1
                 line = line.strip()
@@ -146,9 +151,7 @@ class ConfigLoader:
                             f"Invalid JSON in seeds file at line {line_number}"
                         )
                     except (ValidationError, TypeError) as e:
-                        LOGGER.error(
-                            f"Invalid seed data at line {line_number}: {e}"
-                        )
+                        LOGGER.error(f"Invalid seed data at line {line_number}: {e}")
                         raise ValueError(
                             f"Invalid seed data at line {line_number}: {e}"
                         )
@@ -162,14 +165,15 @@ class ConfigLoader:
 
         # Common API key patterns
         api_keys = [
-            'SHODAN_API_KEY',
-            'CENSYS_API_ID', 'CENSYS_API_SECRET',
-            'LEAKIX_API_KEY',
-            'URLSCAN_API_KEY',
-            'GITHUB_TOKEN',
-            'NEWS_API_KEY',
-            'OPENAI_API_KEY',
-            'ANTHROPIC_API_KEY'
+            "SHODAN_API_KEY",
+            "CENSYS_API_ID",
+            "CENSYS_API_SECRET",
+            "LEAKIX_API_KEY",
+            "URLSCAN_API_KEY",
+            "GITHUB_TOKEN",
+            "NEWS_API_KEY",
+            "OPENAI_API_KEY",
+            "ANTHROPIC_API_KEY",
         ]
 
         for key in api_keys:
@@ -197,7 +201,7 @@ class ConfigLoader:
                 allowlist=allowlist,
                 collectors=collectors,
                 scoring=scoring,
-                ballm=ballm
+                ballm=ballm,
             )
 
             LOGGER.info("Configuration loaded and validated successfully")
@@ -220,7 +224,7 @@ class ConfigLoader:
             enabled=collectors_config.get(
                 "enabled", ["http_web", "shodan", "censys", "leakix"]
             ),
-            rate_limits=collectors_config.get("rate_limits")
+            rate_limits=collectors_config.get("rate_limits"),
         )
 
     def _validate_scoring_config(self, raw_config: Dict[str, Any]) -> ScoringConfig:
@@ -245,7 +249,7 @@ class ConfigLoader:
 
         return BALLMConfig(
             enabled=ballm_config.get("enabled", True),
-            model=ballm_config.get("model", "gpt-4")
+            model=ballm_config.get("model", "gpt-4"),
         )
 
     def _validate_allowlist_config(self, raw_config: Dict[str, Any]) -> List[str]:
@@ -339,7 +343,7 @@ def _validate_seeds_file(seeds_file: str) -> int:
     n_seeds = 0
     line_number = 0
 
-    with open(seeds_path, 'r', encoding='utf-8') as f:
+    with open(seeds_path, "r", encoding="utf-8") as f:
         for line in f:
             line_number += 1
             line = line.strip()
@@ -355,7 +359,8 @@ def _validate_seeds_file(seeds_file: str) -> int:
                 except json.JSONDecodeError as e:
                     raise json.JSONDecodeError(
                         f"Invalid JSON in seeds file at line {line_number}: {e}",
-                        e.doc, e.pos
+                        e.doc,
+                        e.pos,
                     )
                 except ValidationError as e:
                     raise ValueError(f"Invalid seed data at line {line_number}: {e}")
@@ -370,13 +375,11 @@ def _validate_rules_file(rules_file: str) -> int:
     if not rules_path.exists():
         raise FileNotFoundError(f"Rules file not found: {rules_file}")
 
-    with open(rules_path, 'r', encoding='utf-8') as f:
+    with open(rules_path, "r", encoding="utf-8") as f:
         try:
             rules_data = json.load(f)
         except json.JSONDecodeError as e:
-            raise json.JSONDecodeError(
-                f"Invalid JSON in rules file: {e}", e.doc, e.pos
-            )
+            raise json.JSONDecodeError(f"Invalid JSON in rules file: {e}", e.doc, e.pos)
 
     if not isinstance(rules_data, list):
         raise ValueError("Rules file must contain a JSON array")
@@ -388,7 +391,7 @@ def _validate_rules_file(rules_file: str) -> int:
             if not isinstance(rule_data, dict):
                 raise ValueError(f"Rule at index {i} must be a dictionary")
 
-            required_fields = ['id', 'name', 'pattern']
+            required_fields = ["id", "name", "pattern"]
             for field in required_fields:
                 if field not in rule_data:
                     raise ValueError(

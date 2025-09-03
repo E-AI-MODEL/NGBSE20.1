@@ -14,9 +14,7 @@ class BlindspotInterpretationEngine:
         self.llm_client = llm_client
 
     def interpret_blindspots_with_llm(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Use LLM to interpret what blindspots mean epistemically."""
 
@@ -24,24 +22,27 @@ class BlindspotInterpretationEngine:
         prompt = self._create_interpretation_prompt(blindspots, findings)
 
         # Get LLM interpretation
-        interpretation = self.llm_client.call(
-            "You are an epistemic analyst. Analyze blindspots for deeper insights.",
-            prompt,
-            max_tokens=400,
-            temperature=0.3
-        ) or "Unable to interpret blindspots with LLM."
+        interpretation = (
+            self.llm_client.call(
+                "You are an epistemic analyst. Analyze blindspots for deeper insights.",
+                prompt,
+                max_tokens=400,
+                temperature=0.3,
+            )
+            or "Unable to interpret blindspots with LLM."
+        )
 
         return {
             "interpretation": interpretation,
-            "epistemic_insights": self._extract_epistemic_insights_from_text(interpretation),
+            "epistemic_insights": self._extract_epistemic_insights_from_text(
+                interpretation
+            ),
             "confidence_level": self._assess_interpretation_confidence(blindspots),
-            "interpretation_method": "llm_analysis"
+            "interpretation_method": "llm_analysis",
         }
 
     def extract_epistemic_insights(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Extract epistemic insights from blindspots and findings."""
 
@@ -49,15 +50,13 @@ class BlindspotInterpretationEngine:
             "assumptions": self._identify_hidden_assumptions(blindspots, findings),
             "confidence": self._calculate_overall_confidence(findings, blindspots),
             "knowledge_gaps": self._identify_knowledge_gaps(blindspots, findings),
-            "epistemic_biases": self._identify_epistemic_biases(blindspots, findings)
+            "epistemic_biases": self._identify_epistemic_biases(blindspots, findings),
         }
 
         return insights
 
     def _create_interpretation_prompt(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> str:
         """Create comprehensive prompt for LLM interpretation."""
 
@@ -103,8 +102,15 @@ class BlindspotInterpretationEngine:
 
         # Look for key phrases that indicate epistemic insights
         key_phrases = [
-            "bias", "blind spot", "missing", "uncertain", "humble",
-            "assumption", "gap", "incomplete", "partial"
+            "bias",
+            "blind spot",
+            "missing",
+            "uncertain",
+            "humble",
+            "assumption",
+            "gap",
+            "incomplete",
+            "partial",
         ]
 
         for phrase in key_phrases:
@@ -121,11 +127,13 @@ class BlindspotInterpretationEngine:
         confidence = 0.5  # Base confidence
 
         # More blindspots = higher confidence in interpretation
-        total_gaps = sum([
-            len(blindspots.get("coverage", {}).get("ratios", {})),
-            len(blindspots.get("recency", {}).get("detail", {})),
-            blindspots.get("confidence", {}).get("n", 0)
-        ])
+        total_gaps = sum(
+            [
+                len(blindspots.get("coverage", {}).get("ratios", {})),
+                len(blindspots.get("recency", {}).get("detail", {})),
+                blindspots.get("confidence", {}).get("n", 0),
+            ]
+        )
 
         if total_gaps > 0:
             confidence += min(0.3, total_gaps * 0.1)
@@ -138,9 +146,7 @@ class BlindspotInterpretationEngine:
         return min(1.0, confidence)
 
     def _identify_hidden_assumptions(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> List[str]:
         """Identify hidden assumptions in our analysis."""
         assumptions = []
@@ -166,9 +172,7 @@ class BlindspotInterpretationEngine:
         return assumptions
 
     def _calculate_overall_confidence(
-        self,
-        findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any]
+        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> float:
         """Calculate overall epistemic confidence."""
         if not findings:
@@ -192,9 +196,7 @@ class BlindspotInterpretationEngine:
         return max(0.0, base_confidence - blindspot_penalty)
 
     def _identify_knowledge_gaps(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> List[str]:
         """Identify specific knowledge gaps."""
         gaps = []
@@ -220,9 +222,7 @@ class BlindspotInterpretationEngine:
         return gaps
 
     def _identify_epistemic_biases(
-        self,
-        blindspots: Dict[str, Any],
-        findings: List[Dict[str, Any]]
+        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
     ) -> List[str]:
         """Identify potential epistemic biases."""
         biases = []

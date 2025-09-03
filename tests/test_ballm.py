@@ -38,7 +38,7 @@ class TestBALLMMetaLayerGenerator:
         blindspots = {
             "coverage": {"imbalance": 0.3, "ratios": {"Web": 0.7, "News": 0.3}},
             "recency": {"spike": False, "detail": {}},
-            "confidence": {"n": 0, "risky_assets": []}
+            "confidence": {"n": 0, "risky_assets": []},
         }
         asset_scores = {"test.com": {"avg_e_ai_star": 0.8}}
 
@@ -59,7 +59,7 @@ class TestBALLMMetaLayerGenerator:
         blindspots = {
             "coverage": {"imbalance": 0.8},
             "recency": {"spike": True},
-            "confidence": {"n": 5}
+            "confidence": {"n": 5},
         }
 
         humility = generator._calculate_epistemic_humility([], blindspots)
@@ -73,7 +73,7 @@ class TestBALLMMetaLayerGenerator:
         blindspots = {
             "coverage": {"imbalance": 0.7, "max_category": "Web"},
             "recency": {"spike": True},
-            "confidence": {"n": 3}
+            "confidence": {"n": 3},
         }
 
         failures = generator._identify_productive_failures(blindspots, [])
@@ -98,7 +98,7 @@ class TestBlindspotInterpretationEngine:
         blindspots = {
             "coverage": {"imbalance": 0.6, "max_category": "Web"},
             "recency": {"spike": False},
-            "confidence": {"n": 0}
+            "confidence": {"n": 0},
         }
         findings = [{"score": 0.8}]
 
@@ -128,7 +128,7 @@ class TestCuriosityGenerationEngine:
             "coverage": {
                 "imbalance": 0.7,
                 "max_category": "Web",
-                "ratios": {"Web": 0.8, "News": 0.2}
+                "ratios": {"Web": 0.8, "News": 0.2},
             }
         }
 
@@ -144,7 +144,7 @@ class TestCuriosityGenerationEngine:
         blindspots = {
             "coverage": {"imbalance": 0.7},
             "confidence": {"n": 3},
-            "recency": {"spike": True}
+            "recency": {"spike": True},
         }
 
         questions = engine._generate_productive_failure_questions(blindspots)

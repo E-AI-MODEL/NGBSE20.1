@@ -3,6 +3,7 @@ Pipeline orchestrator for NGBSE 20.2 (GA Version).
 Modularized orchestrator with separated concerns and improved testability.
 Order: validate -> collect -> score -> history -> forecast -> propose -> blindspots -> BALLM -> scenarios -> export.
 """
+
 from typing import Any, Dict, List
 
 from ..config.loader import ConfigLoader
@@ -20,9 +21,10 @@ class PipelineOrchestrator:
         self.config_loader = ConfigLoader(config_dir)
         self.config = self.config_loader.load_config()
         self.credentials = self.config_loader.get_credentials()
-        self.collector_manager = CollectorManager(self.config.__dict__, self.credentials)
+        self.collector_manager = CollectorManager(
+            self.config.__dict__, self.credentials
+        )
         self.pipeline_stages = PipelineStages(self.config.output_dir)
-
 
     def run_pipeline(
         self,
@@ -71,17 +73,23 @@ class PipelineOrchestrator:
         traces.append(forecast_result["trace"])
 
         # 6. Seed Proposal Stage
-        seed_proposal_result = self.pipeline_stages.seed_proposal_stage(scored_findings, asset_scores)
+        seed_proposal_result = self.pipeline_stages.seed_proposal_stage(
+            scored_findings, asset_scores
+        )
         next_seeds = seed_proposal_result["next_seeds"]
         traces.append(seed_proposal_result["trace"])
 
         # 7. Blindspot Analysis Stage
-        blindspot_result = self.pipeline_stages.blindspot_analysis_stage(scored_findings)
+        blindspot_result = self.pipeline_stages.blindspot_analysis_stage(
+            scored_findings
+        )
         blindspots = blindspot_result["blindspots"]
         traces.append(blindspot_result["trace"])
 
         # 8. BALLM Stage
-        ballm_result = self.pipeline_stages.ballm_stage(scored_findings, blindspots, asset_scores)
+        ballm_result = self.pipeline_stages.ballm_stage(
+            scored_findings, blindspots, asset_scores
+        )
         meta_layer = ballm_result["meta_layer"]
         traces.append(ballm_result["trace"])
 
@@ -113,7 +121,9 @@ class PipelineOrchestrator:
         )
         traces.append(report_result["trace"])
 
-        LOGGER.info(f"Pipeline completed successfully with {len(scored_findings)} findings")
+        LOGGER.info(
+            f"Pipeline completed successfully with {len(scored_findings)} findings"
+        )
 
         return {
             "status": "ok",
@@ -122,7 +132,7 @@ class PipelineOrchestrator:
                 "findings": len(scored_findings),
                 "forecasts": len(forecast),
                 "next_seeds": len(next_seeds),
-                "scenarios": len(scenarios)
+                "scenarios": len(scenarios),
             },
             "output_files": {
                 "findings": output_files["findings"],
@@ -131,14 +141,14 @@ class PipelineOrchestrator:
             },
             "report_path": report_result.get("report_path"),
             "findings": scored_findings,
-            "stix": bundle.serialize() if hasattr(bundle, 'serialize') else bundle,
+            "stix": bundle.serialize() if hasattr(bundle, "serialize") else bundle,
             "traces": traces,
             "forecast": forecast,
             "next_seeds": next_seeds,
             "blindspots": blindspots,
             "ballm_meta_layer": meta_layer,
             "scenarios": scenarios,
-            "brief": brief
+            "brief": brief,
         }
 
 

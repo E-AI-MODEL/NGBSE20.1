@@ -1,6 +1,7 @@
 """
 Integration tests for the complete NGBSE pipeline.
 """
+
 import json
 import tempfile
 from pathlib import Path
@@ -21,25 +22,35 @@ class TestPipelineIntegration:
 
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
-            with open(seeds_file, 'w') as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + '\n')
+            with open(seeds_file, "w") as f:
+                f.write(
+                    json.dumps(
+                        {"id": "test_seed", "type": "domain", "value": "example.com"}
+                    )
+                    + "\n"
+                )
 
             # Test rules
             rules_file = config_dir / "rules.json"
-            with open(rules_file, 'w') as f:
+            with open(rules_file, "w") as f:
                 json.dump([], f)
 
             # Test config
             config_file = config_dir / "ngbse.config.yml"
-            with open(config_file, 'w') as f:
-                json.dump({
-                    "output_dir": str(Path(temp_dir) / "output"),
-                    "allowlist": ["*"],
-                    "collectors": {"enabled": ["http_web"]}
-                }, f)
+            with open(config_file, "w") as f:
+                json.dump(
+                    {
+                        "output_dir": str(Path(temp_dir) / "output"),
+                        "allowlist": ["*"],
+                        "collectors": {"enabled": ["http_web"]},
+                    },
+                    f,
+                )
 
             # Mock collectors to avoid external API calls
-            with patch('src.ngbse20.runtime.collector_manager.HttpWebCollector') as mock_http:
+            with patch(
+                "src.ngbse20.runtime.collector_manager.HttpWebCollector"
+            ) as mock_http:
                 mock_instance = Mock()
                 mock_instance.collect.return_value = [
                     {"id": "finding1", "type": "web", "confidence": 0.8}
@@ -63,28 +74,39 @@ class TestPipelineIntegration:
 
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
-            with open(seeds_file, 'w') as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + '\n')
+            with open(seeds_file, "w") as f:
+                f.write(
+                    json.dumps(
+                        {"id": "test_seed", "type": "domain", "value": "example.com"}
+                    )
+                    + "\n"
+                )
 
             # Test rules with hard block
             rules_file = config_dir / "rules.json"
-            with open(rules_file, 'w') as f:
-                json.dump([
-                    {
-                        "rule_id": "block1",
-                        "action": {"type": "hard_block"},
-                        "condition": "always_true"
-                    }
-                ], f)
+            with open(rules_file, "w") as f:
+                json.dump(
+                    [
+                        {
+                            "rule_id": "block1",
+                            "action": {"type": "hard_block"},
+                            "condition": "always_true",
+                        }
+                    ],
+                    f,
+                )
 
             # Test config
             config_file = config_dir / "ngbse.config.yml"
-            with open(config_file, 'w') as f:
-                json.dump({
-                    "output_dir": str(Path(temp_dir) / "output"),
-                    "allowlist": ["*"],
-                    "collectors": {"enabled": ["http_web"]}
-                }, f)
+            with open(config_file, "w") as f:
+                json.dump(
+                    {
+                        "output_dir": str(Path(temp_dir) / "output"),
+                        "allowlist": ["*"],
+                        "collectors": {"enabled": ["http_web"]},
+                    },
+                    f,
+                )
 
             orchestrator = PipelineOrchestrator(str(config_dir))
             result = orchestrator.run_pipeline()
@@ -102,25 +124,35 @@ class TestPipelineIntegration:
 
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
-            with open(seeds_file, 'w') as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + '\n')
+            with open(seeds_file, "w") as f:
+                f.write(
+                    json.dumps(
+                        {"id": "test_seed", "type": "domain", "value": "example.com"}
+                    )
+                    + "\n"
+                )
 
             # Test rules
             rules_file = config_dir / "rules.json"
-            with open(rules_file, 'w') as f:
+            with open(rules_file, "w") as f:
                 json.dump([], f)
 
             # Test config
             config_file = config_dir / "ngbse.config.yml"
-            with open(config_file, 'w') as f:
-                json.dump({
-                    "output_dir": str(output_dir),
-                    "allowlist": ["*"],
-                    "collectors": {"enabled": ["http_web"]}
-                }, f)
+            with open(config_file, "w") as f:
+                json.dump(
+                    {
+                        "output_dir": str(output_dir),
+                        "allowlist": ["*"],
+                        "collectors": {"enabled": ["http_web"]},
+                    },
+                    f,
+                )
 
             # Mock collectors
-            with patch('src.ngbse20.runtime.collector_manager.HttpWebCollector') as mock_http:
+            with patch(
+                "src.ngbse20.runtime.collector_manager.HttpWebCollector"
+            ) as mock_http:
                 mock_instance = Mock()
                 mock_instance.collect.return_value = [
                     {"id": "finding1", "type": "web", "confidence": 0.8}
@@ -136,7 +168,7 @@ class TestPipelineIntegration:
                 assert Path(result["output_files"]["history"]).exists()
 
                 # Verify file contents
-                with open(result["output_files"]["findings"], 'r') as f:
+                with open(result["output_files"]["findings"], "r") as f:
                     findings_data = json.load(f)
                     assert len(findings_data) == 1
                     assert findings_data[0]["id"] == "finding1"
@@ -149,47 +181,72 @@ class TestPipelineIntegration:
 
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
-            with open(seeds_file, 'w') as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + '\n')
+            with open(seeds_file, "w") as f:
+                f.write(
+                    json.dumps(
+                        {"id": "test_seed", "type": "domain", "value": "example.com"}
+                    )
+                    + "\n"
+                )
 
             # Test rules
             rules_file = config_dir / "rules.json"
-            with open(rules_file, 'w') as f:
+            with open(rules_file, "w") as f:
                 json.dump([], f)
 
             # Test config with multiple collectors
             config_file = config_dir / "ngbse.config.yml"
-            with open(config_file, 'w') as f:
-                json.dump({
-                    "output_dir": str(Path(temp_dir) / "output"),
-                    "allowlist": ["*"],
-                    "collectors": {"enabled": ["http_web", "shodan", "censys"]}
-                }, f)
+            with open(config_file, "w") as f:
+                json.dump(
+                    {
+                        "output_dir": str(Path(temp_dir) / "output"),
+                        "allowlist": ["*"],
+                        "collectors": {"enabled": ["http_web", "shodan", "censys"]},
+                    },
+                    f,
+                )
 
             # Mock environment variables for credentials
-            with patch.dict('os.environ', {
-                'SHODAN_API_KEY': 'test_shodan_key',
-                'CENSYS_API_ID': 'test_censys_id',
-                'CENSYS_API_SECRET': 'test_censys_secret'
-            }):
+            with patch.dict(
+                "os.environ",
+                {
+                    "SHODAN_API_KEY": "test_shodan_key",
+                    "CENSYS_API_ID": "test_censys_id",
+                    "CENSYS_API_SECRET": "test_censys_secret",
+                },
+            ):
                 # Mock collectors
-                with patch('src.ngbse20.runtime.collector_manager.HttpWebCollector') as mock_http, \
-                     patch('src.ngbse20.runtime.collector_manager.ShodanCollector') as mock_shodan, \
-                     patch('src.ngbse20.runtime.collector_manager.CensysCollector') as mock_censys:
+                with (
+                    patch(
+                        "src.ngbse20.runtime.collector_manager.HttpWebCollector"
+                    ) as mock_http,
+                    patch(
+                        "src.ngbse20.runtime.collector_manager.ShodanCollector"
+                    ) as mock_shodan,
+                    patch(
+                        "src.ngbse20.runtime.collector_manager.CensysCollector"
+                    ) as mock_censys,
+                ):
 
                     # Setup mock instances
                     mock_http_instance = Mock()
-                    mock_http_instance.collect.return_value = [{"id": "http_finding", "type": "web"}]
+                    mock_http_instance.collect.return_value = [
+                        {"id": "http_finding", "type": "web"}
+                    ]
                     mock_http.return_value = mock_http_instance
 
                     mock_shodan_instance = Mock()
                     mock_shodan_instance.api_key = "test_shodan_key"
-                    mock_shodan_instance.collect.return_value = [{"id": "shodan_finding", "type": "shodan"}]
+                    mock_shodan_instance.collect.return_value = [
+                        {"id": "shodan_finding", "type": "shodan"}
+                    ]
                     mock_shodan.return_value = mock_shodan_instance
 
                     mock_censys_instance = Mock()
                     mock_censys_instance.api_id = "test_censys_id"
-                    mock_censys_instance.collect.return_value = [{"id": "censys_finding", "type": "censys"}]
+                    mock_censys_instance.collect.return_value = [
+                        {"id": "censys_finding", "type": "censys"}
+                    ]
                     mock_censys.return_value = mock_censys_instance
 
                     orchestrator = PipelineOrchestrator(str(config_dir))

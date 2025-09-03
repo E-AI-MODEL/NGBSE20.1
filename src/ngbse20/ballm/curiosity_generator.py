@@ -14,9 +14,7 @@ class CuriosityGenerationEngine:
         self.llm_client = llm_client
 
     def generate_curiosity_questions(
-        self,
-        findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any]
+        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Generate curiosity-driven questions based on blindspots and findings."""
 
@@ -44,7 +42,9 @@ class CuriosityGenerationEngine:
 
         return questions[:10]  # Limit to top 10 questions
 
-    def _generate_coverage_curiosity_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_coverage_curiosity_questions(
+        self, blindspots: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Generate questions based on coverage gaps."""
         questions = []
         coverage = blindspots.get("coverage", {})
@@ -54,28 +54,34 @@ class CuriosityGenerationEngine:
         imbalance = coverage.get("imbalance", 0.0)
 
         if imbalance > 0.5:
-            questions.append({
-                "type": "coverage_gap",
-                "question": f"What are we missing by relying heavily on {max_category} sources?",
-                "curiosity_level": "high",
-                "exploration_value": "High - reveals source bias",
-                "category": "source_diversity"
-            })
+            questions.append(
+                {
+                    "type": "coverage_gap",
+                    "question": f"What are we missing by relying heavily on {max_category} sources?",
+                    "curiosity_level": "high",
+                    "exploration_value": "High - reveals source bias",
+                    "category": "source_diversity",
+                }
+            )
 
         if ratios:
             underrepresented = [cat for cat, ratio in ratios.items() if ratio < 0.1]
             for cat in underrepresented:
-                questions.append({
-                    "type": "coverage_gap",
-                    "question": f"What insights might {cat} sources provide that we're missing?",
-                    "curiosity_level": "medium",
-                    "exploration_value": "Medium - diversifies perspective",
-                    "category": "source_diversity"
-                })
+                questions.append(
+                    {
+                        "type": "coverage_gap",
+                        "question": f"What insights might {cat} sources provide that we're missing?",
+                        "curiosity_level": "medium",
+                        "exploration_value": "Medium - diversifies perspective",
+                        "category": "source_diversity",
+                    }
+                )
 
         return questions
 
-    def _generate_recency_curiosity_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_recency_curiosity_questions(
+        self, blindspots: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Generate questions based on recency gaps."""
         questions = []
         recency = blindspots.get("recency", {})
@@ -84,29 +90,35 @@ class CuriosityGenerationEngine:
         detail = recency.get("detail", {})
 
         if spike:
-            questions.append({
-                "type": "recency_gap",
-                "question": "What event or development caused this temporal spike in findings?",
-                "curiosity_level": "high",
-                "exploration_value": "High - reveals causal factors",
-                "category": "temporal_analysis"
-            })
+            questions.append(
+                {
+                    "type": "recency_gap",
+                    "question": "What event or development caused this temporal spike in findings?",
+                    "curiosity_level": "high",
+                    "exploration_value": "High - reveals causal factors",
+                    "category": "temporal_analysis",
+                }
+            )
 
         if detail:
             # Find gaps in temporal coverage
             days = sorted(detail.keys())
             if len(days) > 1:
-                questions.append({
-                    "type": "recency_gap",
-                    "question": "What happened during the periods with no findings?",
-                    "curiosity_level": "medium",
-                    "exploration_value": "Medium - reveals temporal gaps",
-                    "category": "temporal_analysis"
-                })
+                questions.append(
+                    {
+                        "type": "recency_gap",
+                        "question": "What happened during the periods with no findings?",
+                        "curiosity_level": "medium",
+                        "exploration_value": "Medium - reveals temporal gaps",
+                        "category": "temporal_analysis",
+                    }
+                )
 
         return questions
 
-    def _generate_confidence_curiosity_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_confidence_curiosity_questions(
+        self, blindspots: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Generate questions based on confidence gaps."""
         questions = []
         confidence = blindspots.get("confidence", {})
@@ -115,29 +127,31 @@ class CuriosityGenerationEngine:
         n_risky = confidence.get("n", 0)
 
         if n_risky > 0:
-            questions.append({
-                "type": "confidence_gap",
-                "question": f"Why do {n_risky} assets have high scores but low quality?",
-                "curiosity_level": "high",
-                "exploration_value": "High - reveals scoring inconsistencies",
-                "category": "quality_assessment"
-            })
+            questions.append(
+                {
+                    "type": "confidence_gap",
+                    "question": f"Why do {n_risky} assets have high scores but low quality?",
+                    "curiosity_level": "high",
+                    "exploration_value": "High - reveals scoring inconsistencies",
+                    "category": "quality_assessment",
+                }
+            )
 
             if risky_assets:
-                questions.append({
-                    "type": "confidence_gap",
-                    "question": f"What makes {risky_assets[0]} both high-risk and low-quality?",
-                    "curiosity_level": "medium",
-                    "exploration_value": "Medium - investigates specific cases",
-                    "category": "quality_assessment"
-                })
+                questions.append(
+                    {
+                        "type": "confidence_gap",
+                        "question": f"What makes {risky_assets[0]} both high-risk and low-quality?",
+                        "curiosity_level": "medium",
+                        "exploration_value": "Medium - investigates specific cases",
+                        "category": "quality_assessment",
+                    }
+                )
 
         return questions
 
     def _generate_llm_curiosity_questions(
-        self,
-        findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any]
+        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Generate curiosity questions using LLM."""
 
@@ -148,7 +162,7 @@ class CuriosityGenerationEngine:
                 "You are a curiosity-driven researcher. Generate probing questions.",
                 prompt,
                 max_tokens=300,
-                temperature=0.4
+                temperature=0.4,
             )
 
             if response:
@@ -159,9 +173,7 @@ class CuriosityGenerationEngine:
         return []
 
     def _create_curiosity_prompt(
-        self,
-        findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any]
+        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> str:
         """Create prompt for LLM curiosity generation."""
 
@@ -194,55 +206,68 @@ class CuriosityGenerationEngine:
         questions = []
 
         # Simple parsing - look for question patterns
-        lines = response.split('\n')
+        lines = response.split("\n")
         for line in lines:
             line = line.strip()
-            if line and any(line.startswith(prefix) for prefix in ['What if', 'How might', 'Why does', 'What are', 'How do']):
-                questions.append({
-                    "type": "llm_generated",
-                    "question": line,
-                    "curiosity_level": "high",
-                    "exploration_value": "High - LLM-generated insight",
-                    "category": "llm_insight"
-                })
+            if line and any(
+                line.startswith(prefix)
+                for prefix in ["What if", "How might", "Why does", "What are", "How do"]
+            ):
+                questions.append(
+                    {
+                        "type": "llm_generated",
+                        "question": line,
+                        "curiosity_level": "high",
+                        "exploration_value": "High - LLM-generated insight",
+                        "category": "llm_insight",
+                    }
+                )
 
         return questions[:3]  # Limit to 3 LLM questions
 
-    def _generate_productive_failure_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_productive_failure_questions(
+        self, blindspots: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Generate questions that turn failures into learning opportunities."""
         questions = []
 
         # Coverage failures as learning opportunities
         coverage = blindspots.get("coverage", {})
         if coverage.get("imbalance", 0.0) > 0.6:
-            questions.append({
-                "type": "productive_failure",
-                "question": "How can we use this source bias to improve our collection strategy?",
-                "curiosity_level": "high",
-                "exploration_value": "High - turns bias into improvement",
-                "category": "learning_opportunity"
-            })
+            questions.append(
+                {
+                    "type": "productive_failure",
+                    "question": "How can we use this source bias to improve our collection strategy?",
+                    "curiosity_level": "high",
+                    "exploration_value": "High - turns bias into improvement",
+                    "category": "learning_opportunity",
+                }
+            )
 
         # Confidence failures as learning opportunities
         confidence = blindspots.get("confidence", {})
         if confidence.get("n", 0) > 0:
-            questions.append({
-                "type": "productive_failure",
-                "question": "What can we learn from the mismatch between scores and quality?",
-                "curiosity_level": "high",
-                "exploration_value": "High - improves scoring methodology",
-                "category": "learning_opportunity"
-            })
+            questions.append(
+                {
+                    "type": "productive_failure",
+                    "question": "What can we learn from the mismatch between scores and quality?",
+                    "curiosity_level": "high",
+                    "exploration_value": "High - improves scoring methodology",
+                    "category": "learning_opportunity",
+                }
+            )
 
         # Recency failures as learning opportunities
         recency = blindspots.get("recency", {})
         if recency.get("spike", False):
-            questions.append({
-                "type": "productive_failure",
-                "question": "How can we use temporal patterns to predict future information needs?",
-                "curiosity_level": "medium",
-                "exploration_value": "Medium - improves temporal planning",
-                "category": "learning_opportunity"
-            })
+            questions.append(
+                {
+                    "type": "productive_failure",
+                    "question": "How can we use temporal patterns to predict future information needs?",
+                    "curiosity_level": "medium",
+                    "exploration_value": "Medium - improves temporal planning",
+                    "category": "learning_opportunity",
+                }
+            )
 
         return questions

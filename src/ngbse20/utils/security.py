@@ -2,6 +2,7 @@
 Security utilities for NGBSE 20.2.
 Provides API key masking and security-related helper functions.
 """
+
 import re
 from typing import Any, Dict
 
@@ -37,17 +38,29 @@ def mask_credentials_in_dict(data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Common credential field names
     credential_fields = [
-        'api_key', 'api_secret', 'token', 'password', 'secret',
-        'access_token', 'refresh_token', 'private_key', 'auth_token'
+        "api_key",
+        "api_secret",
+        "token",
+        "password",
+        "secret",
+        "access_token",
+        "refresh_token",
+        "private_key",
+        "auth_token",
     ]
 
     for key, value in masked_data.items():
-        if isinstance(value, str) and any(cred_field in key.lower() for cred_field in credential_fields):
+        if isinstance(value, str) and any(
+            cred_field in key.lower() for cred_field in credential_fields
+        ):
             masked_data[key] = mask_api_key(value)
         elif isinstance(value, dict):
             masked_data[key] = mask_credentials_in_dict(value)
         elif isinstance(value, list):
-            masked_data[key] = [mask_credentials_in_dict(item) if isinstance(item, dict) else item for item in value]
+            masked_data[key] = [
+                mask_credentials_in_dict(item) if isinstance(item, dict) else item
+                for item in value
+            ]
 
     return masked_data
 
@@ -72,6 +85,7 @@ def mask_credentials_in_string(text: str) -> str:
 
     masked_text = text
     for pattern in patterns:
+
         def replace_match(match):
             full_match = match.group(0)
             credential = match.group(1)
@@ -121,7 +135,7 @@ def validate_api_key_format(api_key: str, expected_length: int = None) -> bool:
         return False
 
     # Basic validation - should be alphanumeric with some special chars
-    if not re.match(r'^[a-zA-Z0-9_-]+$', api_key):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", api_key):
         return False
 
     # Length validation if specified

@@ -14,6 +14,7 @@ HTML = """
 </html>
 """
 
+
 def test_parse_html_to_finding():
     f = _parse_html("https://example.org/a", HTML, "2025-01-01T00:00:00Z")
     assert f.title == "Test Title"

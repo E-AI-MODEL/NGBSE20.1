@@ -10,14 +10,13 @@ from typing import List
 import argparse
 
 
-def run_command(cmd: List[str], capture_output: bool = True) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: List[str], capture_output: bool = True
+) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     try:
         result = subprocess.run(
-            cmd,
-            capture_output=capture_output,
-            text=True,
-            check=True
+            cmd, capture_output=capture_output, text=True, check=True
         )
         return result
     except subprocess.CalledProcessError as e:
@@ -38,8 +37,9 @@ def install_syft() -> None:
     """Install Syft if not available."""
     print("Installing Syft...")
     install_cmd = [
-        "curl", "-sSfL",
-        "https://raw.githubusercontent.com/anchore/syft/main/install.sh"
+        "curl",
+        "-sSfL",
+        "https://raw.githubusercontent.com/anchore/syft/main/install.sh",
     ]
 
     try:
@@ -47,7 +47,7 @@ def install_syft() -> None:
         subprocess.run(
             install_cmd + ["|", "sh", "-s", "--", "-b", "/usr/local/bin"],
             shell=True,
-            check=True
+            check=True,
         )
         print("Syft installed successfully")
     except subprocess.CalledProcessError as e:
@@ -60,11 +60,7 @@ def generate_cyclonedx_sbom(output_file: str) -> None:
     """Generate CycloneDX format SBOM."""
     print(f"Generating CycloneDX SBOM: {output_file}")
 
-    cmd = [
-        "syft", "packages", ".",
-        "-o", "cyclonedx-json",
-        "--file", output_file
-    ]
+    cmd = ["syft", "packages", ".", "-o", "cyclonedx-json", "--file", output_file]
 
     run_command(cmd)
     print(f"CycloneDX SBOM saved to {output_file}")
@@ -74,11 +70,7 @@ def generate_spdx_sbom(output_file: str) -> None:
     """Generate SPDX format SBOM."""
     print(f"Generating SPDX SBOM: {output_file}")
 
-    cmd = [
-        "syft", "packages", ".",
-        "-o", "spdx-json",
-        "--file", output_file
-    ]
+    cmd = ["syft", "packages", ".", "-o", "spdx-json", "--file", output_file]
 
     run_command(cmd)
     print(f"SPDX SBOM saved to {output_file}")
@@ -101,20 +93,16 @@ def generate_python_sbom(output_file: str) -> None:
             "metadata": {
                 "timestamp": "2024-01-01T00:00:00Z",
                 "tools": [
-                    {
-                        "vendor": "NGBSE",
-                        "name": "SBOM Generator",
-                        "version": "20.2.0"
-                    }
+                    {"vendor": "NGBSE", "name": "SBOM Generator", "version": "20.2.0"}
                 ],
                 "component": {
                     "type": "application",
                     "name": "NGBSE",
                     "version": "20.2.0-GA",
-                    "description": "Next-Generation Business Security Engine"
-                }
+                    "description": "Next-Generation Business Security Engine",
+                },
             },
-            "components": []
+            "components": [],
         }
 
         for package in packages:
@@ -122,11 +110,11 @@ def generate_python_sbom(output_file: str) -> None:
                 "type": "library",
                 "name": package["name"],
                 "version": package["version"],
-                "purl": f"pkg:pypi/{package['name']}@{package['version']}"
+                "purl": f"pkg:pypi/{package['name']}@{package['version']}",
             }
             sbom["components"].append(component)
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(sbom, f, indent=2)
 
         print(f"Python SBOM saved to {output_file}")
@@ -138,7 +126,7 @@ def generate_python_sbom(output_file: str) -> None:
 def validate_sbom(sbom_file: str) -> bool:
     """Validate SBOM file format."""
     try:
-        with open(sbom_file, 'r') as f:
+        with open(sbom_file, "r") as f:
             data = json.load(f)
 
         # Basic validation
@@ -164,20 +152,20 @@ def generate_sbom_summary(sbom_files: List[str], output_file: str) -> None:
         "ngbse_version": "20.2.0-GA",
         "sbom_files": [],
         "total_components": 0,
-        "formats": []
+        "formats": [],
     }
 
     for sbom_file in sbom_files:
         if Path(sbom_file).exists():
             try:
-                with open(sbom_file, 'r') as f:
+                with open(sbom_file, "r") as f:
                     data = json.load(f)
 
                 file_info = {
                     "file": sbom_file,
                     "format": data.get("bomFormat", "SPDX"),
                     "components": len(data.get("components", [])),
-                    "valid": True
+                    "valid": True,
                 }
 
                 summary["sbom_files"].append(file_info)
@@ -192,11 +180,11 @@ def generate_sbom_summary(sbom_files: List[str], output_file: str) -> None:
                     "format": "unknown",
                     "components": 0,
                     "valid": False,
-                    "error": str(e)
+                    "error": str(e),
                 }
                 summary["sbom_files"].append(file_info)
 
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(summary, f, indent=2)
 
     print(f"SBOM summary saved to {output_file}")
@@ -205,15 +193,22 @@ def generate_sbom_summary(sbom_files: List[str], output_file: str) -> None:
 def main():
     """Main SBOM generation function."""
     parser = argparse.ArgumentParser(description="Generate SBOM for NGBSE 20.2")
-    parser.add_argument("--output-dir", default=".", help="Output directory for SBOM files")
-    parser.add_argument("--formats", nargs="+",
-                       choices=["cyclonedx", "spdx", "python", "all"],
-                       default=["all"],
-                       help="SBOM formats to generate")
-    parser.add_argument("--install-syft", action="store_true",
-                       help="Install Syft if not available")
-    parser.add_argument("--validate", action="store_true",
-                       help="Validate generated SBOMs")
+    parser.add_argument(
+        "--output-dir", default=".", help="Output directory for SBOM files"
+    )
+    parser.add_argument(
+        "--formats",
+        nargs="+",
+        choices=["cyclonedx", "spdx", "python", "all"],
+        default=["all"],
+        help="SBOM formats to generate",
+    )
+    parser.add_argument(
+        "--install-syft", action="store_true", help="Install Syft if not available"
+    )
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate generated SBOMs"
+    )
 
     args = parser.parse_args()
 

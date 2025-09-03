@@ -2,6 +2,7 @@
 Collector manager for NGBSE 20.2.
 Manages collector lifecycle and credential validation.
 """
+
 from typing import Any, Dict, List, Type
 
 from ..collectors.base import BaseCollector
@@ -77,11 +78,11 @@ class CollectorManager:
 
     def _has_valid_credentials(self, collector: BaseCollector) -> bool:
         """Check if collector has valid credentials."""
-        if hasattr(collector, 'api_key') and collector.api_key:
+        if hasattr(collector, "api_key") and collector.api_key:
             return True
-        if hasattr(collector, 'token') and collector.token:
+        if hasattr(collector, "token") and collector.token:
             return True
-        if hasattr(collector, 'api_id') and collector.api_id:
+        if hasattr(collector, "api_id") and collector.api_id:
             return True
         if isinstance(collector, HttpWebCollector):
             return True

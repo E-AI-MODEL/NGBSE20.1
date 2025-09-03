@@ -2,6 +2,7 @@
 Health monitoring for NGBSE 20.2.
 Provides health checks and monitoring capabilities.
 """
+
 import time
 import psutil
 import os
@@ -17,6 +18,7 @@ LOGGER = get_logger(__name__)
 @dataclass
 class HealthStatus:
     """Health status for a component."""
+
     name: str
     status: str  # "healthy", "degraded", "unhealthy"
     message: str
@@ -27,6 +29,7 @@ class HealthStatus:
 @dataclass
 class SystemMetrics:
     """System performance metrics."""
+
     cpu_percent: float
     memory_percent: float
     disk_percent: float
@@ -42,7 +45,7 @@ class HealthChecker:
             self._check_system_resources,
             self._check_config_files,
             self._check_credentials,
-            self._check_network_connectivity
+            self._check_network_connectivity,
         ]
 
     def check_health(self) -> Dict[str, Any]:
@@ -65,7 +68,7 @@ class HealthChecker:
                     name=check.__name__,
                     status="unhealthy",
                     message=f"Health check failed: {e}",
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
                 results.append(error_result)
                 overall_status = "unhealthy"
@@ -78,7 +81,7 @@ class HealthChecker:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "uptime_seconds": time.time() - self.start_time,
             "checks": [result.__dict__ for result in results],
-            "metrics": metrics.__dict__
+            "metrics": metrics.__dict__,
         }
 
     def _check_system_resources(self) -> HealthStatus:
@@ -86,7 +89,7 @@ class HealthChecker:
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
 
             status = "healthy"
             message = "System resources normal"
@@ -109,8 +112,8 @@ class HealthChecker:
                 details={
                     "cpu_percent": cpu_percent,
                     "memory_percent": memory.percent,
-                    "disk_percent": disk.percent
-                }
+                    "disk_percent": disk.percent,
+                },
             )
 
         except Exception as e:
@@ -118,7 +121,7 @@ class HealthChecker:
                 name="system_resources",
                 status="unhealthy",
                 message=f"Failed to check system resources: {e}",
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
     def _check_config_files(self) -> HealthStatus:
@@ -127,7 +130,7 @@ class HealthChecker:
             config_files = [
                 "config/ngbse.config.yml",
                 "config/rules.json",
-                "config/seeds.jsonl"
+                "config/seeds.jsonl",
             ]
 
             missing_files = []
@@ -141,14 +144,14 @@ class HealthChecker:
                     status="degraded",
                     message=f"Missing config files: {', '.join(missing_files)}",
                     timestamp=datetime.now(timezone.utc).isoformat(),
-                    details={"missing_files": missing_files}
+                    details={"missing_files": missing_files},
                 )
             else:
                 return HealthStatus(
                     name="config_files",
                     status="healthy",
                     message="All configuration files present",
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
 
         except Exception as e:
@@ -156,7 +159,7 @@ class HealthChecker:
                 name="config_files",
                 status="unhealthy",
                 message=f"Failed to check config files: {e}",
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
     def _check_credentials(self) -> HealthStatus:
@@ -169,7 +172,7 @@ class HealthChecker:
                 "LEAKIX_API_KEY",
                 "URLSCAN_API_KEY",
                 "GITHUB_TOKEN",
-                "NEWS_API_KEY"
+                "NEWS_API_KEY",
             ]
 
             missing_creds = []
@@ -183,7 +186,7 @@ class HealthChecker:
                     status="unhealthy",
                     message="No API credentials configured",
                     timestamp=datetime.now(timezone.utc).isoformat(),
-                    details={"missing_credentials": missing_creds}
+                    details={"missing_credentials": missing_creds},
                 )
             elif missing_creds:
                 return HealthStatus(
@@ -191,14 +194,14 @@ class HealthChecker:
                     status="degraded",
                     message=f"Some credentials missing: {len(missing_creds)}/{len(required_creds)}",
                     timestamp=datetime.now(timezone.utc).isoformat(),
-                    details={"missing_credentials": missing_creds}
+                    details={"missing_credentials": missing_creds},
                 )
             else:
                 return HealthStatus(
                     name="credentials",
                     status="healthy",
                     message="All credentials configured",
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
 
         except Exception as e:
@@ -206,7 +209,7 @@ class HealthChecker:
                 name="credentials",
                 status="unhealthy",
                 message=f"Failed to check credentials: {e}",
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
     def _check_network_connectivity(self) -> HealthStatus:
@@ -218,7 +221,7 @@ class HealthChecker:
             test_urls = [
                 "https://api.shodan.io",
                 "https://search.censys.io",
-                "https://leakix.net"
+                "https://leakix.net",
             ]
 
             failed_urls = []
@@ -236,7 +239,7 @@ class HealthChecker:
                     status="unhealthy",
                     message="No network connectivity to external APIs",
                     timestamp=datetime.now(timezone.utc).isoformat(),
-                    details={"failed_urls": failed_urls}
+                    details={"failed_urls": failed_urls},
                 )
             elif failed_urls:
                 return HealthStatus(
@@ -244,14 +247,14 @@ class HealthChecker:
                     status="degraded",
                     message=f"Some API endpoints unreachable: {len(failed_urls)}/{len(test_urls)}",
                     timestamp=datetime.now(timezone.utc).isoformat(),
-                    details={"failed_urls": failed_urls}
+                    details={"failed_urls": failed_urls},
                 )
             else:
                 return HealthStatus(
                     name="network_connectivity",
                     status="healthy",
                     message="All API endpoints reachable",
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
 
         except Exception as e:
@@ -259,7 +262,7 @@ class HealthChecker:
                 name="network_connectivity",
                 status="unhealthy",
                 message=f"Failed to check network connectivity: {e}",
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
     def _get_system_metrics(self) -> SystemMetrics:
@@ -268,8 +271,8 @@ class HealthChecker:
             return SystemMetrics(
                 cpu_percent=psutil.cpu_percent(),
                 memory_percent=psutil.virtual_memory().percent,
-                disk_percent=psutil.disk_usage('/').percent,
-                timestamp=datetime.now(timezone.utc).isoformat()
+                disk_percent=psutil.disk_usage("/").percent,
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
         except Exception as e:
             LOGGER.warning(f"Failed to get system metrics: {e}")
@@ -277,7 +280,7 @@ class HealthChecker:
                 cpu_percent=0.0,
                 memory_percent=0.0,
                 disk_percent=0.0,
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
 

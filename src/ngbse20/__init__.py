@@ -66,4 +66,3 @@ __all__ = [
     "to_stix_bundle",
     "write_manifest",
 ]
-

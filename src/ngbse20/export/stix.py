@@ -13,17 +13,20 @@ LOGGER = get_logger(__name__)
 
 HASH_LENGTH = 64
 
+
 def _now() -> datetime.datetime:
     return datetime.datetime.now(datetime.timezone.utc)
+
 
 def _sanitize_stix_value(value: str) -> str:
     """Sanitize value for STIX pattern to prevent injection."""
     if not value:
         return ""
     # Remove quotes and other potentially dangerous characters
-    sanitized = re.sub(r'[\"\'\\]', '', str(value))
+    sanitized = re.sub(r"[\"\'\\]", "", str(value))
     # Limit length to prevent oversized patterns
     return sanitized[:255]
+
 
 def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     """Create STIX indicator for a finding based on its type."""
@@ -31,7 +34,7 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
 
     if source_type == "data_breach":
         # LeakIX findings
-        asset = _sanitize_stix_value(f.get('asset', ''))
+        asset = _sanitize_stix_value(f.get("asset", ""))
         pattern = f"[domain-name:value = '{asset}']"
         name = f"Data Breach: {f.get('raw', {}).get('title', 'Unknown')}"
 
@@ -57,14 +60,14 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
     elif source_type in ["code_repository", "code_search"]:
         # GitHub findings
         repo = f.get("asset", "")
-        url = _sanitize_stix_value(f.get('source', {}).get('url', ''))
+        url = _sanitize_stix_value(f.get("source", {}).get("url", ""))
         pattern = f"[url:value = '{url}']"
         name = f"Code: {repo}"
 
     elif source_type == "news":
         # News findings
         title = f.get("raw", {}).get("title", "")
-        url = _sanitize_stix_value(f.get('source', {}).get('url', ''))
+        url = _sanitize_stix_value(f.get("source", {}).get("url", ""))
         pattern = f"[url:value = '{url}']"
         name = f"News: {title[:50]}..."
 
@@ -72,7 +75,9 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
         # Default web findings
         url = _sanitize_stix_value(f.get("source", {}).get("url", ""))
         domain = _sanitize_stix_value(f.get("asset", ""))
-        pattern = f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
+        pattern = (
+            f"[url:value = '{url}']" if url else f"[domain-name:value = '{domain}']"
+        )
         name = f"Web: {f.get('raw', {}).get('title', 'Unknown')}"
 
     # Truncate name to STIX limit
@@ -92,6 +97,7 @@ def _indicator_for_finding(f: dict[str, Any]) -> Indicator:
         },
     )
 
+
 def _create_threat_actor(f: dict[str, Any]) -> ThreatActor | None:
     """Create STIX threat actor if threat indicators are present."""
     if f.get("source", {}).get("type") == "threat_intelligence":
@@ -102,10 +108,13 @@ def _create_threat_actor(f: dict[str, Any]) -> ThreatActor | None:
                 threat_level="medium",
                 custom_properties={
                     "x_ngbse20_threat_indicators": threat_indicators,
-                    "x_ngbse20_malicious_score": f.get("raw", {}).get("malicious_score", 0),
-                }
+                    "x_ngbse20_malicious_score": f.get("raw", {}).get(
+                        "malicious_score", 0
+                    ),
+                },
             )
     return None
+
 
 def _create_vulnerability(f: dict[str, Any]) -> Vulnerability | None:
     """Create STIX vulnerability if vulnerability indicators are present."""
@@ -120,9 +129,10 @@ def _create_vulnerability(f: dict[str, Any]) -> Vulnerability | None:
                     "x_ngbse20_product": product,
                     "x_ngbse20_version": version,
                     "x_ngbse20_ip": f.get("raw", {}).get("ip", ""),
-                }
+                },
             )
     return None
+
 
 def to_stix_bundle(findings: list[dict[str, Any]]) -> Bundle:
     """Create comprehensive STIX bundle from findings."""
@@ -167,6 +177,7 @@ Score: {f.get('score', 0.0)}"""
     LOGGER.info("Built STIX bundle with %d objects", len(objects))
     return bundle
 
+
 def write_stix(findings: list[dict[str, Any]], path: str) -> str:
     """Write STIX bundle to file."""
     bundle = to_stix_bundle(findings)
@@ -174,7 +185,10 @@ def write_stix(findings: list[dict[str, Any]], path: str) -> str:
         f.write(bundle.serialize(pretty=True))
     return path
 
-def findings_to_stix(findings: list[dict[str, Any]], score_lookup=None) -> dict[str, Any]:
+
+def findings_to_stix(
+    findings: list[dict[str, Any]], score_lookup=None
+) -> dict[str, Any]:
     """Return STIX bundle as Python dict for given findings."""
     bundle = to_stix_bundle(findings)
     return json.loads(bundle.serialize())

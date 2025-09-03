@@ -23,7 +23,9 @@ class URLScanCollector(BaseCollector):
         if not self.api_key:
             LOGGER.warning("URLScan collector requires URLSCAN_API_KEY env var.")
         else:
-            LOGGER.debug(f"URLScan collector initialized with API key: {mask_api_key(self.api_key)}")
+            LOGGER.debug(
+                f"URLScan collector initialized with API key: {mask_api_key(self.api_key)}"
+            )
 
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect threat intelligence from URLScan."""
@@ -40,7 +42,9 @@ class URLScanCollector(BaseCollector):
 
         except Exception as e:
             sanitized_error = sanitize_error_message(str(e), {"api_key": self.api_key})
-            LOGGER.error(f"URLScan collector failed for query '{query}': {sanitized_error}")
+            LOGGER.error(
+                f"URLScan collector failed for query '{query}': {sanitized_error}"
+            )
             return []
 
         findings = []
@@ -61,41 +65,42 @@ class URLScanCollector(BaseCollector):
                 if stats.get("suspicious", 0) > 0:
                     threat_indicators.append("suspicious")
 
-            findings.append({
-                "id": f"urlscan-{item.get('_id', 'unknown')}",
-                "hash": content_hash(f"{url}{page.get('title', '')}{str(threat_indicators)}"),
-                "asset": domain.lower(),
-                "raw": {
-                    "url": url,
-                    "title": page.get("title", ""),
-                    "threat_indicators": threat_indicators,
-                    "malicious_score": item.get("stats", {}).get("malicious", 0),
-                    "suspicious_score": item.get("stats", {}).get("suspicious", 0),
-                    "scan_time": item.get("task", {}).get("time", "")
-                },
-                "source": {
-                    "type": "threat_intelligence",
-                    "url": f"https://urlscan.io/result/{item.get('_id', '')}",
-                    "domain": domain
-                },
-                "timestamp": item.get("task", {}).get("time", now_iso),
-                "quality": {"q": 0.9 if threat_indicators else 0.7}
-            })
+            findings.append(
+                {
+                    "id": f"urlscan-{item.get('_id', 'unknown')}",
+                    "hash": content_hash(
+                        f"{url}{page.get('title', '')}{str(threat_indicators)}"
+                    ),
+                    "asset": domain.lower(),
+                    "raw": {
+                        "url": url,
+                        "title": page.get("title", ""),
+                        "threat_indicators": threat_indicators,
+                        "malicious_score": item.get("stats", {}).get("malicious", 0),
+                        "suspicious_score": item.get("stats", {}).get("suspicious", 0),
+                        "scan_time": item.get("task", {}).get("time", ""),
+                    },
+                    "source": {
+                        "type": "threat_intelligence",
+                        "url": f"https://urlscan.io/result/{item.get('_id', '')}",
+                        "domain": domain,
+                    },
+                    "timestamp": item.get("task", {}).get("time", now_iso),
+                    "quality": {"q": 0.9 if threat_indicators else 0.7},
+                }
+            )
 
         return findings
 
     @retry_with_backoff(max_retries=3, base_delay=1.0)
-    @api_rate_limited('urlscan')
+    @api_rate_limited("urlscan")
     def _make_api_request(self, query: str):
         """Make rate-limited API request to URLScan."""
         headers = {"API-Key": self.api_key}
         params = {"q": query, "size": 100}
 
         response = requests.get(
-            f"{self.API_BASE}/search/",
-            headers=headers,
-            params=params,
-            timeout=30
+            f"{self.API_BASE}/search/", headers=headers, params=params, timeout=30
         )
         response.raise_for_status()
         return response

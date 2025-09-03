@@ -17,11 +17,17 @@ class SecurityFilter(logging.Filter):
 
     def filter(self, record):
         """Filter log records to redact sensitive information."""
-        if hasattr(record, 'getMessage'):
+        if hasattr(record, "getMessage"):
             message = record.getMessage()
             for pattern in self.sensitive_patterns:
                 import re
-                message = re.sub(pattern, lambda m: m.group(0).replace(m.group(1), '***REDACTED***'), message, flags=re.IGNORECASE)
+
+                message = re.sub(
+                    pattern,
+                    lambda m: m.group(0).replace(m.group(1), "***REDACTED***"),
+                    message,
+                    flags=re.IGNORECASE,
+                )
             record.msg = message
         return True
 
@@ -37,7 +43,9 @@ def configure_logging(level: str = "INFO") -> None:
         debug_override = os.getenv("ALLOW_DEBUG_IN_PROD", "false").lower()
         if debug_override not in ["true", "1", "yes"]:
             level = "INFO"
-            print("WARNING: DEBUG logging disabled in production. Set ALLOW_DEBUG_IN_PROD=true to override.")
+            print(
+                "WARNING: DEBUG logging disabled in production. Set ALLOW_DEBUG_IN_PROD=true to override."
+            )
 
     lvl = getattr(logging, level.upper(), logging.INFO)
 
@@ -45,7 +53,7 @@ def configure_logging(level: str = "INFO") -> None:
     logging.basicConfig(
         level=lvl,
         format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
-        force=True  # Override any existing configuration
+        force=True,  # Override any existing configuration
     )
 
     # Add security filter to root logger

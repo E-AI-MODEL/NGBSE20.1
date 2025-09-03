@@ -27,15 +27,19 @@ class ScoringConfig:
         }
     )
 
+
 DEFAULT = ScoringConfig()
+
 
 def _recency_score(ts: datetime, half_life_days: int) -> float:
     now = datetime.now(timezone.utc)
     age_days = max(0.0, (now - ts).total_seconds() / 86400.0)
     return 0.5 ** (age_days / float(half_life_days))
 
+
 def _clamp(x: float) -> float:
     return max(0.0, min(1.0, float(x)))
+
 
 def _source_score(f: dict[str, Any]) -> float:
     try:
@@ -44,6 +48,7 @@ def _source_score(f: dict[str, Any]) -> float:
         LOGGER.warning(f"Failed to parse source score: {e}")
         return 0.0
 
+
 def _keyword_score(f: dict[str, Any]) -> float:
     try:
         return float(f.get("metrics", {}).get("keywords", 0))
@@ -51,7 +56,10 @@ def _keyword_score(f: dict[str, Any]) -> float:
         LOGGER.warning(f"Failed to parse keyword score: {e}")
         return 0.0
 
-def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None) -> float:
+
+def compute_cai(
+    traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None
+) -> float:
     if not traces:
         return 0.0
     w = {"trace": 0.4, "transparency": 0.3, "blindspot": 0.3}
@@ -59,7 +67,7 @@ def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None)
         w.update(cfg["cai_weights"])
     trs, trp, blind = [], [], 0
     for e in traces:
-        rub = (e.get('rubric') or {})
+        rub = e.get("rubric") or {}
         if "reasoning_trace" in rub:
             trs.append(float(rub.get("reasoning_trace", 0)))
         if "transparency" in rub:
@@ -70,6 +78,7 @@ def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None)
                 blind += 1
     n = max(1, len(traces))
     blind_rate = blind / n
+
     def mean(xs: list[float]) -> float:
         return (sum(xs) / len(xs)) if xs else 0.0
 
@@ -79,6 +88,7 @@ def compute_cai(traces: list[dict[str, Any]], cfg: dict[str, Any] | None = None)
         + w["blindspot"] * blind_rate
     )
 
+
 def _parse_ts(ts_raw: Any) -> datetime | None:
     if ts_raw is None:
         return None
@@ -86,11 +96,12 @@ def _parse_ts(ts_raw: Any) -> datetime | None:
         return ts_raw
     if isinstance(ts_raw, str):
         try:
-            return datetime.fromisoformat(ts_raw.replace('Z','+00:00'))
+            return datetime.fromisoformat(ts_raw.replace("Z", "+00:00"))
         except (ValueError, TypeError) as e:
             LOGGER.warning(f"Failed to parse timestamp '{ts_raw}': {e}")
             return None
     return None
+
 
 def score_findings(
     findings: list[dict[str, Any]], cfg: ScoringConfig = DEFAULT

@@ -2,6 +2,7 @@
 Rate limiting utilities for NGBSE 20.2.
 Provides rate limiting and retry logic for API calls.
 """
+
 import time
 import random
 from typing import Dict, Callable, Any
@@ -30,7 +31,9 @@ class RateLimiter:
         """Check if a request can be made without exceeding rate limit."""
         now = time.time()
         # Remove requests outside the time window
-        self.requests = [req_time for req_time in self.requests if now - req_time < self.time_window]
+        self.requests = [
+            req_time for req_time in self.requests if now - req_time < self.time_window
+        ]
 
         return len(self.requests) < self.max_requests
 
@@ -54,7 +57,7 @@ def retry_with_backoff(
     base_delay: float = 1.0,
     max_delay: float = 60.0,
     exponential_base: float = 2.0,
-    jitter: bool = True
+    jitter: bool = True,
 ):
     """
     Decorator for retrying functions with exponential backoff.
@@ -66,6 +69,7 @@ def retry_with_backoff(
         exponential_base: Base for exponential backoff
         jitter: Add random jitter to prevent thundering herd
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -78,23 +82,28 @@ def retry_with_backoff(
                     last_exception = e
 
                     if attempt == max_retries:
-                        LOGGER.error(f"Function {func.__name__} failed after {max_retries} retries: {e}")
+                        LOGGER.error(
+                            f"Function {func.__name__} failed after {max_retries} retries: {e}"
+                        )
                         raise e
 
                     # Calculate delay with exponential backoff
-                    delay = min(base_delay * (exponential_base ** attempt), max_delay)
+                    delay = min(base_delay * (exponential_base**attempt), max_delay)
 
                     # Add jitter to prevent thundering herd
                     if jitter:
-                        delay *= (0.5 + random.random() * 0.5)
+                        delay *= 0.5 + random.random() * 0.5
 
-                    LOGGER.warning(f"Function {func.__name__} failed (attempt {attempt + 1}/{max_retries + 1}): {e}. Retrying in {delay:.2f}s")
+                    LOGGER.warning(
+                        f"Function {func.__name__} failed (attempt {attempt + 1}/{max_retries + 1}): {e}. Retrying in {delay:.2f}s"
+                    )
                     time.sleep(delay)
 
             # This should never be reached, but just in case
             raise last_exception
 
         return wrapper
+
     return decorator
 
 
@@ -105,13 +114,16 @@ def rate_limited(rate_limiter: RateLimiter):
     Args:
         rate_limiter: RateLimiter instance to use
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             # Wait if necessary
             wait_time = rate_limiter.wait_time()
             if wait_time > 0:
-                LOGGER.debug(f"Rate limiting: waiting {wait_time:.2f}s before {func.__name__}")
+                LOGGER.debug(
+                    f"Rate limiting: waiting {wait_time:.2f}s before {func.__name__}"
+                )
                 time.sleep(wait_time)
 
             # Record the request
@@ -121,6 +133,7 @@ def rate_limited(rate_limiter: RateLimiter):
             return func(*args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
@@ -129,18 +142,32 @@ class APIRateLimiter:
 
     def __init__(self):
         self.limiters: Dict[str, RateLimiter] = {
-            'shodan': RateLimiter(max_requests=1, time_window=1),  # 1 request per second
-            'censys': RateLimiter(max_requests=5, time_window=1),  # 5 requests per second
-            'leakix': RateLimiter(max_requests=10, time_window=1), # 10 requests per second
-            'urlscan': RateLimiter(max_requests=1, time_window=1), # 1 request per second
-            'github': RateLimiter(max_requests=10, time_window=1), # 10 requests per second
-            'news': RateLimiter(max_requests=100, time_window=1),  # 100 requests per second
-            'default': RateLimiter(max_requests=10, time_window=1) # Default: 10 requests per second
+            "shodan": RateLimiter(
+                max_requests=1, time_window=1
+            ),  # 1 request per second
+            "censys": RateLimiter(
+                max_requests=5, time_window=1
+            ),  # 5 requests per second
+            "leakix": RateLimiter(
+                max_requests=10, time_window=1
+            ),  # 10 requests per second
+            "urlscan": RateLimiter(
+                max_requests=1, time_window=1
+            ),  # 1 request per second
+            "github": RateLimiter(
+                max_requests=10, time_window=1
+            ),  # 10 requests per second
+            "news": RateLimiter(
+                max_requests=100, time_window=1
+            ),  # 100 requests per second
+            "default": RateLimiter(
+                max_requests=10, time_window=1
+            ),  # Default: 10 requests per second
         }
 
     def get_limiter(self, service: str) -> RateLimiter:
         """Get rate limiter for a specific service."""
-        return self.limiters.get(service.lower(), self.limiters['default'])
+        return self.limiters.get(service.lower(), self.limiters["default"])
 
     def wait_for_service(self, service: str):
         """Wait for rate limit on a specific service."""
@@ -163,6 +190,7 @@ def api_rate_limited(service: str):
     Args:
         service: API service name (shodan, censys, etc.)
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -170,4 +198,5 @@ def api_rate_limited(service: str):
             return func(*args, **kwargs)
 
         return wrapper
+
     return decorator

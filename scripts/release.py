@@ -10,14 +10,13 @@ from typing import List
 import re
 
 
-def run_command(cmd: List[str], capture_output: bool = True, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: List[str], capture_output: bool = True, check: bool = True
+) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     try:
         result = subprocess.run(
-            cmd,
-            capture_output=capture_output,
-            text=True,
-            check=check
+            cmd, capture_output=capture_output, text=True, check=check
         )
         return result
     except subprocess.CalledProcessError as e:
@@ -115,7 +114,7 @@ def check_version_consistency() -> bool:
     print(f"Version in pyproject.toml: {version}")
 
     # Check if version follows expected pattern
-    if not re.match(r'^\d+\.\d+\.\d+$', version):
+    if not re.match(r"^\d+\.\d+\.\d+$", version):
         print(f"❌ Version {version} does not follow semantic versioning")
         return False
 
@@ -134,7 +133,9 @@ def create_release_commit(version: str) -> bool:
     """Create release commit."""
     print(f"📝 Creating release commit for {version}...")
 
-    commit_message = f"Release {version}: Complete modular architecture with enhanced security"
+    commit_message = (
+        f"Release {version}: Complete modular architecture with enhanced security"
+    )
 
     try:
         run_command(["git", "add", "."])
@@ -211,12 +212,19 @@ def get_version() -> str:
 def main():
     """Main release function."""
     parser = argparse.ArgumentParser(description="Release NGBSE 20.2.0-GA")
-    parser.add_argument("--validate-only", action="store_true",
-                       help="Only run validation, don't create release")
-    parser.add_argument("--skip-validation", action="store_true",
-                       help="Skip validation checks")
-    parser.add_argument("--dry-run", action="store_true",
-                       help="Show what would be done without executing")
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Only run validation, don't create release",
+    )
+    parser.add_argument(
+        "--skip-validation", action="store_true", help="Skip validation checks"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without executing",
+    )
 
     args = parser.parse_args()
 

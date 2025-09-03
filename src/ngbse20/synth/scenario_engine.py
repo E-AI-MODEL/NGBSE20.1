@@ -6,10 +6,13 @@ from ..llm_client import LLMClient
 HIGH_RISK_THRESHOLD = 0.75
 
 
-def _estimate_probability(avg_score: float, evidence_count: int, prior: float = 0.10) -> float:
+def _estimate_probability(
+    avg_score: float, evidence_count: int, prior: float = 0.10
+) -> float:
     lr = 1 + 9 * max(0.0, (avg_score - 0.5) / 0.5)
     odds = (prior / (1 - prior)) * lr * max(1.0, min(5.0, evidence_count / 3.0))
     return odds / (1 + odds)
+
 
 def group_by_themes(findings: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     themes = {
@@ -36,6 +39,7 @@ def group_by_themes(findings: list[dict[str, Any]]) -> dict[str, list[dict[str, 
         if not assigned and f.get("score", 0.0) >= HIGH_RISK_THRESHOLD:
             grouped.setdefault("High_Risk_Generic", []).append(f)
     return {k: v for k, v in grouped.items() if v}
+
 
 def build_scenarios(
     findings: list[dict[str, Any]],
@@ -67,7 +71,7 @@ def build_scenarios(
                     }
                     for it in items[:8]
                 ],
-                "instructions": "Make a concise summary (2-3 sentences), without secrets."
+                "instructions": "Make a concise summary (2-3 sentences), without secrets.",
             }
             if mode == "api" and client:
                 system_prompt = (
@@ -75,7 +79,9 @@ def build_scenarios(
                 )
                 user_prompt = json.dumps(payload, ensure_ascii=False)
                 summary = (
-                    client.call(system_prompt, user_prompt, max_tokens=300, temperature=0.2)
+                    client.call(
+                        system_prompt, user_prompt, max_tokens=300, temperature=0.2
+                    )
                     or ""
                 )
             else:

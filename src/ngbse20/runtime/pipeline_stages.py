@@ -2,6 +2,7 @@
 Pipeline stages for NGBSE 20.2.
 Separates pipeline logic into distinct, testable stages.
 """
+
 import json
 import os
 from datetime import datetime, timezone
@@ -34,10 +35,13 @@ class PipelineStages:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
 
-    def validate_stage(self, rules: List[Dict[str, Any]], metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_stage(
+        self, rules: List[Dict[str, Any]], metrics: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Validation stage - check for hard blocks."""
         acts_block = evaluate_rules(
-            [r for r in rules if r.get("action", {}).get("type") == "hard_block"], metrics
+            [r for r in rules if r.get("action", {}).get("type") == "hard_block"],
+            metrics,
         )
 
         if acts_block:
@@ -52,7 +56,9 @@ class PipelineStages:
 
         return {"status": "ok"}
 
-    def collect_stage(self, seeds: List[Dict[str, Any]], collectors: List[Any]) -> Dict[str, Any]:
+    def collect_stage(
+        self, seeds: List[Dict[str, Any]], collectors: List[Any]
+    ) -> Dict[str, Any]:
         """Collection stage - gather findings from all collectors."""
         findings = []
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -63,9 +69,13 @@ class PipelineStages:
                 try:
                     collector_findings = collector.collect(seed, timestamp)
                     seed_findings.extend(collector_findings)
-                    LOGGER.debug(f"Collector {collector.__class__.__name__} found {len(collector_findings)} items for seed {seed.get('id')}")
+                    LOGGER.debug(
+                        f"Collector {collector.__class__.__name__} found {len(collector_findings)} items for seed {seed.get('id')}"
+                    )
                 except Exception as e:
-                    LOGGER.error(f"Collector {collector.__class__.__name__} failed for seed {seed.get('id')}: {e}")
+                    LOGGER.error(
+                        f"Collector {collector.__class__.__name__} failed for seed {seed.get('id')}: {e}"
+                    )
 
             findings.extend(seed_findings)
 
@@ -73,15 +83,21 @@ class PipelineStages:
             "collect",
             {"n_seeds": len(seeds), "n_collectors": len(collectors)},
             {"n_findings": len(findings)},
-            "collected findings"
+            "collected findings",
         )
 
         return {"findings": findings, "trace": trace}
 
-    def rules_stage(self, rules: List[Dict[str, Any]], metrics: Dict[str, Any], findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def rules_stage(
+        self,
+        rules: List[Dict[str, Any]],
+        metrics: Dict[str, Any],
+        findings: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
         """Rules evaluation stage - apply non-blocking rules."""
         acts_warn = evaluate_rules(
-            [r for r in rules if r.get("action", {}).get("type") != "hard_block"], metrics
+            [r for r in rules if r.get("action", {}).get("type") != "hard_block"],
+            metrics,
         )
 
         # Apply warning flags to findings
@@ -140,7 +156,7 @@ class PipelineStages:
                 "asset_scores": asset_scores,
                 "forecast": forecast,
                 "history_path": history_path,
-                "trace": trace
+                "trace": trace,
             }
 
         except Exception as e:
@@ -160,10 +176,12 @@ class PipelineStages:
                 "asset_scores": default_asset_scores,
                 "forecast": default_forecast,
                 "history_path": None,
-                "trace": trace
+                "trace": trace,
             }
 
-    def seed_proposal_stage(self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
+    def seed_proposal_stage(
+        self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Seed proposal stage - propose new seeds."""
         next_seeds = propose_next_seeds(scored_findings, asset_scores)
 
@@ -176,13 +194,15 @@ class PipelineStages:
 
         return {"next_seeds": next_seeds, "trace": trace}
 
-    def blindspot_analysis_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def blindspot_analysis_stage(
+        self, scored_findings: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Blindspot analysis stage - identify coverage gaps."""
         try:
             blindspots = {
                 "coverage": coverage_gap(scored_findings),
                 "recency": recency_gap(scored_findings),
-                "confidence": confidence_gap(scored_findings)
+                "confidence": confidence_gap(scored_findings),
             }
 
             trace = event(
@@ -200,7 +220,7 @@ class PipelineStages:
             default_blindspots = {
                 "coverage": {"score": 0.0, "description": "Analysis failed"},
                 "recency": {"score": 0.0, "description": "Analysis failed"},
-                "confidence": {"score": 0.0, "description": "Analysis failed"}
+                "confidence": {"score": 0.0, "description": "Analysis failed"},
             }
 
             trace = event(
@@ -212,16 +232,28 @@ class PipelineStages:
 
             return {"blindspots": default_blindspots, "trace": trace}
 
-    def ballm_stage(self, scored_findings: List[Dict[str, Any]], blindspots: Dict[str, Any], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
+    def ballm_stage(
+        self,
+        scored_findings: List[Dict[str, Any]],
+        blindspots: Dict[str, Any],
+        asset_scores: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """BALLM meta-layer generation stage."""
         try:
             ballm_generator = BALLMMetaLayerGenerator(LLMClient())
-            meta_layer = ballm_generator.generate_meta_layer(scored_findings, blindspots, asset_scores)
+            meta_layer = ballm_generator.generate_meta_layer(
+                scored_findings, blindspots, asset_scores
+            )
 
             trace = event(
                 "ballm_meta_layer",
                 {},
-                {"meta_layer_generated": True, "epistemic_humility": meta_layer.get("epistemic_humility_score", 0.0)},
+                {
+                    "meta_layer_generated": True,
+                    "epistemic_humility": meta_layer.get(
+                        "epistemic_humility_score", 0.0
+                    ),
+                },
                 "generated BALLM meta-layer with epistemic insights",
             )
 
@@ -242,7 +274,9 @@ class PipelineStages:
 
     def scenario_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Scenario synthesis stage."""
-        scenarios = build_scenarios(scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none"))
+        scenarios = build_scenarios(
+            scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none")
+        )
 
         trace = event(
             "scenario_synthesis",
@@ -253,13 +287,15 @@ class PipelineStages:
 
         return {"scenarios": scenarios, "trace": trace}
 
-    def brief_stage(self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
+    def brief_stage(
+        self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Brief synthesis stage."""
         brief = synthesize_brief_llm(
             scored_findings,
             asset_scores,
             mode=os.getenv("NGBSE_BRIEF_MODE", "none"),
-            out_dir=self.output_dir
+            out_dir=self.output_dir,
         )
 
         return {"brief": brief}
@@ -277,7 +313,9 @@ class PipelineStages:
                 except Exception:
                     objects = list(bundle.objects)
             else:
-                raw = bundle.serialize() if hasattr(bundle, "serialize") else str(bundle)
+                raw = (
+                    bundle.serialize() if hasattr(bundle, "serialize") else str(bundle)
+                )
                 data = json.loads(raw)
                 objects = data.get("objects", []) if isinstance(data, dict) else []
 
@@ -293,19 +331,23 @@ class PipelineStages:
             for obj in objects:
                 obj_type = _get(obj, "type", None)
                 if obj_type == "indicator":
-                    indicators.append({
-                        "type": "indicator",
-                        "labels": _get(obj, "labels", []),
-                        "pattern": _get(obj, "pattern", "")
-                    })
+                    indicators.append(
+                        {
+                            "type": "indicator",
+                            "labels": _get(obj, "labels", []),
+                            "pattern": _get(obj, "pattern", ""),
+                        }
+                    )
                 elif obj_type == "threat-actor":
                     name = _get(obj, "name", "Unknown")
                     threat_actors.append(name)
                 elif obj_type == "vulnerability":
-                    vulnerabilities.append({
-                        "name": _get(obj, "name", "Unknown"),
-                        "severity": _get(obj, "severity", "n/a")
-                    })
+                    vulnerabilities.append(
+                        {
+                            "name": _get(obj, "name", "Unknown"),
+                            "severity": _get(obj, "severity", "n/a"),
+                        }
+                    )
 
             top_indicators: list[Dict[str, Any]] = []
             # Take up to 5 indicators and expose value/pattern
@@ -313,18 +355,25 @@ class PipelineStages:
                 pattern = ind.get("pattern", "")
                 # Attempt to extract a compact value from the STIX pattern
                 value = None
-                for token in ["domain-name:value = '", "ipv4-addr:value = '", "file:hashes.MD5 = '", "url:value = '"]:
+                for token in [
+                    "domain-name:value = '",
+                    "ipv4-addr:value = '",
+                    "file:hashes.MD5 = '",
+                    "url:value = '",
+                ]:
                     if token in pattern:
                         try:
                             value = pattern.split(token, 1)[1].split("'", 1)[0]
                             break
                         except Exception:
                             value = None
-                top_indicators.append({
-                    "type": "indicator",
-                    "value": value or pattern,
-                    "labels": ind.get("labels", [])
-                })
+                top_indicators.append(
+                    {
+                        "type": "indicator",
+                        "value": value or pattern,
+                        "labels": ind.get("labels", []),
+                    }
+                )
 
             return {
                 "top_indicators": top_indicators,
@@ -381,7 +430,11 @@ class PipelineStages:
                 {"report_path": report_path},
                 "generated docx report",
             )
-            return {"report_path": report_path, "stix_summary": stix_summary, "trace": trace}
+            return {
+                "report_path": report_path,
+                "stix_summary": stix_summary,
+                "trace": trace,
+            }
         except Exception as e:
             LOGGER.warning(f"Report generation skipped/failed: {e}")
             trace = event(
@@ -392,7 +445,9 @@ class PipelineStages:
             )
             return {"report_path": None, "stix_summary": None, "trace": trace}
 
-    def export_stage(self, scored_findings: List[Dict[str, Any]], traces: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def export_stage(
+        self, scored_findings: List[Dict[str, Any]], traces: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Export stage - generate STIX bundle and save outputs."""
         cai = compute_cai(traces, {})
         bundle = to_stix_bundle(scored_findings)
@@ -417,9 +472,6 @@ class PipelineStages:
         return {
             "cai": cai,
             "bundle": bundle,
-            "output_files": {
-                "findings": findings_path,
-                "stix_bundle": stix_path
-            },
-            "trace": trace
+            "output_files": {"findings": findings_path, "stix_bundle": stix_path},
+            "trace": trace,
         }
