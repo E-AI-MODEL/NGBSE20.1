@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 from pathlib import Path
@@ -10,7 +9,7 @@ import requests
 
 import click
 
-from ngbse20.config.loader import load_seeds, validate_files
+from ngbse20.config.loader import validate_files
 from ngbse20.export.stix import findings_to_stix
 from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline

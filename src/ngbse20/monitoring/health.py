@@ -5,7 +5,7 @@ Provides health checks and monitoring capabilities.
 import time
 import psutil
 import os
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from dataclasses import dataclass
 from datetime import datetime, timezone
 

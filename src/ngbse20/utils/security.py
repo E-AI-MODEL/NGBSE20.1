@@ -3,7 +3,7 @@ Security utilities for NGBSE 20.2.
 Provides API key masking and security-related helper functions.
 """
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 
 def mask_api_key(api_key: str, visible_chars: int = 4) -> str:

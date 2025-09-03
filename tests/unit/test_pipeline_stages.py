@@ -3,8 +3,6 @@ Unit tests for PipelineStages.
 """
 from unittest.mock import Mock, patch
 
-import pytest
-
 from src.ngbse20.runtime.pipeline_stages import PipelineStages
 
 

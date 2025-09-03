@@ -1,9 +1,7 @@
 import json
 from pathlib import Path
 
-from pydantic import ValidationError
-
-from ngbse20.config.loader import load_rules, load_seeds, validate_files
+from ngbse20.config.loader import validate_files
 
 
 def test_validate_files(tmp_path: Path):

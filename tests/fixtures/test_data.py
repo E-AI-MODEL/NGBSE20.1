@@ -1,7 +1,6 @@
 """
 Test fixtures and sample data for NGBSE tests.
 """
-import json
 from typing import Dict, List, Any
 
 

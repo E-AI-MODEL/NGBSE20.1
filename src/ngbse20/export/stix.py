@@ -5,7 +5,7 @@ import json
 import re
 from typing import Any
 
-from stix2 import Bundle, Indicator, Note, ThreatActor, Vulnerability, Malware, Tool
+from stix2 import Bundle, Indicator, Note, ThreatActor, Vulnerability
 
 from ngbse20.logging import get_logger
 

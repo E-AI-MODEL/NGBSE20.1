@@ -4,7 +4,7 @@ Provides rate limiting and retry logic for API calls.
 """
 import time
 import random
-from typing import Dict, Optional, Callable, Any
+from typing import Dict, Callable, Any
 from functools import wraps
 from ..logging import get_logger
 

@@ -3,11 +3,10 @@
 SBOM (Software Bill of Materials) generation script for NGBSE 20.2.
 Generates CycloneDX and SPDX format SBOMs for supply chain security.
 """
-import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import List
 import argparse
 
 

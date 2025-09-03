@@ -6,9 +6,7 @@ Automates the release process with validation and safety checks.
 import argparse
 import subprocess
 import sys
-from pathlib import Path
-from typing import List, Dict, Any
-import json
+from typing import List
 import re
 
 
