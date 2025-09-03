@@ -192,9 +192,9 @@ class CuriosityGenerationEngine:
         self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
     ) -> str:
         """Create prompt for LLM curiosity generation."""
-        min_score = min([f.get('score', 0.0) for f in findings], default=0.0)
-        max_score = max([f.get('score', 0.0) for f in findings], default=0.0)
-        asset_types = list(set(f.get('asset', '') for f in findings))
+        min_score = min([f.get("score", 0.0) for f in findings], default=0.0)
+        max_score = max([f.get("score", 0.0) for f in findings], default=0.0)
+        asset_types = list(set(f.get("asset", "") for f in findings))
 
         return f"""
         Based on these findings and blindspots, generate 3 curiosity-driven questions:

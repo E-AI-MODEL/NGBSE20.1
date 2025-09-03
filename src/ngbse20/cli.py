@@ -139,9 +139,7 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
             f"individual collection.",
             err=True,
         )
-        click.echo(
-            "Use 'ngbse20 run' for full pipeline with all collectors.", err=True
-        )
+        click.echo("Use 'ngbse20 run' for full pipeline with all collectors.", err=True)
         raise click.Abort()
 
     # Collect data
