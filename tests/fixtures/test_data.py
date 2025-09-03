@@ -2,7 +2,7 @@
 Test fixtures and sample data for NGBSE tests.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 def get_sample_seeds() -> List[Dict[str, Any]]:
