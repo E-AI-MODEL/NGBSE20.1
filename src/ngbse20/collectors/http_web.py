@@ -69,7 +69,9 @@ class HttpWebCollector:
             return True
         if d in self.allow_domains:
             return True
-        return any(entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains)
+        return any(
+            entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains
+        )
 
     def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         query = seed.get("query", "")
@@ -87,8 +89,8 @@ class HttpWebCollector:
                     status = r.status_code
                 else:
                     with urllib.request.urlopen(url, timeout=15) as r:
-                        text = r.read().decode('utf-8', 'ignore')
-                        status = getattr(r, 'status', 200)
+                        text = r.read().decode("utf-8", "ignore")
+                        status = getattr(r, "status", 200)
 
                 text = text[:500000]
                 published = parse_published(text)
@@ -101,15 +103,21 @@ class HttpWebCollector:
                     mt = TITLE_RE.search(text)
                     title = mt.group(1).strip() if mt else ""
 
-                findings.append({
-                    "id": f"finding-{seed.get('id', 'unknown')}-{len(findings)}",
-                    "hash": content_hash(text, url=url, title=title),
-                    "asset": domain.lower(),
-                    "raw": {"url": url, "status": status, "title": title},
-                    "source": {"type": seed.get("type","web"), "url": url, "domain": domain},
-                    "timestamp": published or now_iso,
-                    "quality": {"q": 0.6 if status == HTTP_OK else 0.3}
-                })
+                findings.append(
+                    {
+                        "id": f"finding-{seed.get('id', 'unknown')}-{len(findings)}",
+                        "hash": content_hash(text, url=url, title=title),
+                        "asset": domain.lower(),
+                        "raw": {"url": url, "status": status, "title": title},
+                        "source": {
+                            "type": seed.get("type", "web"),
+                            "url": url,
+                            "domain": domain,
+                        },
+                        "timestamp": published or now_iso,
+                        "quality": {"q": 0.6 if status == HTTP_OK else 0.3},
+                    }
+                )
             except Exception as e:
                 LOGGER.error(f"Collector failed for {url}: {e}")
         return findings

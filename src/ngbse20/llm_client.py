@@ -13,8 +13,10 @@ LOGGER = get_logger(__name__)
 try:
     from requests.exceptions import RequestException
 except Exception:  # pragma: no cover - fallback for stubbed requests
+
     class RequestException(Exception):
         pass
+
 
 class LLMClient:
     def __init__(self, provider_priority: list[str] | None = None):
@@ -70,9 +72,11 @@ class LLMClient:
                 LOGGER.warning(f"llm_json_error, url={url}, err={e!s}")
                 return None
 
-    def _call_openai(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
+    def _call_openai(
+        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
+    ) -> str | None:
         api_key = os.getenv("OPENAI_API_KEY")
-        model = os.getenv("OPENAI_MODEL","gpt-4o-mini")
+        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         if not api_key:
             return None
         data = self._post_json(
@@ -88,19 +92,27 @@ class LLMClient:
                 "temperature": temperature,
             },
         )
-        return data["choices"][0]["message"]["content"] if data and data.get("choices") else None
+        return (
+            data["choices"][0]["message"]["content"]
+            if data and data.get("choices")
+            else None
+        )
 
-    def _call_azure_openai(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
+    def _call_azure_openai(
+        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
+    ) -> str | None:
         api_key = os.getenv("AZURE_OPENAI_API_KEY")
         endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-        deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT","gpt-4o-mini")
+        deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini")
         if not api_key or not endpoint:
             return None
         url = (
-            f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-02-15-preview"
+            f"{endpoint}/openai/deployments/{deployment}/chat/completions"
+            f"?api-version=2024-02-15-preview"
         )
         data = self._post_json(
-            url, {"api-key": api_key, "Content-Type": "application/json"},
+            url,
+            {"api-key": api_key, "Content-Type": "application/json"},
             {
                 "messages": [
                     {"role": "system", "content": system_prompt},
@@ -110,11 +122,17 @@ class LLMClient:
                 "temperature": temperature,
             },
         )
-        return data["choices"][0]["message"]["content"] if data and data.get("choices") else None
+        return (
+            data["choices"][0]["message"]["content"]
+            if data and data.get("choices")
+            else None
+        )
 
-    def _call_anthropic(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
+    def _call_anthropic(
+        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
+    ) -> str | None:
         api_key = os.getenv("ANTHROPIC_API_KEY")
-        model = os.getenv("ANTHROPIC_MODEL","claude-3-5-sonnet-20240620")
+        model = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
         if not api_key:
             return None
         data = self._post_json(
@@ -138,7 +156,10 @@ class LLMClient:
             if parts
             else None
         )
-    def _call_google(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
+
+    def _call_google(
+        self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
+    ) -> str | None:
         api_key = os.getenv("GOOGLE_API_KEY")
         model = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
         if not api_key:
@@ -152,9 +173,7 @@ class LLMClient:
                 {
                     "role": "user",
                     "parts": [
-                        {
-                            "text": f"System:\n{system_prompt}\n\nUser:\n{user_prompt}"
-                        }
+                        {"text": f"System:\n{system_prompt}\n\nUser:\n{user_prompt}"}
                     ],
                 }
             ],
@@ -165,7 +184,9 @@ class LLMClient:
         }
         data = self._post_json(url, {"Content-Type": "application/json"}, payload)
         parts = (
-            ((data.get("candidates", [{}])[0] or {}).get("content", {}) or {}).get("parts", [])
+            ((data.get("candidates", [{}])[0] or {}).get("content", {}) or {}).get(
+                "parts", []
+            )
             if data
             else []
         )

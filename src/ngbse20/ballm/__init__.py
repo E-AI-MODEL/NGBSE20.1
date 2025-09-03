@@ -2,4 +2,8 @@
 
 from .meta_layer_generator import BALLMMetaLayerGenerator
 
-__all__ = ["BALLMMetaLayerGenerator", "BlindspotInterpretationEngine", "CuriosityGenerationEngine"]
+__all__ = [
+    "BALLMMetaLayerGenerator",
+    "BlindspotInterpretationEngine",
+    "CuriosityGenerationEngine",
+]

@@ -7,7 +7,7 @@ import tldextract
 
 class BaseCollector(ABC):
     """Base class for all NGBSE collectors."""
-    
+
     def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
         """Initialize collector with configuration and domain allowlist."""
         self.config = config
@@ -17,24 +17,24 @@ class BaseCollector(ABC):
         """Check if domain is in allowlist."""
         if not domain:
             return False
-            
+
         d = domain.lower()
-        
+
         # Wildcard allows all domains
         if "*" in self.allow_domains:
             return True
-        
+
         # Exact match
         if d in self.allow_domains:
             return True
-        
+
         # Subdomain matching (e.g., .example.com matches sub.example.com)
         for entry in self.allow_domains:
-            if entry.startswith('.') and d.endswith(entry):
+            if entry.startswith(".") and d.endswith(entry):
                 return True
-        
+
         return False
-    
+
     def _extract_domain(self, url: str) -> str:
         """Extract domain from URL using tldextract."""
         try:
@@ -45,6 +45,7 @@ class BaseCollector(ABC):
         except Exception:
             # Fallback to basic URL parsing
             from urllib.parse import urlparse
+
             parsed = urlparse(url)
             host = parsed.netloc.split("@")[-1].split(":")[0]
             if host.startswith("www."):
@@ -55,22 +56,24 @@ class BaseCollector(ABC):
     def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
         """Collect data from the source. Must be implemented by subclasses."""
         raise NotImplementedError
-    
+
     def get_collector_info(self) -> Dict[str, Any]:
         """Get information about this collector."""
         return {
             "name": self.__class__.__name__,
             "description": self.__class__.__doc__ or "No description available",
-            "requires_api_key": hasattr(self, 'api_key') or hasattr(self, 'token') or hasattr(self, 'api_id'),
-            "active": self._is_active()
+            "requires_api_key": hasattr(self, "api_key")
+            or hasattr(self, "token")
+            or hasattr(self, "api_id"),
+            "active": self._is_active(),
         }
-    
+
     def _is_active(self) -> bool:
         """Check if collector is active (has required credentials)."""
-        if hasattr(self, 'api_key') and not self.api_key:
+        if hasattr(self, "api_key") and not self.api_key:
             return False
-        if hasattr(self, 'token') and not self.token:
+        if hasattr(self, "token") and not self.token:
             return False
-        if hasattr(self, 'api_id') and not self.api_id:
+        if hasattr(self, "api_id") and not self.api_id:
             return False
         return True

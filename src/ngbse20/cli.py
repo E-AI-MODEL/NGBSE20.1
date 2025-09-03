@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 from pathlib import Path
 from datetime import datetime, timezone
 import os
+import requests
 
 import click
 
-from ngbse20.config.loader import load_seeds, validate_files
+from ngbse20.config.loader import validate_files
 from ngbse20.export.stix import findings_to_stix
 from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline
@@ -19,50 +19,73 @@ from ngbse20.utils.validation import validate_allowlist
 
 LOGGER = logging.getLogger(__name__)
 
+
 @click.group()
 @click.option("--log-level", default="INFO", help="DEBUG|INFO|WARNING|ERROR")
 def cli(log_level: str):
     configure_logging(log_level)
 
+
 @cli.command("run")
-@click.option("--seeds", required=True, type=click.Path(exists=True), help="Path to seeds.jsonl file")
-@click.option("--rules", required=True, type=click.Path(exists=True), help="Path to rules.json file")
-@click.option("--outdir", default='out', show_default=True, help="Output directory for results")
-@click.option("--allowlist", default='*', show_default=True, help="Comma-separated list of allowed domains")
-@click.option("--metrics", default='{}', help="JSON string of runtime metrics")
+@click.option(
+    "--seeds",
+    required=True,
+    type=click.Path(exists=True),
+    help="Path to seeds.jsonl file",
+)
+@click.option(
+    "--rules",
+    required=True,
+    type=click.Path(exists=True),
+    help="Path to rules.json file",
+)
+@click.option(
+    "--outdir", default="out", show_default=True, help="Output directory for results"
+)
+@click.option(
+    "--allowlist",
+    default="*",
+    show_default=True,
+    help="Comma-separated list of allowed domains",
+)
+@click.option("--metrics", default="{}", help="JSON string of runtime metrics")
 def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str):
     """Run the full NGBSE pipeline from collection to reporting."""
     click.echo("Starting NGBSE 20.1 pipeline...")
-    
+
     try:
         # Load and parse input files
         rules_data = json.loads(Path(rules).read_text("utf-8"))
-        seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
+        seeds_data = [
+            json.loads(line)
+            for line in Path(seeds).read_text("utf-8").splitlines()
+            if line.strip()
+        ]
         metrics_data = json.loads(metrics)
     except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading input files: {e}", err=True)
         raise click.Abort()
 
-            # Parse and validate allowlist
-        allowlist_domains = [d.strip() for d in allowlist.split(',')]
+        # Parse and validate allowlist
+        allowlist_domains = [d.strip() for d in allowlist.split(",")]
         allowlist_domains = validate_allowlist(allowlist_domains)
-    
-    config = {
-        "output_dir": outdir,
-        "allowlist": allowlist_domains
-    }
+
+    config = {"output_dir": outdir, "allowlist": allowlist_domains}
 
     # Run the complete pipeline
-    result = run_pipeline(seeds=seeds_data, rules=rules_data, metrics=metrics_data, config=config)
-    
+    result = run_pipeline(
+        seeds=seeds_data, rules=rules_data, metrics=metrics_data, config=config
+    )
+
     click.echo(f"Pipeline finished. Results are in '{outdir}'.")
     click.echo(f"Status: {result.get('status', 'unknown')}")
-    if 'cai' in result:
+    if "cai" in result:
         click.echo(f"CAI Score: {result.get('cai', 0.0):.3f}")
-    if 'counts' in result:
-        counts = result.get('counts', {})
+    if "counts" in result:
+        counts = result.get("counts", {})
         click.echo(f"Findings: {counts.get('findings', 0)}")
         click.echo(f"Scenarios: {counts.get('scenarios', 0)}")
+
 
 @cli.command("validate-config")
 @click.option("--seeds", required=True, type=click.Path(exists=True))
@@ -76,51 +99,73 @@ def validate_config_cmd(seeds: str, rules: str):
         click.echo(f"Validation FAILED: {e}", err=True)
         raise click.Abort()
 
+
 @cli.command()
 @click.option("--seeds", required=True, type=click.Path(exists=True))
 @click.option("--out", required=True, type=click.Path())
-@click.option("--collector", default="web", help="Collector type to use (web, leakix, shodan, censys, urlscan, github, news)")
-@click.option("--allowlist", default="*", help="Comma-separated list of allowed domains")
+@click.option(
+    "--collector",
+    default="web",
+    help="Collector type to use (web, leakix, shodan, censys, urlscan, github, news)",
+)
+@click.option(
+    "--allowlist", default="*", help="Comma-separated list of allowed domains"
+)
 def collect(seeds: str, out: str, collector: str, allowlist: str):
     """Collect data from seeds using specified collector."""
     Path(out).mkdir(parents=True, exist_ok=True)
-    
+
     try:
         # Load seeds
-        seeds_data = [json.loads(line) for line in Path(seeds).read_text("utf-8").splitlines() if line.strip()]
+        seeds_data = [
+            json.loads(line)
+            for line in Path(seeds).read_text("utf-8").splitlines()
+            if line.strip()
+        ]
     except (FileNotFoundError, json.JSONDecodeError, UnicodeDecodeError) as e:
         click.echo(f"Error loading seeds: {e}", err=True)
         raise click.Abort()
-    
-            # Parse and validate allowlist
-        allowlist_domains = [d.strip() for d in allowlist.split(',')]
+
+        # Parse and validate allowlist
+        allowlist_domains = [d.strip() for d in allowlist.split(",")]
         allowlist_domains = validate_allowlist(allowlist_domains)
-    
+
     # Use appropriate collector
     if collector == "web":
         collector_instance = HttpWebCollector(allowlist_domains=allowlist_domains)
     else:
-        click.echo(f"Collector type '{collector}' not yet implemented for individual collection.", err=True)
-        click.echo("Use 'ngbse20 run' for full pipeline with all collectors.", err=True)
+        click.echo(
+            f"Collector type '{collector}' not yet implemented for "
+            f"individual collection.",
+            err=True,
+        )
+        click.echo(
+            "Use 'ngbse20 run' for full pipeline with all collectors.", err=True
+        )
         raise click.Abort()
-    
+
     # Collect data
     findings = []
     now_iso = datetime.now(timezone.utc).isoformat()
-    
+
     for seed in seeds_data:
         try:
             seed_findings = collector_instance.collect(seed, now_iso)
             findings.extend(seed_findings)
         except (requests.RequestException, ValueError, KeyError) as e:
-            click.echo(f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True)
-    
+            click.echo(
+                f"Error collecting from seed {seed.get('id', 'unknown')}: {e}", err=True
+            )
+
     # Save findings
     findings_path = Path(out, "findings.json")
-    findings_path.write_text(json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8")
-    
+    findings_path.write_text(
+        json.dumps(findings, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
     click.echo(f"Collection complete. Found {len(findings)} items.")
     click.echo(f"Results saved to: {findings_path}")
+
 
 @cli.command()
 @click.option("--findings", required=True, type=click.Path(exists=True))
@@ -130,8 +175,11 @@ def export_stix(findings: str, out: str):
     data = json.loads(Path(findings).read_text(encoding="utf-8"))
     bundle = findings_to_stix(data, score_lookup=None)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
-    Path(out).write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
+    Path(out).write_text(
+        json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     click.echo(out)
+
 
 @cli.command()
 @click.option("--findings", required=True, type=click.Path(exists=True))
@@ -139,10 +187,10 @@ def export_stix(findings: str, out: str):
 @click.option("--depth", default=3, help="Depth of curiosity questions (1-5)")
 def ballm_analyze(findings: str, out: str, depth: int):
     """Run BALLM analysis to generate epistemic insights and curiosity questions."""
-    
+
     # Load findings
     data = json.loads(Path(findings).read_text(encoding="utf-8"))
-    
+
     # Check if we have the required data structure
     if isinstance(data, dict):
         findings_data = data.get("findings", [])
@@ -152,37 +200,46 @@ def ballm_analyze(findings: str, out: str, depth: int):
         findings_data = data
         blindspots_data = {}
         asset_scores_data = {}
-    
+
     # Generate BALLM meta-layer
     from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
     from ngbse20.llm_client import LLMClient
-    
+
     ballm_generator = BALLMMetaLayerGenerator(LLMClient())
     meta_layer = ballm_generator.generate_meta_layer(
-        findings_data,
-        blindspots_data,
-        asset_scores_data
+        findings_data, blindspots_data, asset_scores_data
     )
-    
+
     # Save BALLM output
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(
-        json.dumps(meta_layer, ensure_ascii=False, indent=2), 
-        encoding="utf-8"
+        json.dumps(meta_layer, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    
+
     click.echo(f"BALLM analysis complete. Output saved to {out}")
-    click.echo(f"Epistemic Humility Score: {meta_layer.get('epistemic_humility_score', 0.0):.3f}")
-    click.echo(f"Curiosity Questions Generated: {len(meta_layer.get('curiosity_questions', []))}")
+    click.echo(
+        f"Epistemic Humility Score: "
+        f"{meta_layer.get('epistemic_humility_score', 0.0):.3f}"
+    )
+    click.echo(
+        f"Curiosity Questions Generated: "
+        f"{len(meta_layer.get('curiosity_questions', []))}"
+    )
+
 
 @cli.command("collectors")
 def list_collectors():
     """List all available collectors and their status."""
     from ngbse20.collectors import (
-        HttpWebCollector, LeakIXCollector, ShodanCollector, CensysCollector,
-        URLScanCollector, GitHubCollector, NewsCollector
+        HttpWebCollector,
+        LeakIXCollector,
+        ShodanCollector,
+        CensysCollector,
+        URLScanCollector,
+        GitHubCollector,
+        NewsCollector,
     )
-    
+
     collectors = [
         ("HttpWebCollector", HttpWebCollector, []),
         ("LeakIX", LeakIXCollector, ["LEAKIX_API_KEY"]),
@@ -192,15 +249,15 @@ def list_collectors():
         ("GitHub", GitHubCollector, ["GITHUB_TOKEN"]),
         ("News", NewsCollector, ["NEWS_API_KEY"]),
     ]
-    
+
     click.echo("Available NGBSE 20.1 Collectors:")
     click.echo("=" * 50)
-    
+
     for name, collector_class, required_envs in collectors:
         # Check if required environment variables are set
         env_status = "✅" if all(os.getenv(env) for env in required_envs) else "❌"
         status = "Active" if env_status == "✅" else "Inactive (missing API keys)"
-        
+
         click.echo(f"{name:<15} {env_status} {status}")
         if required_envs:
             click.echo(f"{'':15}   Requires: {', '.join(required_envs)}")
@@ -208,27 +265,32 @@ def list_collectors():
 
 
 @cli.command("health")
-@click.option("--format", "output_format", default="text", type=click.Choice(["text", "json"]), help="Output format")
+@click.option(
+    "--format",
+    "output_format",
+    default="text",
+    type=click.Choice(["text", "json"]),
+    help="Output format",
+)
 def health_check(output_format: str):
     """Check the health status of NGBSE components."""
     try:
         health_data = get_health_status()
-        
+
         if output_format == "json":
             click.echo(json.dumps(health_data, indent=2))
         else:
             # Text format
-            status_emoji = {
-                "healthy": "✅",
-                "degraded": "⚠️",
-                "unhealthy": "❌"
-            }
-            
+            status_emoji = {"healthy": "✅", "degraded": "⚠️", "unhealthy": "❌"}
+
             overall_status = health_data["status"]
-            click.echo(f"Overall Status: {status_emoji.get(overall_status, '❓')} {overall_status.upper()}")
+            click.echo(
+                f"Overall Status: {status_emoji.get(overall_status, '❓')} "
+                f"{overall_status.upper()}"
+            )
             click.echo(f"Uptime: {health_data['uptime_seconds']:.1f} seconds")
             click.echo()
-            
+
             # System metrics
             metrics = health_data["metrics"]
             click.echo("System Metrics:")
@@ -236,7 +298,7 @@ def health_check(output_format: str):
             click.echo(f"  Memory: {metrics['memory_percent']:.1f}%")
             click.echo(f"  Disk: {metrics['disk_percent']:.1f}%")
             click.echo()
-            
+
             # Health checks
             click.echo("Component Health:")
             for check in health_data["checks"]:
@@ -248,7 +310,7 @@ def health_check(output_format: str):
                             click.echo(f"    {key}: {', '.join(map(str, value))}")
                         else:
                             click.echo(f"    {key}: {value}")
-            
+
     except (OSError, ImportError, AttributeError) as e:
         click.echo(f"Health check failed: {e}", err=True)
         raise click.Abort()

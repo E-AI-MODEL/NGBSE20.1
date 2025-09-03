@@ -9,6 +9,7 @@ from ngbse20.logging import get_logger
 
 LOGGER = get_logger(__name__)
 
+
 @dataclass
 class Manifest:
     run_id: str
@@ -18,8 +19,10 @@ class Manifest:
     outputs: dict[str, Any]
     stats: dict[str, Any]
 
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
 
 def write_manifest(
     run_id: str,

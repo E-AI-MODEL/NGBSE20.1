@@ -8,6 +8,7 @@ from typing import Any
 def now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
+
 def event(  # noqa: PLR0913
     component: str,
     input: dict[str, Any],
@@ -22,10 +23,12 @@ def event(  # noqa: PLR0913
         "id": f"evt_{uuid.uuid4().hex[:12]}",
         "timestamp": now_iso(),
         "component": component,
-        "input": input, "output": output, "reasoning": reasoning,
+        "input": input,
+        "output": output,
+        "reasoning": reasoning,
         "rules_fired": rules_fired or [],
         "seeds_used": seeds_used or [],
         "metrics": metrics or {},
         "rubric": rubric or {},
-        "meta": {}
+        "meta": {},
     }
