@@ -125,7 +125,6 @@ class HttpWebCollector:
 
 def parse_html(url: str, html: str, timestamp: str) -> Any:
     """Parse HTML content and return a finding object."""
-    from ..models.seed import Seed
     
     # Extract title
     title_match = TITLE_RE.search(html)
