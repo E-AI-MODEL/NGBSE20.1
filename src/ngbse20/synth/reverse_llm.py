@@ -6,6 +6,9 @@ from collections import Counter
 from typing import Any
 
 from ..llm_client import LLMClient
+from ..logging import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 def coverage_gap(findings: list[dict[str, Any]]) -> dict[str, Any]:
@@ -115,13 +118,39 @@ def synthesize_brief_llm(
         return base
 
     if mode == "api":
-        client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"])
-        system_prompt = "You are a Dutch security analyst. Produce concise BLUF and " "3 concrete actions."
+        client = LLMClient(
+            provider_priority or ["openai", "azure_openai", "anthropic", "cohere", "google"]
+        )
+        system_prompt = (
+            "You are a senior cybersecurity threat intelligence analyst. "
+            "Produce a concise BLUF (1-2 sentences), a list of top risks, and 3 actionable mitigation steps. "
+            "Be factual and grounded in the provided evidence."
+        )
         user_prompt = json.dumps(payload, ensure_ascii=False)
-        txt = client.call(system_prompt, user_prompt, max_tokens=400, temperature=0.2)
+        txt = client.call(system_prompt, user_prompt, max_tokens=600, temperature=0.2)
+
+        # Try to parse structured JSON first
         if isinstance(txt, str) and txt.strip():
-            return {**base, "BLUF": txt.strip()}
+            try:
+                parsed = json.loads(txt)
+                required = {"BLUF", "TopRisks", "Actions"}
+                if isinstance(parsed, dict) and required.issubset(parsed.keys()):
+                    return {
+                        "BLUF": parsed.get("BLUF", base["BLUF"]),
+                        "TopRisks": parsed.get("TopRisks", base["TopRisks"]),
+                        "Actions": parsed.get("Actions", base["Actions"]),
+                    }
+                # If model returned plain text instead of JSON, fall back to BLUF-only merge
+                LOGGER.warning("LLM returned non-conforming JSON. Falling back to base + BLUF text.")
+                return {**base, "BLUF": txt.strip()}
+            except Exception:
+                # Not JSON - treat as plain BLUF text
+                LOGGER.warning("LLM output not JSON. Using BLUF text fallback.")
+                return {**base, "BLUF": txt.strip()}
+
+    # Ultimate fallback
     return base
+
 
 
 HIGH_SCORE_THRESHOLD = 0.7
