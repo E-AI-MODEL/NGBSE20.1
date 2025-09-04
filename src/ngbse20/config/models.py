@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -65,6 +65,32 @@ class CollectorConfig(BaseModel):
     options: dict = Field(default_factory=dict, description="Collector-specific options")
 
 
+class SourceTrustConfig(BaseModel):
+    """Source trust configuration for scoring v18.1."""
+    
+    domains: Dict[str, Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Domain-specific trust levels"
+    )
+    default_trust_level: float = Field(
+        0.5,
+        ge=0.0,
+        le=1.0,
+        description="Default trust level for unknown domains"
+    )
+    
+    @field_validator("domains")
+    @classmethod
+    def validate_domains(cls, v: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+        for domain, config in v.items():
+            if "trust_level" not in config:
+                raise ValueError(f"Domain {domain} missing trust_level")
+            trust = config["trust_level"]
+            if not isinstance(trust, (int, float)) or not 0.0 <= trust <= 1.0:
+                raise ValueError(f"Domain {domain} trust_level must be 0.0-1.0, got {trust}")
+        return v
+
+
 class Config(BaseModel):
     """Main configuration for NGBSE 20.1."""
 
@@ -72,6 +98,7 @@ class Config(BaseModel):
     rules: list[Rule] = Field(default_factory=list, description="List of rules to apply")
     collectors: list[CollectorConfig] = Field(default_factory=list, description="Collector configurations")
     options: dict[str, str] = Field(default_factory=dict, description="General options")
+    source_trust: Optional[SourceTrustConfig] = Field(None, description="Source trust configuration")
 
     # Pipeline options
     max_concurrent_collectors: int = Field(5, ge=1, description="Maximum concurrent collectors")

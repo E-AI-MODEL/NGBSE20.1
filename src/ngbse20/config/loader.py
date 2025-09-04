@@ -15,6 +15,7 @@ from pydantic import ValidationError
 from ..logging import get_logger
 from ..models.seed import Seed
 from ..utils.validation import validate_allowlist
+from .models import SourceTrustConfig
 
 LOGGER = get_logger(__name__)
 
@@ -376,3 +377,32 @@ def _validate_rules_file(rules_file: str) -> int:
             raise ValueError(f"Invalid rule data at index {i}: {e}")
 
     return n_rules
+
+
+def load_source_trust(sources_file: str = "sources.json", config_dir: str = "config") -> SourceTrustConfig:
+    """Load source trust configuration.
+
+    Args:
+        sources_file: Name of the sources file
+        config_dir: Directory containing configuration files
+
+    Returns:
+        SourceTrustConfig: Loaded and validated source trust configuration
+    """
+    sources_path = Path(config_dir) / sources_file
+
+    if not sources_path.exists():
+        LOGGER.warning(f"Sources file {sources_path} not found, using default trust config")
+        return SourceTrustConfig()
+
+    try:
+        with open(sources_path, "r", encoding="utf-8") as f:
+            raw_config = json.load(f)
+        
+        # Validate with Pydantic
+        return SourceTrustConfig(**raw_config)
+    
+    except (FileNotFoundError, json.JSONDecodeError, ValidationError) as e:
+        LOGGER.error(f"Failed to load source trust config from {sources_path}: {e}")
+        LOGGER.info("Using default source trust configuration")
+        return SourceTrustConfig()

@@ -1,0 +1,21 @@
+{
+  "domains": {
+    "github.com": {
+      "trust_level": 0.9,
+      "comment": "High trust - official GitHub"
+    },
+    "stackoverflow.com": {
+      "trust_level": 0.8,
+      "comment": "High trust - community verified"
+    },
+    "reddit.com": {
+      "trust_level": 0.4,
+      "comment": "Medium trust - user generated"
+    },
+    "example.com": {
+      "trust_level": 0.1,
+      "comment": "Low trust - example domain"
+    }
+  },
+  "default_trust_level": 0.5
+}

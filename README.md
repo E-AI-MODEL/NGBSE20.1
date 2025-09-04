@@ -114,6 +114,15 @@ For local installation, Python 3.11+ is required.
    python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --outdir out
    ```
 
+## New in v18.1
+
+- **Source Trust Scoring**: Evaluate findings based on domain trustworthiness
+- **Keyword Pattern Scoring**: Enhanced relevance scoring with configurable rules  
+- **Shadow Mode**: Safe rollout with side-by-side comparison
+- **Enhanced Observability**: Detailed metrics and contributor tracking
+
+See [Scoring v18.1 Documentation](docs/SCORING_V18_1.md) for details.
+
 4. **Individual pipeline steps (legacy):**
    You can still run individual steps if needed.
    

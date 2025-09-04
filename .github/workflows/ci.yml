@@ -95,6 +95,47 @@ jobs:
             bandit-report.json
             safety-report.json
 
+  config-validation:
+    name: Config Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock
+          pip install .
+
+      - name: Validate sources.json schema
+        env:
+          PYTHONPATH: src
+        run: |
+          python -c "
+          from ngbse20.config.loader import load_source_trust
+          config = load_source_trust()
+          print(f'Source trust config loaded: {len(config.domains)} domains')
+          print(f'Default trust level: {config.default_trust_level}')
+          "
+
+      - name: Validate rules.json schema
+        env:
+          PYTHONPATH: src
+        run: |
+          python -c "
+          from ngbse20.config.loader import load_rules
+          rules = load_rules()
+          print(f'Rules loaded: {len(rules)} rules')
+          for rule in rules:
+              print(f'Rule {rule[\"id\"]}: {rule[\"name\"]} (enabled: {rule.get(\"enabled\", True)})')
+          "
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -133,6 +174,11 @@ jobs:
           PYTHONPATH: src
         run: pytest -q -m "not slow and not integration" --maxfail=1 --cov=src/ngbse20 --cov-report=xml --cov-report=html
 
+      - name: Run scoring v18.1 tests
+        env:
+          PYTHONPATH: src
+        run: pytest tests/test_scoring_v18_1.py tests/test_source_trust_config.py -v
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         if: matrix.python-version == '3.11'
@@ -167,6 +213,58 @@ jobs:
         env:
           PYTHONPATH: src
         run: pytest -vv -m "integration" tests/integration --maxfail=1
+
+      - name: Run scoring integration tests
+        env:
+          PYTHONPATH: src
+        run: pytest tests/integration/test_scoring_integration.py -v
+
+  golden-tests:
+    name: Golden Tests (Determinism)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock
+          pip install .
+
+      - name: Run golden tests
+        env:
+          PYTHONPATH: src
+        run: |
+          python -c "
+          from src.ngbse20.scoring.v18 import ScoringConfig, score_findings
+          from src.ngbse20.config.loader import load_source_trust, load_rules
+          
+          # Test deterministic scoring
+          findings = [
+              {
+                  'title': 'Test finding',
+                  'url': 'https://github.com/user/repo',
+                  'timestamp': '2024-01-01T00:00:00Z'
+              }
+          ]
+          
+          cfg = ScoringConfig(enable_source_trust=True, enable_keyword_score=True)
+          source_trust = load_source_trust()
+          rules = load_rules()
+          
+          # Run multiple times to ensure determinism
+          result1 = score_findings(findings, cfg, source_trust.dict(), rules)
+          result2 = score_findings(findings, cfg, source_trust.dict(), rules)
+          
+          assert result1[0]['score'] == result2[0]['score'], 'Scoring is not deterministic'
+          print('Golden test passed: scoring is deterministic')
+          "
 
   sbom-generation:
     name: Generate SBOM
@@ -205,7 +303,7 @@ jobs:
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: [lint-and-format, unit-tests, integration-tests]
+    needs: [config-validation, lint-and-format, unit-tests, integration-tests, golden-tests]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

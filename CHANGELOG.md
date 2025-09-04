@@ -5,6 +5,24 @@ All notable changes to NGBSE will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.2.1] - 2024-01-XX
+
+### Added
+- **Scoring v18.1**: New source trust and keyword pattern scoring
+  - Source trust scoring based on domain trustworthiness
+  - Keyword pattern scoring with configurable rules
+  - Shadow mode for safe rollout and comparison
+  - Enhanced observability with detailed metrics
+  - Gradual rollout configuration stages
+- **Configuration Schema**: New `sources.json` schema for domain trust levels
+- **Enhanced CI/CD**: Added config validation and golden tests
+- **Comprehensive Documentation**: Scoring v18.1 guide and migration docs
+
+### Changed
+- **Scoring Configuration**: Added v18.1 flags (backward compatible)
+- **Score Output**: Enhanced breakdown format with new fields
+- **Configuration Validation**: Stricter schema validation for config files
+
 ## [20.2.0-GA] - 2024-01-XX
 
 ### Added
