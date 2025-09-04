@@ -61,7 +61,6 @@ extend-immutable-calls = []
 known-first-party = ["ngbse20"]
 combine-as-imports = true
 force-single-line = false
-multi-line-output = 3
 
 [tool.black]
 line-length = 120
