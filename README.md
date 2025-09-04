@@ -1,6 +1,6 @@
-# NGBSE20.2.0-GA
+# NGBSE
 
-NGBSE 20.2.0-GA is an engine for epistemic Open-Source Intelligence (OSINT). It's designed not just to find answers, but to expose the "blind spots" in knowledge: assumptions, gaps, and uncertainties. It transforms Large Language Models from "answer machines" into "curiosity partners".
+NGBSE is an engine for epistemic Open-Source Intelligence (OSINT). It's designed not just to find answers, but to expose the "blind spots" in knowledge: assumptions, gaps, and uncertainties. It transforms Large Language Models from "answer machines" into "curiosity partners".
 
 This tool is the practical implementation of the research paper "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs) and the Next-Generation Blind Spot Engine (NGBSE)".
 
@@ -114,7 +114,7 @@ For local installation, Python 3.11+ is required.
    python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json --outdir out
    ```
 
-## New in v18.1
+## New in Scoring v18.1
 
 - **Source Trust Scoring**: Evaluate findings based on domain trustworthiness
 - **Keyword Pattern Scoring**: Enhanced relevance scoring with configurable rules  

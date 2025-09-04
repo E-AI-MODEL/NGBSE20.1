@@ -1,4 +1,4 @@
-# NGBSE 20.1 User Guide
+# NGBSE User Guide
 ## Complete OSINT Intelligence Engine
 
 ---

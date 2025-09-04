@@ -1,8 +1,8 @@
-# Scoring v18.1 - Source Trust and Keyword Scoring
+# NGBSE Scoring v18.1 - Source Trust and Keyword Scoring
 
 ## Overview
 
-Scoring v18.1 introduces two new scoring components to enhance the accuracy and relevance of findings:
+NGBSE Scoring v18.1 introduces two new scoring components to enhance the accuracy and relevance of findings:
 
 - **Source Trust Score (S_s)**: Evaluates the trustworthiness of findings based on their source domain
 - **Keyword Score (S_k)**: Computes relevance based on pattern matching against configurable rules
@@ -200,7 +200,7 @@ cfg_full = gradual_rollout_config("full")
 
 ## Migration Guide
 
-### From v18.0 to v18.1
+### From Previous Version to v18.1
 
 1. **No breaking changes**: v18.1 is backward compatible
 2. **Flags default to off**: New features are disabled by default

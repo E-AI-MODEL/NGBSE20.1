@@ -1,4 +1,4 @@
-# NGBSE 20.2.0-GA API Reference
+# NGBSE API Reference
 ## Complete Technical Documentation
 
 ---

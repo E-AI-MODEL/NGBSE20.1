@@ -1,4 +1,4 @@
-# NGBSE 20.1 Documentation
+# NGBSE Documentation
 ## Complete User and Developer Resources
 
 ---

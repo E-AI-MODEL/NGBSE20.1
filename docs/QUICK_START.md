@@ -1,4 +1,4 @@
-# NGBSE 20.2.0-GA Quick Start Guide
+# NGBSE Quick Start Guide
 ## Get Up and Running in 5 Minutes
 
 ---

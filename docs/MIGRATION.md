@@ -1,10 +1,10 @@
-# Migration Guide: NGBSE 18.0.0-GA → 20.2.0-GA
+# NGBSE Migration Guide
 
-This guide helps you migrate from NGBSE 18.0.0-GA to the new 20.2.0-GA release.
+This guide helps you migrate from previous versions to the current NGBSE release.
 
 ## Overview of Changes
 
-NGBSE 20.2.0-GA introduces significant architectural improvements while maintaining backward compatibility for most use cases. The main changes include:
+NGBSE introduces significant architectural improvements while maintaining backward compatibility for most use cases. The main changes include:
 
 - **Modular Architecture**: Complete refactoring for better maintainability
 - **Centralized Configuration**: All config files moved to `config/` directory

@@ -1,4 +1,4 @@
-# NGBSE 20.2 Architecture
+# NGBSE Architecture
 
 ## Overview
 

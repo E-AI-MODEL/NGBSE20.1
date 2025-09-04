@@ -5,7 +5,7 @@ All notable changes to NGBSE will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [20.2.1] - 2024-01-XX
+## [Unreleased]
 
 ### Added
 - **Scoring v18.1**: New source trust and keyword pattern scoring
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Score Output**: Enhanced breakdown format with new fields
 - **Configuration Validation**: Stricter schema validation for config files
 
-## [20.2.0-GA] - 2024-01-XX
+## [Previous Release] - 2024-01-XX
 
 ### Added
 - **Modular Architecture**: Complete refactoring of the orchestrator into separate, testable components
