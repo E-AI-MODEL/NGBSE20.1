@@ -118,9 +118,7 @@ def synthesize_brief_llm(
         return base
 
     if mode == "api":
-        client = LLMClient(
-            provider_priority or ["openai", "azure_openai", "anthropic", "cohere", "google"]
-        )
+        client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic", "cohere", "google"])
         system_prompt = (
             "You are a senior cybersecurity threat intelligence analyst. "
             "Produce a concise BLUF (1-2 sentences), a list of top risks, and 3 actionable mitigation steps. "
@@ -150,8 +148,6 @@ def synthesize_brief_llm(
 
     # Ultimate fallback
     return base
-
-
 
 HIGH_SCORE_THRESHOLD = 0.7
 LOW_QUALITY_THRESHOLD = 0.5

@@ -125,20 +125,20 @@ class HttpWebCollector:
 
 def parse_html(url: str, html: str, timestamp: str) -> Any:
     """Parse HTML content and return a finding object."""
-    
+
     # Extract title
     title_match = TITLE_RE.search(html)
     title = title_match.group(1).strip() if title_match else ""
-    
+
     # Extract published date
     published = parse_published(html)
-    
+
     # Extract domain
     domain = extract_domain(url)
-    
+
     # Generate hash
     hash_value = content_hash(html, url=url, title=title)
-    
+
     # Create finding object
     finding = {
         "id": f"finding-{hash_value[:8]}",
@@ -153,7 +153,7 @@ def parse_html(url: str, html: str, timestamp: str) -> Any:
         "timestamp": published or timestamp,
         "quality": {"q": 0.8},
     }
-    
+
     # Create a simple object with attributes for the test
     class Finding:
         def __init__(self, data):
@@ -163,5 +163,5 @@ def parse_html(url: str, html: str, timestamp: str) -> Any:
             self.hash = hash_value
             self.url = url
             self.__dict__.update(data)
-    
+
     return Finding(finding)
