@@ -48,12 +48,24 @@ def build_scenarios(
 ) -> dict[str, dict[str, Any]]:
     groups = group_by_themes(findings)
     out: dict[str, dict[str, Any]] = {}
-    client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic"]) if mode == "api" else None
+    client = (
+        LLMClient(provider_priority or ["openai", "azure_openai", "anthropic", "cohere", "google"])
+        if mode == "api"
+        else None
+    )
 
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))
         prob = _estimate_probability(avg, len(items))
         summary = ""
+        # Derive additional template fields for non-LLM mode
+        risk_level = "High" if avg > 0.7 else ("Medium" if avg > 0.4 else "Low")
+        mitigation_priority = "Immediate" if avg > 0.7 else ("Short-term" if avg > 0.4 else "Planned")
+        if mode == "none":
+            summary = (
+                f"Theme '{theme.replace('_', ' ')}' requires manual review. "
+                f"Found {len(items)} findings with average score {avg:.2f}."
+            )
         if mode in ("prompt", "api"):
             payload = {
                 "theme": theme,
@@ -85,5 +97,7 @@ def build_scenarios(
             "semantic_summary": summary,
             "avg_eai_score": round(avg, 3),
             "evidence_count": len(items),
+            "risk_level": risk_level,
+            "mitigation_priority": mitigation_priority,
         }
     return out
