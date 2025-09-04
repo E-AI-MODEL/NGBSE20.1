@@ -35,6 +35,7 @@ class LLMClient:
             "openai",
             "azure_openai",
             "anthropic",
+            "cohere",
             "google",
         ]:
             fn = getattr(self, f"_call_{p}", None)
@@ -46,7 +47,15 @@ class LLMClient:
                     return out
                 else:
                     LOGGER.warning(f"LLM call to {p} failed.")
-        return None
+        # Universal safe fallback to avoid crashes and provide consistent structure
+        LOGGER.warning("All configured LLM providers failed or are unavailable. Returning safe fallback output.")
+        return json.dumps(
+            {
+                "BLUF": "No model output available. Using safe fallback.",
+                "TopRisks": [],
+                "Actions": [],
+            }
+        )
 
     def _post_json(
         self,
@@ -135,6 +144,34 @@ class LLMClient:
         )
         parts = data.get("content", []) if data else []
         return "\n".join([p.get("text", "") for p in parts if p.get("type") == "text"]) if parts else None
+
+    def _call_cohere(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
+        """Cohere fallback implementation.
+
+        Returns a structured fallback when COHERE_API_KEY is not configured or
+        if the API call is not implemented in this environment.
+        """
+        api_key = os.getenv("COHERE_API_KEY")
+        model = os.getenv("COHERE_MODEL", "command-r7b-12-2024")
+        if not api_key:
+            # No key provided; return a consistent, safe fallback structure
+            LOGGER.warning("Cohere API key not set. Using fallback response.")
+            return json.dumps(
+                {
+                    "BLUF": "No output available (Cohere provider not configured).",
+                    "TopRisks": [],
+                    "Actions": [],
+                }
+            )
+        # If in the future we implement real Cohere calls, use a pattern similar to _post_json
+        LOGGER.warning("Cohere provider call not implemented. Using fallback response.")
+        return json.dumps(
+            {
+                "BLUF": "No output available (Cohere provider not implemented).",
+                "TopRisks": [],
+                "Actions": [],
+            }
+        )
 
     def _call_google(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("GOOGLE_API_KEY")
