@@ -23,7 +23,7 @@ class OllamaClient(BaseLLMProvider):
         # Ollama doesn't require API key for local usage
         self.api_key = api_key
     
-    def list_models(self) -> List[str]:
+    def list_models(self):
         """List available Ollama models."""
         try:
             return self._get_available_models()
@@ -39,7 +39,7 @@ class OllamaClient(BaseLLMProvider):
                 "phi3:latest"
             ]
     
-    def _get_available_models(self) -> List[str]:
+    def _get_available_models(self):
         """Get available models from Ollama API."""
         try:
             response = requests.get(f"{self.base_url}/api/tags", timeout=10)
@@ -61,18 +61,18 @@ class OllamaClient(BaseLLMProvider):
                 "phi3:latest"
             ]
     
-    def default_model(self) -> str:
+    def default_model(self):
         """Get default Ollama model."""
         return "llama3.2:latest"
     
-    def bind(self, model: str, **params) -> "OllamaHandle":
+    def bind(self, model: str, **params):
         """Bind model and parameters."""
         return OllamaHandle(self, model, params)
     
     def _call_api(self, system_prompt: str, user_prompt: str,
                   model: str, temperature: float = 0.0,
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to Ollama."""
         headers = {
             "Content-Type": "application/json"
@@ -122,7 +122,7 @@ class OllamaHandle(LLMHandle):
         super().__init__("ollama", model, params)
         self.client = client
     
-    def generate(self, system_prompt: str, user_prompt: str) -> str:
+    def generate(self, system_prompt: str, user_prompt: str):
         """Generate response using Ollama API."""
         try:
             response = self.client._call_api(
@@ -140,7 +140,7 @@ class OllamaHandle(LLMHandle):
     def _call_api(self, system_prompt: str, user_prompt: str,
                   model: str, temperature: float = 0.0,
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to Ollama."""
         headers = {
             "Content-Type": "application/json"

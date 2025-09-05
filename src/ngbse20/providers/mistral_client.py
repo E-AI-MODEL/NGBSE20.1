@@ -23,7 +23,7 @@ class MistralClient(BaseLLMProvider):
         if not self.api_key:
             raise ValueError("MISTRAL_API_KEY environment variable is required")
     
-    def list_models(self) -> List[str]:
+    def list_models(self):
         """List available Mistral models."""
         return [
             "mistral-large-latest",
@@ -35,18 +35,18 @@ class MistralClient(BaseLLMProvider):
             "open-mixtral-8x22b"
         ]
     
-    def default_model(self) -> str:
+    def default_model(self):
         """Get default Mistral model."""
         return "mistral-small-latest"
     
-    def bind(self, model: str, **params) -> "MistralHandle":
+    def bind(self, model: str, **params):
         """Bind model and parameters."""
         return MistralHandle(self, model, params)
     
     def _call_api(self, system_prompt: str, user_prompt: str,
                   model: str, temperature: float = 0.0,
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to Mistral."""
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -94,7 +94,7 @@ class MistralHandle(LLMHandle):
         super().__init__("mistral", model, params)
         self.client = client
     
-    def generate(self, system_prompt: str, user_prompt: str) -> str:
+    def generate(self, system_prompt: str, user_prompt: str):
         """Generate response using Mistral API."""
         try:
             response = self.client._call_api(
@@ -112,7 +112,7 @@ class MistralHandle(LLMHandle):
     def _call_api(self, system_prompt: str, user_prompt: str,
                   model: str, temperature: float = 0.0,
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to Mistral."""
         headers = {
             "Authorization": f"Bearer {self.api_key}",

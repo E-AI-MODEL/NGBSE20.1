@@ -4,7 +4,7 @@ Centralized LLM management with provider abstraction and configuration.
 """
 
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from .providers import OpenAIClient, AnthropicClient, MistralClient, OllamaClient
 from .config.models import LLMConfig, ProfileConfig
@@ -14,7 +14,7 @@ from .logging import get_logger
 LOGGER = get_logger(__name__)
 
 
-def get_provider_client(provider_name: str) -> Union[OpenAIClient, AnthropicClient, MistralClient, OllamaClient]:
+def get_provider_client(provider_name: str):
     """
     Get provider client by name.
     
@@ -141,7 +141,7 @@ def build_llm(config: LLMConfig,
     return handle
 
 
-def list_models(provider: str) -> List[str]:
+def list_models(provider: str):
     """
     List available models for a provider.
     
@@ -159,7 +159,7 @@ def list_models(provider: str) -> List[str]:
         return []
 
 
-def get_default_model(provider: str) -> str:
+def get_default_model(provider: str):
     """
     Get default model for a provider.
     

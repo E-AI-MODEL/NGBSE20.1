@@ -174,7 +174,7 @@ class ConfigLoader:
 
         return credentials
 
-    def _validate_and_convert_config(self, raw_config: Dict[str, Any]) -> NGBSEConfig:
+    def _validate_and_convert_config(self, raw_config: Dict[str, Any]):
         """Validate and convert raw config to structured config."""
         try:
             # Validate required fields
@@ -207,7 +207,7 @@ class ConfigLoader:
             LOGGER.info("Using default configuration")
             return self._get_default_config()
 
-    def _validate_collectors_config(self, raw_config: Dict[str, Any]) -> CollectorConfig:
+    def _validate_collectors_config(self, raw_config: Dict[str, Any]):
         """Validate and convert collectors configuration."""
         collectors_config = raw_config.get("collectors", {})
         if not isinstance(collectors_config, dict):
@@ -218,7 +218,7 @@ class ConfigLoader:
             rate_limits=collectors_config.get("rate_limits"),
         )
 
-    def _validate_scoring_config(self, raw_config: Dict[str, Any]) -> ScoringConfig:
+    def _validate_scoring_config(self, raw_config: Dict[str, Any]):
         """Validate and convert scoring configuration."""
         scoring_config = raw_config.get("scoring", {})
         if not isinstance(scoring_config, dict):
@@ -228,7 +228,7 @@ class ConfigLoader:
             default_weights=scoring_config.get("default_weights", {"coverage": 0.3, "recency": 0.3, "confidence": 0.4})
         )
 
-    def _validate_llm_config(self, raw_config: Dict[str, Any]) -> Optional[LLMConfig]:
+    def _validate_llm_config(self, raw_config: Dict[str, Any]):
         """Validate and convert LLM configuration."""
         llm_config = raw_config.get("llm")
         if not llm_config or not isinstance(llm_config, dict):
@@ -240,7 +240,7 @@ class ConfigLoader:
             LOGGER.warning(f"Invalid LLM configuration: {e}")
             return None
 
-    def _validate_profiles_config(self, raw_config: Dict[str, Any]) -> Dict[str, ProfileConfig]:
+    def _validate_profiles_config(self, raw_config: Dict[str, Any]):
         """Validate and convert profiles configuration."""
         profiles_config = raw_config.get("profiles", {})
         if not isinstance(profiles_config, dict):
@@ -255,7 +255,7 @@ class ConfigLoader:
                     LOGGER.warning(f"Invalid profile '{name}': {e}")
         return profiles
 
-    def _validate_ballm_config(self, raw_config: Dict[str, Any]) -> BALLMConfig:
+    def _validate_ballm_config(self, raw_config: Dict[str, Any]):
         """Validate and convert BALLM configuration."""
         ballm_config = raw_config.get("ballm", {})
         if not isinstance(ballm_config, dict):
@@ -266,18 +266,18 @@ class ConfigLoader:
             model=ballm_config.get("model", "gpt-4"),
         )
 
-    def _validate_allowlist_config(self, raw_config: Dict[str, Any]) -> List[str]:
+    def _validate_allowlist_config(self, raw_config: Dict[str, Any]):
         """Validate and convert allowlist configuration."""
         allowlist = raw_config.get("allowlist", ["*"])
         return validate_allowlist(allowlist)
 
-    def _get_default_config(self) -> NGBSEConfig:
+    def _get_default_config(self):
         """Get default configuration."""
         return NGBSEConfig()
 
 
 # Standalone functions for backward compatibility and easier imports
-def load_config(config_file: str = "ngbse.config.yml", config_dir: str = "config") -> NGBSEConfig:
+def load_config(config_file: str = "ngbse.config.yml", config_dir: str = "config"):
     """Load main configuration file with validation.
 
     Args:

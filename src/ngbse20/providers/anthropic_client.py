@@ -23,7 +23,7 @@ class AnthropicClient(BaseLLMProvider):
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable is required")
     
-    def list_models(self) -> List[str]:
+    def list_models(self):
         """List available Anthropic models."""
         return [
             "claude-3-5-sonnet-20241022",
@@ -33,18 +33,18 @@ class AnthropicClient(BaseLLMProvider):
             "claude-3-haiku-20240307"
         ]
     
-    def default_model(self) -> str:
+    def default_model(self):
         """Get default Anthropic model."""
         return "claude-3-5-sonnet-20241022"
     
-    def bind(self, model: str, **params) -> "AnthropicHandle":
+    def bind(self, model: str, **params):
         """Bind model and parameters."""
         return AnthropicHandle(self, model, params)
     
     def _call_api(self, system_prompt: str, user_prompt: str,
                   model: str, temperature: float = 0.0,
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to Anthropic."""
         headers = {
             "x-api-key": self.api_key,
@@ -92,7 +92,7 @@ class AnthropicHandle(LLMHandle):
         super().__init__("anthropic", model, params)
         self.client = client
     
-    def generate(self, system_prompt: str, user_prompt: str) -> str:
+    def generate(self, system_prompt: str, user_prompt: str):
         """Generate response using Anthropic API."""
         try:
             response = self.client._call_api(
@@ -110,7 +110,7 @@ class AnthropicHandle(LLMHandle):
     def _call_api(self, system_prompt: str, user_prompt: str,
                   model: str, temperature: float = 0.0,
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to Anthropic."""
         headers = {
             "x-api-key": self.api_key,

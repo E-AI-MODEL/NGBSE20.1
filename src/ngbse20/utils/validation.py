@@ -13,7 +13,7 @@ except ImportError:
     jsonschema = None
 
 
-def validate_and_normalize(obj: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
+def validate_and_normalize(obj: Dict[str, Any], schema: Dict[str, Any]):
     """
     Validate object against JSON schema and normalize for deterministic output.
     
@@ -36,7 +36,7 @@ def validate_and_normalize(obj: Dict[str, Any], schema: Dict[str, Any]) -> Dict[
     return _sort_object(obj)
 
 
-def _sort_object(obj: Any) -> Any:
+def _sort_object(obj: Any):
     """
     Recursively sort object keys and lists for deterministic output.
     
@@ -60,7 +60,7 @@ def _sort_object(obj: Any) -> Any:
         return obj
 
 
-def create_hash(obj: Any) -> str:
+def create_hash(obj: Any):
     """
     Create a deterministic hash of an object.
     
@@ -75,7 +75,7 @@ def create_hash(obj: Any) -> str:
     return hashlib.sha256(json_str.encode('utf-8')).hexdigest()
 
 
-def validate_llm_output(output: str, expected_schema: Dict[str, Any]) -> Dict[str, Any]:
+def validate_llm_output(output: str, expected_schema: Dict[str, Any]):
     """
     Parse and validate LLM output against expected schema.
     

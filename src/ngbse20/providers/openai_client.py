@@ -23,7 +23,7 @@ class OpenAIClient(BaseLLMProvider):
         if not self.api_key:
             raise ValueError("OPENAI_API_KEY environment variable is required")
     
-    def list_models(self) -> List[str]:
+    def list_models(self):
         """List available OpenAI models."""
         try:
             # Cache models for 1 hour
@@ -41,7 +41,7 @@ class OpenAIClient(BaseLLMProvider):
                 "o1-mini"
             ]
     
-    def _get_cached_models(self) -> List[str]:
+    def _get_cached_models(self):
         """Get cached models or fetch from API."""
         # In a real implementation, this would use a proper cache
         # For now, return the known models
@@ -55,18 +55,18 @@ class OpenAIClient(BaseLLMProvider):
             "o1-mini"
         ]
     
-    def default_model(self) -> str:
+    def default_model(self):
         """Get default OpenAI model."""
         return "gpt-4o-mini"
     
-    def bind(self, model: str, **params) -> "OpenAIHandle":
+    def bind(self, model: str, **params):
         """Bind model and parameters."""
         return OpenAIHandle(self, model, params)
     
     def _call_api(self, system_prompt: str, user_prompt: str, 
                   model: str, temperature: float = 0.0, 
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to OpenAI."""
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -114,7 +114,7 @@ class OpenAIHandle(LLMHandle):
         super().__init__("openai", model, params)
         self.client = client
     
-    def generate(self, system_prompt: str, user_prompt: str) -> str:
+    def generate(self, system_prompt: str, user_prompt: str):
         """Generate response using OpenAI API."""
         try:
             response = self.client._call_api(
@@ -132,7 +132,7 @@ class OpenAIHandle(LLMHandle):
     def _call_api(self, system_prompt: str, user_prompt: str, 
                   model: str, temperature: float = 0.0, 
                   top_p: float = 1.0, max_tokens: int = 400,
-                  seed: Optional[int] = None) -> str:
+                  seed: Optional[int] = None):
         """Make API call to OpenAI."""
         headers = {
             "Authorization": f"Bearer {self.api_key}",

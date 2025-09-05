@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 
 def hash_prompt(system_prompt: str, user_prompt: str, 
                 model: str, params: Dict[str, Any], 
-                seed: Optional[int] = None) -> str:
+                seed: Optional[int] = None):
     """
     Create a deterministic hash of a prompt and parameters.
     
@@ -40,7 +40,7 @@ def hash_prompt(system_prompt: str, user_prompt: str,
     return hashlib.sha256(hash_input.encode('utf-8')).hexdigest()
 
 
-def hash_input(input_data: Any) -> str:
+def hash_input(input_data: Any):
     """
     Create a deterministic hash of input data.
     

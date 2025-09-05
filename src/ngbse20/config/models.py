@@ -74,7 +74,7 @@ class LLMParams(BaseModel):
     
     @field_validator("temperature")
     @classmethod
-    def validate_temperature(cls, v: float) -> float:
+    def validate_temperature(cls, v: float):
         if v < 0.0 or v > 2.0:
             raise ValueError("Temperature must be between 0.0 and 2.0")
         return v
@@ -90,7 +90,7 @@ class LLMConfig(BaseModel):
     
     @field_validator("provider")
     @classmethod
-    def validate_provider(cls, v: str) -> str:
+    def validate_provider(cls, v: str):
         valid_providers = ["openai", "anthropic", "mistral", "ollama"]
         if v.lower() not in valid_providers:
             raise ValueError(f"Invalid provider. Must be one of: {', '.join(valid_providers)}")
@@ -121,7 +121,7 @@ class SourceTrustConfig(BaseModel):
     
     @field_validator("domains")
     @classmethod
-    def validate_domains(cls, v: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    def validate_domains(cls, v: Dict[str, Dict[str, Any]]):
         for domain, config in v.items():
             if "trust_level" not in config:
                 raise ValueError(f"Domain {domain} missing trust_level")
@@ -153,7 +153,7 @@ class Config(BaseModel):
 
     @field_validator("output_format")
     @classmethod
-    def validate_output_format(cls, v: str) -> str:
+    def validate_output_format(cls, v: str):
         valid_formats = ["json", "stix", "docx", "all"]
         if v.lower() not in valid_formats:
             raise ValueError(f"Invalid output format. Must be one of: {', '.join(valid_formats)}")
