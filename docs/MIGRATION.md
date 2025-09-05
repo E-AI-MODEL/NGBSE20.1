@@ -432,3 +432,56 @@ pip install -e .
 - Automated dependency vulnerability scanning
 - SBOM generation for supply chain transparency
 - Regular security updates
+
+## HttpWebCollector Behavior Changes
+
+### **Important: Allowlist Behavior Restored**
+
+In NGBSE 20.3.0, the `HttpWebCollector` behavior has been restored to match the original implementation. This affects how empty allowlists are handled.
+
+#### **Before (Temporary Issue)**
+```python
+# Empty allowlist [] = No domains allowed
+# This was a breaking change introduced during mypy fixes
+```
+
+#### **After (NGBSE 20.3.0)**
+```python
+# Empty allowlist [] = All domains allowed (restored)
+# Wildcard allowlist ["*"] = All domains allowed
+# Specific allowlist ["example.com"] = Only specified domains
+```
+
+#### **Migration Impact**
+
+**No Action Required** for most users:
+- **Wildcard Configuration**: `allowlist: ["*"]` (default) - No change
+- **Specific Domains**: `allowlist: ["example.com", "test.nl"]` - No change
+
+**Action Required** only if you:
+- Use empty allowlist `allowlist: []` and expect it to block all domains
+- Rely on the temporary restrictive behavior
+
+#### **Recommended Configuration**
+
+```yaml
+# Recommended: Use wildcard for all domains
+allowlist: ["*"]
+
+# Or specify exact domains
+allowlist: ["example.com", "test.nl", "*.trusted-domain.com"]
+```
+
+#### **Verification**
+
+To verify your configuration works as expected:
+
+```bash
+# Test with empty allowlist (should allow all domains)
+echo 'allowlist: []' > test-config.yml
+ngbse20 run --config test-config.yml
+
+# Test with specific domains (should be restrictive)
+echo 'allowlist: ["example.com"]' > test-config.yml
+ngbse20 run --config test-config.yml
+```

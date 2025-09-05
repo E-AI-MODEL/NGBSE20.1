@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Linting**: Resolved 79% of code quality issues (442 → 94 errors)
 - **Type Annotations**: Updated deprecated type hints to modern Python syntax
 - **Exception Handling**: Improved error handling with specific exception types
+- **HttpWebCollector Logic**: Restored original allowlist behavior for empty configurations
+  - Empty allowlist now allows all domains (restored from BaseCollector inheritance)
+  - Maintains backward compatibility for existing configurations
+  - Special constructor handling preserved for http_web collector
 
 ## [Unreleased]
 

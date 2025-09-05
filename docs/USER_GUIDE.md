@@ -253,6 +253,36 @@ make test-github
 make test-news
 ```
 
+### **HttpWebCollector Allowlist Behavior**
+
+The `HttpWebCollector` handles domain allowlists with the following behavior:
+
+#### **Allowlist Configuration**
+
+```yaml
+# Allow all domains (recommended default)
+allowlist: ["*"]
+
+# Allow specific domains only
+allowlist: ["example.com", "test.org", "*.trusted-domain.com"]
+
+# Empty allowlist - allows all domains (restored behavior)
+allowlist: []
+```
+
+#### **Behavior Details**
+
+- **`["*"]`**: Allows all domains (wildcard)
+- **`["example.com"]`**: Allows only `example.com` and its subdomains
+- **`[".example.com"]`**: Allows all subdomains of `example.com`
+- **`[]`**: Allows all domains (empty = permissive)
+
+#### **Important Notes**
+
+- **Default Configuration**: Uses `allowlist: ["*"]` for maximum compatibility
+- **Empty Allowlist**: In NGBSE 20.3.0, empty allowlist allows all domains (restored behavior)
+- **Subdomain Matching**: Use `*.domain.com` or `.domain.com` for subdomain support
+
 ---
 
 ## 🔄 **Pipeline Operations**
