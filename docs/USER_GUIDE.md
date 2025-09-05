@@ -19,9 +19,9 @@
 
 ## 🎯 **Introduction**
 
-### **What is NGBSE 20.1?**
+### **What is NGBSE 20.3?**
 
-NGBSE 20.1 (Next-Generation Blind Spot Engine) is a comprehensive Open-Source Intelligence (OSINT) engine designed to:
+NGBSE 20.3 (Next-Generation Blind Spot Engine) is a comprehensive Open-Source Intelligence (OSINT) engine designed to:
 
 - **Collect intelligence** from multiple sources (web, threat feeds, infrastructure, code repositories)
 - **Identify blind spots** in your intelligence gathering
@@ -43,8 +43,8 @@ NGBSE 20.1 (Next-Generation Blind Spot Engine) is a comprehensive Open-Source In
 
 ```bash
 # Clone the repository
-git clone https://github.com/E-AI-MODEL/NGBSE20.1.git
-cd NGBSE20.1
+git clone https://github.com/E-AI-MODEL/NGBSE20.3.git
+cd NGBSE20.3
 
 # Install dependencies
 make install
@@ -102,8 +102,11 @@ cat out/stix_bundle.json
    # For news intelligence
    NEWS_API_KEY=your_key_here
    
-   # For AI-powered insights
+   # For AI-powered insights (LLM Configuration)
    OPENAI_API_KEY=your_key_here
+   ANTHROPIC_API_KEY=your_key_here
+   COHERE_API_KEY=your_key_here
+   GOOGLE_API_KEY=your_key_here
    ```
 
 ### **Seed Configuration**
@@ -148,6 +151,64 @@ cat out/stix_bundle.json
 
 ---
 
+## 🤖 **LLM Configuration**
+
+### **Dynamic LLM Provider Selection**
+
+NGBSE 20.3 features intelligent LLM provider selection based on available API keys. The system automatically detects which providers are configured and selects the most appropriate model.
+
+### **Supported LLM Providers**
+
+| Provider | Models | API Key | Configuration |
+|----------|--------|---------|---------------|
+| **OpenAI** | GPT-4, GPT-3.5-turbo, GPT-4o-mini | `OPENAI_API_KEY` | Direct API key |
+| **Azure OpenAI** | GPT-4, GPT-3.5-turbo variants | `AZURE_OPENAI_API_KEY` | Key + Endpoint + Version |
+| **Anthropic** | Claude-3.5-Sonnet, Claude-3-Haiku | `ANTHROPIC_API_KEY` | Direct API key |
+| **Cohere** | Command, Command-Light | `COHERE_API_KEY` | Direct API key |
+| **Google** | Gemini-Pro, Gemini-Pro-Vision | `GOOGLE_API_KEY` | Direct API key |
+
+### **Model Selection Logic**
+
+1. **Priority Order**: OpenAI → Azure OpenAI → Anthropic → Cohere → Google
+2. **Model Mapping**: Generic model preferences are mapped to provider-specific models
+3. **Fallback**: If preferred model unavailable, uses best available alternative
+
+**Example Model Mappings:**
+```yaml
+# If you specify "gpt-4" but only have Anthropic API key:
+gpt-4 → claude-3.5-sonnet
+
+# If you specify "claude-3.5-sonnet" but only have OpenAI API key:
+claude-3.5-sonnet → gpt-4o-mini
+```
+
+### **LLM Configuration in ngbse.config.yml**
+
+```yaml
+ballm:
+  enabled: true
+  model: "gpt-4"  # Preferred model (auto-mapped to available provider)
+  
+  # Optional: Provider-specific overrides
+  provider_models:
+    openai: "gpt-4o-mini"
+    anthropic: "claude-3.5-sonnet"
+    cohere: "command"
+    google: "gemini-pro"
+```
+
+### **Environment Variables for LLM Models**
+
+```bash
+# Model preferences (optional)
+OPENAI_MODEL=gpt-4o-mini
+ANTHROPIC_MODEL=claude-3.5-sonnet
+COHERE_MODEL=command
+GOOGLE_MODEL=gemini-pro
+```
+
+---
+
 ## 🔍 **OSINT Collectors**
 
 ### **Available Collectors**
@@ -169,7 +230,7 @@ cat out/stix_bundle.json
 python -m ngbse20.cli collectors
 
 # Output example:
-# Available NGBSE 20.1 Collectors:
+# Available NGBSE 20.3 Collectors:
 # ==================================================
 # HttpWebCollector ✅ Active
 # LeakIX           ❌ Inactive (missing API keys)

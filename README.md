@@ -14,6 +14,45 @@ This tool is the practical implementation of the research paper "From Closure to
 - **STIX 2.1 Export**: Export results in a standardized format for cybersecurity applications
 - **Reproducible & Scalable**: Fully containerized with Docker for consistent and easy deployment
 
+## LLM Configuration
+
+NGBSE 20.3.0-GA features dynamic LLM provider selection based on available API keys. The system automatically detects which LLM providers are configured and selects the appropriate model.
+
+### **Supported LLM Providers**
+- **OpenAI**: GPT-4, GPT-3.5-turbo, GPT-4o-mini
+- **Azure OpenAI**: GPT-4, GPT-3.5-turbo variants
+- **Anthropic**: Claude-3.5-Sonnet, Claude-3-Haiku
+- **Cohere**: Command, Command-Light
+- **Google**: Gemini-Pro, Gemini-Pro-Vision
+
+### **LLM Configuration**
+Configure your preferred LLM provider by setting the appropriate API key in `.env`:
+
+```bash
+# OpenAI (default if available)
+OPENAI_API_KEY=your_openai_key_here
+
+# Azure OpenAI
+AZURE_OPENAI_API_KEY=your_azure_key_here
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_API_VERSION=2024-02-15-preview
+
+# Anthropic
+ANTHROPIC_API_KEY=your_anthropic_key_here
+
+# Cohere
+COHERE_API_KEY=your_cohere_key_here
+
+# Google
+GOOGLE_API_KEY=your_google_key_here
+```
+
+### **Model Selection**
+The system automatically maps your preferred model to the available provider:
+- If you specify `gpt-4` but only have Anthropic API key → uses `claude-3.5-sonnet`
+- If you specify `claude-3.5-sonnet` but only have OpenAI API key → uses `gpt-4o-mini`
+- Configuration in `ngbse.config.yml` allows fine-tuning of model preferences
+
 ## OSINT Collectors
 
 NGBSE 20.3.0-GA includes comprehensive OSINT collectors for threat intelligence:
