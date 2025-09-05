@@ -66,6 +66,16 @@ class HttpWebCollector(BaseCollector):
     def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         super().__init__(config, allowlist_domains)
 
+    def _is_allowed(self, domain: str) -> bool:
+        """Check if domain is in allowlist - RESTORED ORIGINAL LOGIC."""
+        d = (domain or "").lower()
+        # ORIGINAL LOGIC: Empty allowlist = allow all domains
+        if not self.allow_domains or "*" in self.allow_domains:
+            return True
+        if d in self.allow_domains:
+            return True
+        return any(entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains)
+
     def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         query = seed.get("query", "")
         urls = re.findall(r"https?://[^\s\"'>]+", query)
