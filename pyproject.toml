@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ngbse20"
-version = "20.2.1"
-description = "Next-Gen Breach Scenario Engine 20.2 - GA Release"
+version = "20.3.0"
+description = "Next-Gen Breach Scenario Engine 20.3 - GA Release"
 license = {text = "Commercial"}
 requires-python = ">=3.9.23"
 dependencies = [
