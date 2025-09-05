@@ -47,7 +47,13 @@ def cli(log_level: str):
     help="Comma-separated list of allowed domains",
 )
 @click.option("--metrics", default="{}", help="JSON string of runtime metrics")
-def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str):
+@click.option(
+    "--export-formats",
+    default="csv,html,docx",
+    show_default=True,
+    help="Comma-separated list of export formats (csv,html,docx,stix)",
+)
+def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str, export_formats: str):
     """Run the full NGBSE pipeline from collection to reporting."""
     click.echo("Starting NGBSE 20.3 pipeline...")
 
@@ -64,7 +70,23 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
         allowlist_domains = [d.strip() for d in allowlist.split(",")]
         allowlist_domains = validate_allowlist(allowlist_domains)
 
-    config = {"output_dir": outdir, "allowlist": allowlist_domains}
+        # Parse export formats
+        export_formats_list = [f.strip() for f in export_formats.split(",")]
+        valid_formats = ["csv", "html", "docx", "stix"]
+        invalid_formats = [f for f in export_formats_list if f not in valid_formats]
+        if invalid_formats:
+            click.echo(f"Warning: Invalid export formats: {invalid_formats}", err=True)
+            click.echo(f"Valid formats: {valid_formats}", err=True)
+            export_formats_list = [f for f in export_formats_list if f in valid_formats]
+
+    config = {
+        "output_dir": outdir, 
+        "allowlist": allowlist_domains,
+        "export": {
+            "formats": export_formats_list,
+            "output_dir": outdir
+        }
+    }
 
     # Run the complete pipeline
     result = run_pipeline(seeds=seeds_data, rules=rules_data, metrics=metrics_data, config=config)
@@ -146,7 +168,52 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
     click.echo(f"Results saved to: {findings_path}")
 
 
-@cli.command()
+@cli.command("export")
+@click.option("--findings", required=True, type=click.Path(exists=True), help="Path to findings.json file")
+@click.option("--output", required=True, type=click.Path(), help="Output path for exported file")
+@click.option(
+    "--format",
+    type=click.Choice(["csv", "html", "docx", "stix"]),
+    default="html",
+    help="Export format"
+)
+@click.option("--target", default="Unknown", help="Target name for the report")
+def export_cmd(findings: str, output: str, format: str, target: str):
+    """Export findings to various formats."""
+    try:
+        from ngbse20.runtime.orchestrator import PipelineOrchestrator
+        
+        # Load findings
+        findings_data = json.loads(Path(findings).read_text("utf-8"))
+        
+        # Create orchestrator for export functionality
+        orchestrator = PipelineOrchestrator()
+        
+        # Prepare export data
+        export_data = {
+            "findings": findings_data,
+            "config": {
+                "target": target,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+        # Export data
+        output_path = Path(output)
+        success = orchestrator.export_data(export_data, output_path, format)
+        
+        if success:
+            click.echo(f"Export successful: {output_path}")
+        else:
+            click.echo(f"Export failed: {output_path}", err=True)
+            raise click.Abort()
+            
+    except Exception as e:
+        click.echo(f"Export error: {e}", err=True)
+        raise click.Abort()
+
+
+@cli.command("export-stix")
 @click.option("--findings", required=True, type=click.Path(exists=True))
 @click.option("--out", required=True, type=click.Path())
 def export_stix(findings: str, out: str):
