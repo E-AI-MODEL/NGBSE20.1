@@ -2,13 +2,30 @@
 
 __version__ = "20.2.1"
 
-# BALLM modules
-from .ballm import (
-    BALLMMetaLayerGenerator,
-    BlindspotInterpretationEngine,
-    CuriosityGenerationEngine,
-)
-from .cli import cli
+# BALLM modules (optional - requires LLM dependencies)
+try:
+    from .ballm import (
+        BALLMMetaLayerGenerator,
+        BlindspotInterpretationEngine,
+        CuriosityGenerationEngine,
+    )
+    BALLM_AVAILABLE = True
+except ImportError:
+    BALLM_AVAILABLE = False
+    # Create dummy classes when BALLM is not available
+    class BALLMMetaLayerGenerator:
+        pass
+    class BlindspotInterpretationEngine:
+        pass
+    class CuriosityGenerationEngine:
+        pass
+# CLI (optional - requires click dependency)
+try:
+    from .cli import cli
+    CLI_AVAILABLE = True
+except ImportError:
+    CLI_AVAILABLE = False
+    cli = None
 
 # Collectors
 from .collectors import (
@@ -33,7 +50,19 @@ from .runtime.orchestrator import run_pipeline
 # Scoring and analysis
 from .scoring.v18 import DEFAULT as SCORE_DEFAULT
 from .scoring.v18 import compute_cai, score_findings
-from .synth.reverse_llm import confidence_gap, coverage_gap, recency_gap
+
+# Synthesis modules (optional - requires LLM dependencies)
+try:
+    from .synth.reverse_llm import confidence_gap, coverage_gap, recency_gap
+    SYNTH_AVAILABLE = True
+except ImportError:
+    SYNTH_AVAILABLE = False
+    def confidence_gap(*args, **kwargs):
+        return 0.0
+    def coverage_gap(*args, **kwargs):
+        return 0.0
+    def recency_gap(*args, **kwargs):
+        return 0.0
 
 __all__ = [
     "__version__",

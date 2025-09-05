@@ -6,7 +6,23 @@ Provides Pydantic models for seed validation.
 import re
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field, field_validator
+try:
+    from pydantic import BaseModel, Field, field_validator
+    PYDANTIC_AVAILABLE = True
+except ImportError:
+    PYDANTIC_AVAILABLE = False
+    class BaseModel:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+    
+    def Field(default=None, **kwargs):
+        return default
+    
+    def field_validator(field_name):
+        def decorator(func):
+            return func
+        return decorator
 
 
 class Seed(BaseModel):

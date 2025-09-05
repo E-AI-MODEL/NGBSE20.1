@@ -10,7 +10,13 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import yaml
-from pydantic import ValidationError
+try:
+    from pydantic import ValidationError
+    PYDANTIC_AVAILABLE = True
+except ImportError:
+    PYDANTIC_AVAILABLE = False
+    class ValidationError(Exception):
+        pass
 
 from ..logging import get_logger
 from ..models.seed import Seed

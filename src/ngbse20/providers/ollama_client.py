@@ -5,8 +5,14 @@ Ollama provider client for NGBSE 20.2.
 import os
 from typing import Any, Dict, List, Optional
 
-import requests
-from requests.exceptions import RequestException
+try:
+    import requests
+    from requests.exceptions import RequestException
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+    class RequestException(Exception):
+        pass
 
 from .base import BaseLLMProvider, LLMHandle
 from ..logging import get_logger
@@ -74,6 +80,9 @@ class OllamaClient(BaseLLMProvider):
                   top_p: float = 1.0, max_tokens: int = 400,
                   seed: Optional[int] = None):
         """Make API call to Ollama."""
+        if not REQUESTS_AVAILABLE:
+            raise ImportError("requests library is required for Ollama API calls")
+            
         headers = {
             "Content-Type": "application/json"
         }
@@ -142,6 +151,9 @@ class OllamaHandle(LLMHandle):
                   top_p: float = 1.0, max_tokens: int = 400,
                   seed: Optional[int] = None):
         """Make API call to Ollama."""
+        if not REQUESTS_AVAILABLE:
+            raise ImportError("requests library is required for Ollama API calls")
+            
         headers = {
             "Content-Type": "application/json"
         }

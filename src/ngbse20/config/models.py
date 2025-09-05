@@ -2,7 +2,24 @@ from __future__ import annotations
 
 from typing import Optional, Dict, Any, List
 
-from pydantic import BaseModel, Field, field_validator
+try:
+    from pydantic import BaseModel, Field, field_validator
+    PYDANTIC_AVAILABLE = True
+except ImportError:
+    PYDANTIC_AVAILABLE = False
+    # Create dummy classes when pydantic is not available
+    class BaseModel:
+        def __init__(self, **kwargs):
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+    
+    def Field(default=None, **kwargs):
+        return default
+    
+    def field_validator(field_name):
+        def decorator(func):
+            return func
+        return decorator
 
 
 class Seed(BaseModel):
