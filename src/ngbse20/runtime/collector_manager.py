@@ -1,60 +1,47 @@
 """
-Collector manager for NGBSE 20.3.
-Manages collector lifecycle and credential validation.
+Enhanced collector manager for NGBSE 20.3.
+Manages collector lifecycle, credential validation, and dynamic loading.
 """
 
-from typing import Any, ClassVar
+from typing import Any, Dict, List, Optional
 
 from ..collectors.base import BaseCollector
-from ..collectors.censys import CensysCollector
-from ..collectors.github import GitHubCollector
-from ..collectors.http_web import HttpWebCollector
-from ..collectors.leakix import LeakIXCollector
-from ..collectors.news import NewsCollector
-from ..collectors.shodan import ShodanCollector
-from ..collectors.urlscan import URLScanCollector
 from ..logging import get_logger
+from .collector_registry import DynamicCollectorRegistry
 
 LOGGER = get_logger(__name__)
 
 
 class CollectorManager:
-    """Manages collector instances and credential validation."""
+    """Enhanced collector manager with dynamic registry support."""
 
-    # Registry of available collectors
-    COLLECTOR_REGISTRY: ClassVar[dict[str, type[BaseCollector]]] = {
-        "http_web": HttpWebCollector,
-        "leakix": LeakIXCollector,
-        "shodan": ShodanCollector,
-        "censys": CensysCollector,
-        "urlscan": URLScanCollector,
-        "github": GitHubCollector,
-        "news": NewsCollector,
-    }
-
-    def __init__(self, config: dict[str, Any], credentials: dict[str, str]):
+    def __init__(self, config: Dict[str, Any], credentials: Dict[str, str]):
         self.config = config
         self.credentials = credentials
-        self._collectors: list[BaseCollector] = []
+        self.registry = DynamicCollectorRegistry()
+        self._collectors: List[BaseCollector] = []
+        
+        # Load external collectors if configured
+        self._load_external_collectors()
 
-    def build_collectors(self, allowlist: list[str]) -> list[BaseCollector]:
-        """Build and validate collector instances."""
+    def build_collectors(self, allowlist: List[str]) -> List[BaseCollector]:
+        """Build and validate collector instances using dynamic registry."""
         # Handle both dict and Pydantic model config
         if hasattr(self.config, 'collectors'):
             # Pydantic model
             collectors_config = self.config.collectors
-            enabled_collectors = collectors_config.enabled if collectors_config.enabled else list(self.COLLECTOR_REGISTRY.keys())
+            enabled_collectors = collectors_config.enabled if collectors_config.enabled else self.registry.list_collectors()
         else:
             # Dictionary
-            enabled_collectors = self.config.get("collectors", {}).get("enabled", list(self.COLLECTOR_REGISTRY.keys()))
+            enabled_collectors = self.config.get("collectors", {}).get("enabled", self.registry.list_collectors())
+        
         active_collectors = []
 
         for collector_name in enabled_collectors:
-            if collector_name not in self.COLLECTOR_REGISTRY:
+            collector_class = self.registry.get_collector(collector_name)
+            if not collector_class:
                 LOGGER.warning(f"Unknown collector: {collector_name}")
                 continue
-
-            collector_class = self.COLLECTOR_REGISTRY[collector_name]
 
             try:
                 # Create collector instance
@@ -109,3 +96,42 @@ class CollectorManager:
             findings.extend(seed_findings)
 
         return findings
+    
+    def _load_external_collectors(self) -> None:
+        """Load external collectors from configuration."""
+        external_collectors = self.config.get("external_collectors", [])
+        
+        for collector_config in external_collectors:
+            if isinstance(collector_config, dict):
+                module_path = collector_config.get("module_path")
+                class_name = collector_config.get("class_name")
+                collector_name = collector_config.get("name")
+                
+                if module_path and class_name and collector_name:
+                    success = self.registry.load_external_collector(
+                        module_path, class_name, collector_name
+                    )
+                    if success:
+                        LOGGER.info(f"Loaded external collector: {collector_name}")
+                    else:
+                        LOGGER.warning(f"Failed to load external collector: {collector_name}")
+    
+    def register_collector(self, name: str, collector_class: type[BaseCollector]) -> None:
+        """Register a new collector dynamically."""
+        self.registry.register_collector(name, collector_class)
+    
+    def list_available_collectors(self) -> List[str]:
+        """List all available collectors."""
+        return self.registry.list_collectors()
+    
+    def get_collector_info(self, name: str) -> Optional[Dict[str, Any]]:
+        """Get information about a specific collector."""
+        collector_class = self.registry.get_collector(name)
+        if collector_class:
+            return {
+                "name": name,
+                "class": collector_class.__name__,
+                "module": collector_class.__module__,
+                "description": getattr(collector_class, "__doc__", "").strip() if getattr(collector_class, "__doc__", None) else ""
+            }
+        return None
