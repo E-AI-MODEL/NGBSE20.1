@@ -11,9 +11,11 @@
 4. [OSINT Collectors](#osint-collectors)
 5. [Pipeline Operations](#pipeline-operations)
 6. [Output & Reports](#output--reports)
-7. [Advanced Usage](#advanced-usage)
-8. [Troubleshooting](#troubleshooting)
-9. [Examples](#examples)
+7. [Modular Export System](#modular-export-system)
+8. [Enhanced Collector Management](#enhanced-collector-management)
+9. [Advanced Usage](#advanced-usage)
+10. [Troubleshooting](#troubleshooting)
+11. [Examples](#examples)
 
 ---
 
@@ -645,6 +647,249 @@ python -m ngbse20.cli run --seeds data/seeds.jsonl --rules data/rules.json
 - **Research Paper**: "From Closure to Curiosity: Blindspot-Aware Large Language Models (BALLMs)"
 - **E-AI Model**: [Research framework](https://github.com/E-AI-MODEL)
 - **Community**: Join discussions and share use cases
+
+---
+
+## 🔄 **Modular Export System**
+
+NGBSE 20.3 includes a comprehensive modular export system supporting multiple output formats for different use cases.
+
+### **Available Export Formats**
+
+#### **CSV Export**
+- **Purpose**: Data analysis and spreadsheet import
+- **Features**: Customizable delimiters, encoding, and quote characters
+- **Use Cases**: Data analysis, Excel import, database integration
+
+```bash
+# Export findings to CSV
+ngbse20 export --findings findings.json --output data.csv --format csv --target example.com
+```
+
+#### **HTML Export**
+- **Purpose**: Interactive web reports
+- **Features**: Responsive design, search functionality, severity color coding
+- **Use Cases**: Web dashboards, client presentations, internal reports
+
+```bash
+# Export findings to HTML
+ngbse20 export --findings findings.json --output report.html --format html --target example.com
+```
+
+#### **DOCX Export**
+- **Purpose**: Professional Word documents
+- **Features**: Structured reports, metadata sections, recommendations
+- **Use Cases**: Business reports, client deliverables, documentation
+
+```bash
+# Export findings to DOCX
+ngbse20 export --findings findings.json --output report.docx --format docx --target example.com
+```
+
+#### **STIX Export**
+- **Purpose**: Threat intelligence sharing
+- **Features**: STIX 2.1 compliance, indicators, observables, relationships
+- **Use Cases**: Threat intelligence platforms, security tools integration
+
+```bash
+# Export findings to STIX
+ngbse20 export --findings findings.json --output threat_intel.json --format stix --target example.com
+```
+
+### **Export Configuration**
+
+#### **Basic Configuration**
+```yaml
+export:
+  formats: ["csv", "html", "docx", "stix"]
+  output_dir: "output"
+```
+
+#### **Advanced Configuration**
+```yaml
+export:
+  formats: ["csv", "html", "docx", "stix"]
+  output_dir: "reports"
+  
+  # CSV Configuration
+  csv_delimiter: ","
+  csv_quote_char: '"'
+  csv_encoding: "utf-8"
+  
+  # HTML Configuration
+  html_theme: "default"  # default, dark, light, corporate
+  html_title: "Security Analysis Report"
+  html_template_path: "/path/to/custom_template.html"
+  
+  # DOCX Configuration
+  docx_template_path: "/path/to/custom_template.docx"
+  include_charts: true
+  include_tables: true
+  
+  # STIX Configuration
+  stix_version: "2.1"  # 2.0 or 2.1
+  include_indicators: true
+  include_observables: true
+  include_relationships: true
+```
+
+### **Pipeline Integration**
+
+#### **Multiple Format Export**
+```bash
+# Run pipeline with multiple export formats
+ngbse20 run --seeds seeds.jsonl --rules rules.json --export-formats csv,html,docx,stix
+```
+
+#### **Custom Export Configuration**
+```yaml
+# config/ngbse.config.yml
+export:
+  formats: ["html", "docx"]  # Only generate HTML and DOCX
+  output_dir: "client_reports"
+  html_theme: "corporate"
+  html_title: "Client Security Assessment"
+```
+
+---
+
+## 🔧 **Enhanced Collector Management**
+
+NGBSE 20.3 features an enhanced collector management system with dynamic loading and external collector support.
+
+### **Collector Types**
+
+#### **Built-in Collectors**
+- **HttpWebCollector**: Web scraping and content analysis
+- **ShodanCollector**: Internet-connected device discovery
+- **CensysCollector**: Internet infrastructure scanning
+- **LeakIXCollector**: Data leak and vulnerability discovery
+- **URLScanCollector**: Website analysis and screenshots
+- **GitHubCollector**: Code repository intelligence
+- **NewsCollector**: News and media monitoring
+
+#### **External Collectors**
+Support for custom collectors through plugin system:
+```yaml
+collector_manager:
+  external_collectors:
+    - name: "custom_threat_intel"
+      module_path: "/path/to/threat_intel_collector.py"
+      class_name: "ThreatIntelCollector"
+    - name: "custom_social_media"
+      module_path: "/path/to/social_media_collector.py"
+      class_name: "SocialMediaCollector"
+```
+
+### **API Key Management**
+
+#### **Required API Keys**
+| Collector | API Key Required | Environment Variable |
+|-----------|------------------|---------------------|
+| HttpWebCollector | No | - |
+| ShodanCollector | Yes | `SHODAN_API_KEY` |
+| CensysCollector | Yes | `CENSYS_API_ID`, `CENSYS_SECRET` |
+| LeakIXCollector | Yes | `LEAKIX_TOKEN` |
+| URLScanCollector | Yes | `URLSCAN_API_KEY` |
+| GitHubCollector | Yes | `GITHUB_TOKEN` |
+| NewsCollector | Yes | `NEWS_API_KEY` |
+
+#### **API Key Configuration**
+```bash
+# Environment variables
+export SHODAN_API_KEY="your_shodan_key"
+export CENSYS_API_ID="your_censys_id"
+export CENSYS_SECRET="your_censys_secret"
+export LEAKIX_TOKEN="your_leakix_token"
+export URLSCAN_API_KEY="your_urlscan_key"
+export GITHUB_TOKEN="your_github_token"
+export NEWS_API_KEY="your_news_key"
+```
+
+### **Collector Configuration**
+
+#### **Basic Configuration**
+```yaml
+collector_manager:
+  enabled_collectors: ["http_web", "shodan", "censys"]
+  auto_discovery: true
+  max_concurrent_collectors: 5
+```
+
+#### **Advanced Configuration**
+```yaml
+collector_manager:
+  enabled_collectors: []  # Empty = all available
+  external_collectors:
+    - name: "custom_collector"
+      module_path: "/opt/ngbse/collectors/custom.py"
+      class_name: "CustomCollector"
+  auto_discovery: true
+  plugin_directory: "/opt/ngbse/plugins"
+  collector_timeout: 300
+  max_concurrent_collectors: 10
+```
+
+#### **Individual Collector Settings**
+```yaml
+collectors:
+  - name: "shodan"
+    enabled: true
+    api_key: null  # Set via environment variable
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options:
+      facets: ["country", "org", "os"]
+      minify: true
+  
+  - name: "censys"
+    enabled: true
+    api_key: null
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options:
+      index: "ipv4"
+      per_page: 100
+```
+
+### **Collector Validation**
+
+The system automatically validates collector credentials before initialization:
+
+```bash
+# Example output
+INFO: Activated collector: http_web
+WARNING: Collector shodan disabled - missing API credentials
+WARNING: Collector censys disabled - missing API credentials
+INFO: Collectors disabled due to missing credentials: ['shodan', 'censys']
+INFO: Active collectors: ['HttpWebCollector']
+```
+
+### **Custom Collector Development**
+
+#### **Collector Interface**
+```python
+from ngbse20.collectors.base import BaseCollector
+
+class CustomCollector(BaseCollector):
+    def __init__(self, config, allowlist):
+        super().__init__(config, allowlist)
+        self.api_key = config.get("api_key")
+    
+    def collect(self, seed, timestamp):
+        # Implementation here
+        return findings
+```
+
+#### **Registration**
+```python
+from ngbse20.runtime.collector_manager import CollectorManager
+
+manager = CollectorManager(config, credentials)
+manager.register_collector("custom", CustomCollector)
+```
 
 ---
 
