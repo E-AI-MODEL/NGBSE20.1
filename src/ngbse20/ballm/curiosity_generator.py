@@ -5,7 +5,7 @@ This engine generates curiosity-driven questions based on blindspots and finding
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 
 class CuriosityGenerationEngine:
@@ -16,8 +16,8 @@ class CuriosityGenerationEngine:
         self.llm_client = llm_client
 
     def generate_curiosity_questions(
-        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, findings: list[dict[str, Any]], blindspots: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Generate curiosity-driven questions based on blindspots and findings."""
 
         questions = []
@@ -44,7 +44,7 @@ class CuriosityGenerationEngine:
 
         return questions[:10]  # Limit to top 10 questions
 
-    def _fallback_confidence_questions(self) -> List[Dict[str, Any]]:
+    def _fallback_confidence_questions(self) -> list[dict[str, Any]]:
         """Fallback questions for confidence gaps when inputs are insufficient."""
         return [
             {
@@ -67,7 +67,7 @@ class CuriosityGenerationEngine:
             },
         ]
 
-    def _generate_coverage_curiosity_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_coverage_curiosity_questions(self, blindspots: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate questions based on coverage gaps."""
         questions = []
         coverage = blindspots.get("coverage", {})
@@ -102,7 +102,7 @@ class CuriosityGenerationEngine:
 
         return questions
 
-    def _generate_recency_curiosity_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_recency_curiosity_questions(self, blindspots: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate questions based on recency gaps."""
         questions = []
         recency = blindspots.get("recency", {})
@@ -137,7 +137,7 @@ class CuriosityGenerationEngine:
 
         return questions
 
-    def _generate_confidence_curiosity_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_confidence_curiosity_questions(self, blindspots: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate questions based on confidence gaps."""
         questions = []
         confidence = blindspots.get("confidence", {})
@@ -170,8 +170,8 @@ class CuriosityGenerationEngine:
         return questions or self._fallback_confidence_questions()
 
     def _generate_llm_curiosity_questions(
-        self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, findings: list[dict[str, Any]], blindspots: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Generate curiosity questions using LLM."""
 
         prompt = self._create_curiosity_prompt(findings, blindspots)
@@ -191,7 +191,7 @@ class CuriosityGenerationEngine:
 
         return []
 
-    def _create_curiosity_prompt(self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]) -> str:
+    def _create_curiosity_prompt(self, findings: list[dict[str, Any]], blindspots: dict[str, Any]) -> str:
         """Create prompt for LLM curiosity generation."""
         min_score = min([f.get("score", 0.0) for f in findings], default=0.0)
         max_score = max([f.get("score", 0.0) for f in findings], default=0.0)
@@ -222,21 +222,21 @@ class CuriosityGenerationEngine:
         Make them specific and actionable for further investigation.
         """
 
-    def _parse_llm_curiosity_questions(self, response: str) -> List[Dict[str, Any]]:
+    def _parse_llm_curiosity_questions(self, response: str) -> list[dict[str, Any]]:
         """Parse LLM response into structured curiosity questions."""
         questions = []
 
         # Simple parsing - look for question patterns
         lines = response.split("\n")
         for line in lines:
-            line = line.strip()
-            if line and any(
-                line.startswith(prefix) for prefix in ["What if", "How might", "Why does", "What are", "How do"]
+            stripped_line = line.strip()
+            if stripped_line and any(
+                stripped_line.startswith(prefix) for prefix in ["What if", "How might", "Why does", "What are", "How do"]
             ):
                 questions.append(
                     {
                         "type": "llm_generated",
-                        "question": line,
+                        "question": stripped_line,
                         "curiosity_level": "high",
                         "exploration_value": "High - LLM-generated insight",
                         "category": "llm_insight",
@@ -245,7 +245,7 @@ class CuriosityGenerationEngine:
 
         return questions[:3]  # Limit to 3 LLM questions
 
-    def _generate_productive_failure_questions(self, blindspots: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_productive_failure_questions(self, blindspots: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate questions that turn failures into learning opportunities."""
         questions = []
 
@@ -292,7 +292,7 @@ class CuriosityGenerationEngine:
 
         return questions or self._fallback_productive_failure_questions()
 
-    def _fallback_productive_failure_questions(self) -> List[Dict[str, Any]]:
+    def _fallback_productive_failure_questions(self) -> list[dict[str, Any]]:
         """Fallback questions when LLM or heuristics provide no results."""
         return [
             {

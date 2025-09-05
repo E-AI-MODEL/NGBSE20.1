@@ -1,4 +1,4 @@
-from .loader import load_config, load_rules, load_seeds, validate_files, load_source_trust
+from .loader import load_config, load_rules, load_seeds, load_source_trust, validate_files
 from .models import Config, Rule, Seed, SourceTrustConfig
 
 __all__ = [

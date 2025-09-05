@@ -4,7 +4,7 @@ import json
 import os
 import time
 from json import JSONDecodeError
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 
@@ -21,7 +21,7 @@ except Exception:  # pragma: no cover - fallback for stubbed requests
 
 
 class LLMClient:
-    def __init__(self, provider_priority: list[str] | None = None, config: Dict[str, Any] | None = None):
+    def __init__(self, provider_priority: list[str] | None = None, config: dict[str, Any] | None = None):
         self.providers = provider_priority
         self.config = config or {}
         self._determine_provider_priority()
@@ -120,12 +120,12 @@ class LLMClient:
                     partial_matches.append((model_key, provider_models))
             
             # Try exact matches first
-            for model_key, provider_models in exact_matches:
+            for _model_key, provider_models in exact_matches:
                 if provider in provider_models:
                     return provider_models[provider]
             
             # Then try partial matches
-            for model_key, provider_models in partial_matches:
+            for _model_key, provider_models in partial_matches:
                 if provider in provider_models:
                     return provider_models[provider]
         
@@ -268,7 +268,7 @@ class LLMClient:
         if the API call is not implemented in this environment.
         """
         api_key = os.getenv("COHERE_API_KEY")
-        model = self._get_model_for_provider("cohere")
+        self._get_model_for_provider("cohere")
         if not api_key:
             # No key provided; return a consistent, safe fallback structure
             LOGGER.warning("Cohere API key not set. Using fallback response.")

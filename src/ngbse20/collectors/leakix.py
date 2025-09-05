@@ -1,7 +1,7 @@
 """LeakIX collector for data breach intelligence."""
 
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -19,7 +19,7 @@ class LeakIXCollector(BaseCollector):
 
     API_BASE = "https://leakix.net/api"
 
-    def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         super().__init__(config, allowlist_domains)
         self.api_key = os.getenv("LEAKIX_API_KEY")
         if not self.api_key:
@@ -27,7 +27,7 @@ class LeakIXCollector(BaseCollector):
         else:
             LOGGER.debug(f"LeakIX collector initialized with API key: " f"{mask_api_key(self.api_key)}")
 
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         """Collect data breach intelligence from LeakIX."""
         query = seed.get("query", "")
         if "leakix" not in (seed.get("type", "").lower() or query.lower()):

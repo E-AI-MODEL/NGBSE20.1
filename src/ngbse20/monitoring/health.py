@@ -7,7 +7,7 @@ import os
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 import psutil
 
@@ -24,7 +24,7 @@ class HealthStatus:
     status: str  # "healthy", "degraded", "unhealthy"
     message: str
     timestamp: str
-    details: Dict[str, Any] = None
+    details: dict[str, Any] = None
 
 
 @dataclass
@@ -42,14 +42,14 @@ class HealthChecker:
 
     def __init__(self):
         self.start_time = time.time()
-        self.checks: List[callable] = [
+        self.checks: list[callable] = [
             self._check_system_resources,
             self._check_config_files,
             self._check_credentials,
             self._check_network_connectivity,
         ]
 
-    def check_health(self) -> Dict[str, Any]:
+    def check_health(self) -> dict[str, Any]:
         """Run all health checks and return overall status."""
         results = []
         overall_status = "healthy"
@@ -285,7 +285,7 @@ class HealthChecker:
             )
 
 
-def get_health_status() -> Dict[str, Any]:
+def get_health_status() -> dict[str, Any]:
     """Get current health status of NGBSE."""
     checker = HealthChecker()
     return checker.check_health()

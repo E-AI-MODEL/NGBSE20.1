@@ -4,7 +4,7 @@ Provides validation for user inputs to prevent security issues.
 """
 
 import re
-from typing import Any, List
+from typing import Any
 
 from ..logging import get_logger
 
@@ -47,7 +47,7 @@ def validate_domain_name(domain: str) -> bool:
     return bool(re.match(domain_pattern, domain))
 
 
-def validate_allowlist(allowlist: List[str]) -> List[str]:
+def validate_allowlist(allowlist: list[str]) -> list[str]:
     """
     Validate and sanitize allowlist domains.
 
@@ -67,12 +67,12 @@ def validate_allowlist(allowlist: List[str]) -> List[str]:
     invalid_domains = []
 
     for domain in allowlist:
-        domain = domain.strip()
-        if not domain:
+        stripped_domain = domain.strip()
+        if not stripped_domain:
             continue
 
-        if validate_domain_name(domain):
-            validated_domains.append(domain)
+        if validate_domain_name(stripped_domain):
+            validated_domains.append(stripped_domain)
         else:
             invalid_domains.append(domain)
 

@@ -102,8 +102,8 @@ def _keyword_pattern_score(f: dict[str, Any], rules: list[dict[str, Any]]) -> tu
     # Build searchable text
     searchable_fields = ["title", "description", "content", "summary", "text"]
     searchable_text = ""
-    for field in searchable_fields:
-        value = f.get(field, "")
+    for field_name in searchable_fields:
+        value = f.get(field_name, "")
         if isinstance(value, str):
             searchable_text += " " + value.lower()
     

@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 from ..ballm.meta_layer_generator import BALLMMetaLayerGenerator
 from ..export.stix import to_stix_bundle
@@ -16,8 +16,7 @@ from ..forecast.engine import aggregate_asset_scores, build_forecast
 from ..llm_client import LLMClient
 from ..logging import get_logger
 from ..rules.engine import evaluate_rules
-from ..scoring.v18 import DEFAULT as SCORE_DEFAULT
-from ..scoring.v18 import compute_cai, score_findings
+from ..scoring.v18 import DEFAULT as SCORE_DEFAULT, compute_cai, score_findings
 from ..seeds.proposer import propose_next_seeds
 from ..synth.reverse_llm import (
     confidence_gap,
@@ -34,12 +33,12 @@ LOGGER = get_logger(__name__)
 class PipelineStages:
     """Manages individual pipeline stages."""
 
-    def __init__(self, output_dir: str, config: Dict[str, Any] | None = None):
+    def __init__(self, output_dir: str, config: dict[str, Any] | None = None):
         self.output_dir = output_dir
         self.config = config or {}
         os.makedirs(output_dir, exist_ok=True)
 
-    def validate_stage(self, rules: List[Dict[str, Any]], metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_stage(self, rules: list[dict[str, Any]], metrics: dict[str, Any]) -> dict[str, Any]:
         """Validation stage - check for hard blocks."""
         acts_block = evaluate_rules(
             [r for r in rules if r.get("action", {}).get("type") == "hard_block"],
@@ -58,7 +57,7 @@ class PipelineStages:
 
         return {"status": "ok"}
 
-    def collect_stage(self, seeds: List[Dict[str, Any]], collectors: List[Any]) -> Dict[str, Any]:
+    def collect_stage(self, seeds: list[dict[str, Any]], collectors: list[Any]) -> dict[str, Any]:
         """Collection stage - gather findings from all collectors."""
         findings = []
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -89,10 +88,10 @@ class PipelineStages:
 
     def rules_stage(
         self,
-        rules: List[Dict[str, Any]],
-        metrics: Dict[str, Any],
-        findings: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        rules: list[dict[str, Any]],
+        metrics: dict[str, Any],
+        findings: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """Rules evaluation stage - apply non-blocking rules."""
         acts_warn = evaluate_rules(
             [r for r in rules if r.get("action", {}).get("type") != "hard_block"],
@@ -115,7 +114,7 @@ class PipelineStages:
 
         return {"actions": acts_warn, "trace": trace}
 
-    def scoring_stage(self, findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def scoring_stage(self, findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Scoring stage - score all findings."""
         scored_findings = score_findings(findings, SCORE_DEFAULT)
 
@@ -128,7 +127,7 @@ class PipelineStages:
 
         return {"scored_findings": scored_findings, "trace": trace}
 
-    def forecast_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def forecast_stage(self, scored_findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Forecast stage - generate asset scores and forecasts."""
         try:
             asset_scores = aggregate_asset_scores(scored_findings)
@@ -179,8 +178,8 @@ class PipelineStages:
             }
 
     def seed_proposal_stage(
-        self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, scored_findings: list[dict[str, Any]], asset_scores: dict[str, Any]
+    ) -> dict[str, Any]:
         """Seed proposal stage - propose new seeds."""
         next_seeds = propose_next_seeds(scored_findings, asset_scores)
 
@@ -193,7 +192,7 @@ class PipelineStages:
 
         return {"next_seeds": next_seeds, "trace": trace}
 
-    def blindspot_analysis_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def blindspot_analysis_stage(self, scored_findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Blindspot analysis stage - identify coverage gaps."""
         try:
             blindspots = {
@@ -231,10 +230,10 @@ class PipelineStages:
 
     def ballm_stage(
         self,
-        scored_findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any],
-        asset_scores: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        scored_findings: list[dict[str, Any]],
+        blindspots: dict[str, Any],
+        asset_scores: dict[str, Any],
+    ) -> dict[str, Any]:
         """BALLM meta-layer generation stage."""
         try:
             ballm_generator = BALLMMetaLayerGenerator(LLMClient(config=self.config))
@@ -265,7 +264,7 @@ class PipelineStages:
 
             return {"meta_layer": meta_layer, "trace": trace}
 
-    def scenario_stage(self, scored_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def scenario_stage(self, scored_findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Scenario synthesis stage."""
         scenarios = build_scenarios(scored_findings, mode=os.getenv("NGBSE_SCENARIO_MODE", "none"))
 
@@ -278,7 +277,7 @@ class PipelineStages:
 
         return {"scenarios": scenarios, "trace": trace}
 
-    def brief_stage(self, scored_findings: List[Dict[str, Any]], asset_scores: Dict[str, Any]) -> Dict[str, Any]:
+    def brief_stage(self, scored_findings: list[dict[str, Any]], asset_scores: dict[str, Any]) -> dict[str, Any]:
         """Brief synthesis stage."""
         brief = synthesize_brief_llm(
             scored_findings,
@@ -289,7 +288,7 @@ class PipelineStages:
 
         return {"brief": brief}
 
-    def _extract_stix_summary(self, bundle: Any) -> Dict[str, Any]:
+    def _extract_stix_summary(self, bundle: Any) -> dict[str, Any]:
         """Extract a concise STIX summary for reporting purposes."""
         try:
             # Access objects from bundle or serialized json
@@ -308,9 +307,9 @@ class PipelineStages:
                 data = json.loads(raw)
                 objects = data.get("objects", []) if isinstance(data, dict) else []
 
-            indicators: list[Dict[str, Any]] = []
+            indicators: list[dict[str, Any]] = []
             threat_actors: list[str] = []
-            vulnerabilities: list[Dict[str, Any]] = []
+            vulnerabilities: list[dict[str, Any]] = []
 
             def _get(obj: Any, key: str, default: Any = None) -> Any:
                 if isinstance(obj, dict):
@@ -338,7 +337,7 @@ class PipelineStages:
                         }
                     )
 
-            top_indicators: list[Dict[str, Any]] = []
+            top_indicators: list[dict[str, Any]] = []
             # Take up to 5 indicators and expose value/pattern
             for ind in indicators[:5]:
                 pattern = ind.get("pattern", "")
@@ -385,14 +384,14 @@ class PipelineStages:
 
     def report_stage(
         self,
-        brief: Dict[str, Any],
-        blindspots: Dict[str, Any],
-        forecast: Dict[str, Any],
-        scenarios: Dict[str, Any] | None,
-        ballm_meta_layer: Dict[str, Any] | None,
+        brief: dict[str, Any],
+        blindspots: dict[str, Any],
+        forecast: dict[str, Any],
+        scenarios: dict[str, Any] | None,
+        ballm_meta_layer: dict[str, Any] | None,
         bundle: Any,
-        next_seeds: List[Dict[str, Any]] | None,
-    ) -> Dict[str, Any]:
+        next_seeds: list[dict[str, Any]] | None,
+    ) -> dict[str, Any]:
         """Report generation stage - create DOCX report if python-docx is available."""
         try:
             # Import lazily to avoid hard dependency for environments without docx
@@ -434,7 +433,7 @@ class PipelineStages:
             )
             return {"report_path": None, "stix_summary": None, "trace": trace}
 
-    def export_stage(self, scored_findings: List[Dict[str, Any]], traces: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def export_stage(self, scored_findings: list[dict[str, Any]], traces: list[dict[str, Any]]) -> dict[str, Any]:
         """Export stage - generate STIX bundle and save outputs."""
         cai = compute_cai(traces, {})
         bundle = to_stix_bundle(scored_findings)

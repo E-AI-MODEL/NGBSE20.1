@@ -1,7 +1,7 @@
 """Base collector class for NGBSE 20.1."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
 import tldextract
 
@@ -9,7 +9,7 @@ import tldextract
 class BaseCollector(ABC):
     """Base class for all NGBSE collectors."""
 
-    def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         """Initialize collector with configuration and domain allowlist."""
         self.config = config
         self.allow_domains = [d.lower() for d in allowlist_domains]
@@ -30,11 +30,7 @@ class BaseCollector(ABC):
             return True
 
         # Subdomain matching (e.g., .example.com matches sub.example.com)
-        for entry in self.allow_domains:
-            if entry.startswith(".") and d.endswith(entry):
-                return True
-
-        return False
+        return any(entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains)
 
     def _extract_domain(self, url: str) -> str:
         """Extract domain from URL using tldextract."""
@@ -54,11 +50,11 @@ class BaseCollector(ABC):
             return host
 
     @abstractmethod
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         """Collect data from the source. Must be implemented by subclasses."""
         raise NotImplementedError
 
-    def get_collector_info(self) -> Dict[str, Any]:
+    def get_collector_info(self) -> dict[str, Any]:
         """Get information about this collector."""
         return {
             "name": self.__class__.__name__,
@@ -73,6 +69,4 @@ class BaseCollector(ABC):
             return False
         if hasattr(self, "token") and not self.token:
             return False
-        if hasattr(self, "api_id") and not self.api_id:
-            return False
-        return True
+        return not (hasattr(self, "api_id") and not self.api_id)

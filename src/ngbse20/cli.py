@@ -180,8 +180,8 @@ def ballm_analyze(findings: str, out: str, depth: int):
 
     # Generate BALLM meta-layer
     from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
-    from ngbse20.llm_client import LLMClient
     from ngbse20.config.loader import load_config
+    from ngbse20.llm_client import LLMClient
 
     # Load configuration for BALLM
     config = load_config()
@@ -223,7 +223,7 @@ def list_collectors():
     click.echo("Available NGBSE 20.1 Collectors:")
     click.echo("=" * 50)
 
-    for name, collector_class, required_envs in collectors:
+    for name, _collector_class, required_envs in collectors:
         # Check if required environment variables are set
         env_status = "✅" if all(os.getenv(env) for env in required_envs) else "❌"
         status = "Active" if env_status == "✅" else "Inactive (missing API keys)"

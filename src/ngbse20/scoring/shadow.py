@@ -5,8 +5,8 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from .v18 import ScoringConfig, score_findings
 from ..logging import get_logger
+from .v18 import ScoringConfig, score_findings
 
 LOGGER = get_logger(__name__)
 
@@ -66,7 +66,7 @@ def score_findings_shadow(
     }
     
     # Calculate deltas
-    for i, (legacy, new) in enumerate(zip(legacy_result, new_result)):
+    for _i, (legacy, new) in enumerate(zip(legacy_result, new_result)):
         delta = new["score"] - legacy["score"]
         shadow_metrics["score_deltas"].append(delta)
         shadow_metrics["max_delta"] = max(shadow_metrics["max_delta"], abs(delta))

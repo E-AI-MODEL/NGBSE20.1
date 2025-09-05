@@ -6,7 +6,7 @@ epistemic insights and curiosity-generating questions using Large Language Model
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 from .blindspot_interpreter import BlindspotInterpretationEngine
 from .curiosity_generator import CuriosityGenerationEngine
@@ -24,10 +24,10 @@ class BALLMMetaLayerGenerator:
 
     def generate_meta_layer(
         self,
-        findings: List[Dict[str, Any]],
-        blindspots: Dict[str, Any],
-        asset_scores: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        findings: list[dict[str, Any]],
+        blindspots: dict[str, Any],
+        asset_scores: dict[str, Any],
+    ) -> dict[str, Any]:
         """Generate the complete BALLM meta-layer output."""
 
         # 1. Interpret blindspots with LLM
@@ -56,7 +56,7 @@ class BALLMMetaLayerGenerator:
             "generation_timestamp": self._get_timestamp(),
         }
 
-    def _calculate_epistemic_humility(self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]) -> float:
+    def _calculate_epistemic_humility(self, findings: list[dict[str, Any]], blindspots: dict[str, Any]) -> float:
         """Calculate epistemic humility score based on blindspot awareness."""
         # Base score starts at 0.5 (neutral)
         base_score = 0.5
@@ -76,8 +76,8 @@ class BALLMMetaLayerGenerator:
         return min(1.0, base_score + coverage_bonus + confidence_bonus + recency_bonus)
 
     def _identify_productive_failures(
-        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, blindspots: dict[str, Any], findings: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """Identify areas where 'failures' lead to productive learning."""
         productive_failures = []
 

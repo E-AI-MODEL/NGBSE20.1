@@ -1,7 +1,7 @@
 """GitHub collector for code repository intelligence."""
 
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -19,7 +19,7 @@ class GitHubCollector(BaseCollector):
 
     API_BASE = "https://api.github.com"
 
-    def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         super().__init__(config, allowlist_domains)
         self.token = os.getenv("GITHUB_TOKEN")
         if not self.token:
@@ -27,7 +27,7 @@ class GitHubCollector(BaseCollector):
         else:
             LOGGER.debug(f"GitHub collector initialized with token: {mask_api_key(self.token)}")
 
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         """Collect code repository intelligence from GitHub."""
         query = seed.get("query", "")
         if "github" not in (seed.get("type", "").lower() or query.lower()):

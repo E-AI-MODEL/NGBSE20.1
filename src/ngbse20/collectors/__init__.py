@@ -11,11 +11,11 @@ from .urlscan import URLScanCollector
 
 __all__ = [
     "BaseCollector",
+    "CensysCollector",
+    "GitHubCollector",
     "HttpWebCollector",
     "LeakIXCollector",
-    "ShodanCollector",
-    "CensysCollector",
-    "URLScanCollector",
-    "GitHubCollector",
     "NewsCollector",
+    "ShodanCollector",
+    "URLScanCollector",
 ]

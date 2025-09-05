@@ -1,7 +1,7 @@
 """URLScan collector for threat intelligence."""
 
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -19,7 +19,7 @@ class URLScanCollector(BaseCollector):
 
     API_BASE = "https://urlscan.io/api/v1"
 
-    def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         super().__init__(config, allowlist_domains)
         self.api_key = os.getenv("URLSCAN_API_KEY")
         if not self.api_key:
@@ -27,7 +27,7 @@ class URLScanCollector(BaseCollector):
         else:
             LOGGER.debug(f"URLScan collector initialized with API key: " f"{mask_api_key(self.api_key)}")
 
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         """Collect threat intelligence from URLScan."""
         query = seed.get("query", "")
         if "urlscan" not in (seed.get("type", "").lower() or query.lower()):
@@ -66,7 +66,7 @@ class URLScanCollector(BaseCollector):
             findings.append(
                 {
                     "id": f"urlscan-{item.get('_id', 'unknown')}",
-                    "hash": content_hash(f"{url}{page.get('title', '')}{str(threat_indicators)}"),
+                    "hash": content_hash(f"{url}{page.get('title', '')}{threat_indicators!s}"),
                     "asset": domain.lower(),
                     "raw": {
                         "url": url,

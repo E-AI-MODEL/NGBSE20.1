@@ -1,7 +1,7 @@
 """News collector for recent developments and threat intelligence."""
 
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -17,7 +17,7 @@ LOGGER = get_logger(__name__)
 class NewsCollector(BaseCollector):
     """Collector for news and recent developments."""
 
-    def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         super().__init__(config, allowlist_domains)
         self.api_key = os.getenv("NEWS_API_KEY")
         if not self.api_key:
@@ -25,7 +25,7 @@ class NewsCollector(BaseCollector):
         else:
             LOGGER.debug(f"News collector initialized with API key: {mask_api_key(self.api_key)}")
 
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         """Collect news and recent developments."""
         query = seed.get("query", "")
         if "news" not in (seed.get("type", "").lower() or query.lower()):
@@ -61,7 +61,7 @@ class NewsCollector(BaseCollector):
 
     @retry_with_backoff(max_retries=3, base_delay=1.0)
     @api_rate_limited("news")
-    def _collect_from_newsapi(self, query: str) -> List[Dict[str, Any]]:
+    def _collect_from_newsapi(self, query: str) -> list[dict[str, Any]]:
         """Collect from NewsAPI.org."""
         url = "https://newsapi.org/v2/everything"
         params = {
@@ -108,7 +108,7 @@ class NewsCollector(BaseCollector):
 
     @retry_with_backoff(max_retries=3, base_delay=1.0)
     @api_rate_limited("news")
-    def _collect_from_gnews(self, query: str) -> List[Dict[str, Any]]:
+    def _collect_from_gnews(self, query: str) -> list[dict[str, Any]]:
         """Collect from GNews (backup)."""
         url = "https://gnews.io/api/v4/search"
         params = {"q": query, "token": self.api_key, "lang": "en", "max": 50}

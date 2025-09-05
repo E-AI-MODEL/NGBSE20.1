@@ -5,7 +5,7 @@ This engine uses LLM to interpret blindspots and extract deeper epistemic insigh
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 
 class BlindspotInterpretationEngine:
@@ -16,8 +16,8 @@ class BlindspotInterpretationEngine:
         self.llm_client = llm_client
 
     def interpret_blindspots_with_llm(
-        self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, blindspots: dict[str, Any], findings: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Use LLM to interpret what blindspots mean epistemically."""
 
         # Create comprehensive prompt for LLM interpretation
@@ -41,7 +41,7 @@ class BlindspotInterpretationEngine:
             "interpretation_method": "llm_analysis",
         }
 
-    def extract_epistemic_insights(self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def extract_epistemic_insights(self, blindspots: dict[str, Any], findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Extract epistemic insights from blindspots and findings."""
 
         insights = {
@@ -53,7 +53,7 @@ class BlindspotInterpretationEngine:
 
         return insights
 
-    def _create_interpretation_prompt(self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]) -> str:
+    def _create_interpretation_prompt(self, blindspots: dict[str, Any], findings: list[dict[str, Any]]) -> str:
         """Create comprehensive prompt for LLM interpretation."""
 
         return f"""
@@ -91,7 +91,7 @@ class BlindspotInterpretationEngine:
         3. Areas where we should be epistemically humble
         """
 
-    def _extract_epistemic_insights_from_text(self, text: str) -> List[str]:
+    def _extract_epistemic_insights_from_text(self, text: str) -> list[str]:
         """Extract key epistemic insights from LLM response."""
         # Simple extraction - in production this could be more sophisticated
         insights = []
@@ -118,7 +118,7 @@ class BlindspotInterpretationEngine:
 
         return insights
 
-    def _assess_interpretation_confidence(self, blindspots: Dict[str, Any]) -> float:
+    def _assess_interpretation_confidence(self, blindspots: dict[str, Any]) -> float:
         """Assess confidence in the interpretation based on blindspot quality."""
         confidence = 0.5  # Base confidence
 
@@ -141,7 +141,7 @@ class BlindspotInterpretationEngine:
 
         return min(1.0, confidence)
 
-    def _identify_hidden_assumptions(self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]) -> List[str]:
+    def _identify_hidden_assumptions(self, blindspots: dict[str, Any], findings: list[dict[str, Any]]) -> list[str]:
         """Identify hidden assumptions in our analysis."""
         assumptions = []
 
@@ -163,7 +163,7 @@ class BlindspotInterpretationEngine:
 
         return assumptions
 
-    def _calculate_overall_confidence(self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]) -> float:
+    def _calculate_overall_confidence(self, findings: list[dict[str, Any]], blindspots: dict[str, Any]) -> float:
         """Calculate overall epistemic confidence."""
         if not findings:
             return 0.0
@@ -185,7 +185,7 @@ class BlindspotInterpretationEngine:
 
         return max(0.0, base_confidence - blindspot_penalty)
 
-    def _identify_knowledge_gaps(self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]) -> List[str]:
+    def _identify_knowledge_gaps(self, blindspots: dict[str, Any], findings: list[dict[str, Any]]) -> list[str]:
         """Identify specific knowledge gaps."""
         gaps = []
 
@@ -209,7 +209,7 @@ class BlindspotInterpretationEngine:
 
         return gaps
 
-    def _identify_epistemic_biases(self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]) -> List[str]:
+    def _identify_epistemic_biases(self, blindspots: dict[str, Any], findings: list[dict[str, Any]]) -> list[str]:
         """Identify potential epistemic biases."""
         biases = []
 

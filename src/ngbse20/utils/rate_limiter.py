@@ -6,7 +6,7 @@ Provides rate limiting and retry logic for API calls.
 import random
 import time
 from functools import wraps
-from typing import Any, Callable, Dict
+from typing import Any, Callable, List
 
 from ..logging import get_logger
 
@@ -138,7 +138,7 @@ class APIRateLimiter:
     """Rate limiter specifically for API calls with different limits per service."""
 
     def __init__(self):
-        self.limiters: Dict[str, RateLimiter] = {
+        self.limiters: dict[str, RateLimiter] = {
             "shodan": RateLimiter(max_requests=1, time_window=1),  # 1 request per second
             "censys": RateLimiter(max_requests=5, time_window=1),  # 5 requests per second
             "leakix": RateLimiter(max_requests=10, time_window=1),  # 10 requests per second

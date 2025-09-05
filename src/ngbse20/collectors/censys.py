@@ -1,7 +1,7 @@
 """Censys collector for network and SSL intelligence."""
 
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -19,7 +19,7 @@ class CensysCollector(BaseCollector):
 
     API_BASE = "https://search.censys.io/api/v2"
 
-    def __init__(self, config: Dict[str, Any], allowlist_domains: List[str]):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
         super().__init__(config, allowlist_domains)
         self.api_id = os.getenv("CENSYS_API_ID")
         self.api_secret = os.getenv("CENSYS_API_SECRET")
@@ -28,7 +28,7 @@ class CensysCollector(BaseCollector):
         else:
             LOGGER.debug(f"Censys collector initialized with API ID: " f"{mask_api_key(self.api_id)}")
 
-    def collect(self, seed: Dict[str, Any], now_iso: str) -> List[Dict[str, Any]]:
+    def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         """Collect network and SSL intelligence from Censys."""
         query = seed.get("query", "")
         if "censys" not in (seed.get("type", "").lower() or query.lower()):
@@ -81,7 +81,7 @@ class CensysCollector(BaseCollector):
             findings.append(
                 {
                     "id": (f"censys-{ip}-" f"{item.get('location', {}).get('country', 'unknown')}"),
-                    "hash": content_hash(f"{ip}{domain}{str(ssl_info)}"),
+                    "hash": content_hash(f"{ip}{domain}{ssl_info!s}"),
                     "asset": domain.lower() if domain else ip,
                     "raw": {
                         "ip": ip,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Dict, Any
+from typing import Any, List
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -14,10 +14,10 @@ class Seed(BaseModel):
         "web",
         description=("Collector type (web, leakix, shodan, censys, urlscan, github, news)"),
     )
-    asset_id: Optional[str] = Field(None, description="Optional asset identifier")
+    asset_id: str | None = Field(None, description="Optional asset identifier")
     tags: list[str] = Field(default_factory=list, description="Tags for categorization")
     priority: int = Field(1, ge=1, le=10, description="Collection priority (1-10)")
-    max_findings: Optional[int] = Field(None, ge=1, description="Maximum findings to collect")
+    max_findings: int | None = Field(None, ge=1, description="Maximum findings to collect")
 
     @field_validator("type")
     @classmethod
@@ -29,7 +29,7 @@ class Seed(BaseModel):
 
     @field_validator("tags", mode="before")
     @classmethod
-    def _coerce_tags(cls, v: Optional[List[str]]) -> List[str]:
+    def _coerce_tags(cls, v: List[str] | None) -> List[str]:
         return v or []
 
 
@@ -58,8 +58,8 @@ class CollectorConfig(BaseModel):
 
     name: str = Field(..., description="Collector name")
     enabled: bool = Field(True, description="Whether collector is enabled")
-    api_key: Optional[str] = Field(None, description="API key for the collector")
-    rate_limit: Optional[int] = Field(None, ge=1, description="Rate limit per minute")
+    api_key: str | None = Field(None, description="API key for the collector")
+    rate_limit: int | None = Field(None, ge=1, description="Rate limit per minute")
     timeout: int = Field(30, ge=1, description="Request timeout in seconds")
     max_retries: int = Field(3, ge=0, description="Maximum retry attempts")
     options: dict = Field(default_factory=dict, description="Collector-specific options")
@@ -68,7 +68,7 @@ class CollectorConfig(BaseModel):
 class SourceTrustConfig(BaseModel):
     """Source trust configuration for scoring v18.1."""
     
-    domains: Dict[str, Dict[str, Any]] = Field(
+    domains: dict[str, dict[str, Any]] = Field(
         default_factory=dict,
         description="Domain-specific trust levels"
     )
@@ -81,7 +81,7 @@ class SourceTrustConfig(BaseModel):
     
     @field_validator("domains")
     @classmethod
-    def validate_domains(cls, v: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    def validate_domains(cls, v: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
         for domain, config in v.items():
             if "trust_level" not in config:
                 raise ValueError(f"Domain {domain} missing trust_level")
@@ -98,7 +98,7 @@ class Config(BaseModel):
     rules: list[Rule] = Field(default_factory=list, description="List of rules to apply")
     collectors: list[CollectorConfig] = Field(default_factory=list, description="Collector configurations")
     options: dict[str, str] = Field(default_factory=dict, description="General options")
-    source_trust: Optional[SourceTrustConfig] = Field(None, description="Source trust configuration")
+    source_trust: SourceTrustConfig | None = Field(None, description="Source trust configuration")
 
     # Pipeline options
     max_concurrent_collectors: int = Field(5, ge=1, description="Maximum concurrent collectors")

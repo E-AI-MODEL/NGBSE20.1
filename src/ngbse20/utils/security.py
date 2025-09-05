@@ -4,7 +4,7 @@ Provides API key masking and security-related helper functions.
 """
 
 import re
-from typing import Any, Dict
+from typing import Any, Optional
 
 
 def mask_api_key(api_key: str, visible_chars: int = 4) -> str:
@@ -24,7 +24,7 @@ def mask_api_key(api_key: str, visible_chars: int = 4) -> str:
     return "*" * (len(api_key) - visible_chars) + api_key[-visible_chars:]
 
 
-def mask_credentials_in_dict(data: Dict[str, Any]) -> Dict[str, Any]:
+def mask_credentials_in_dict(data: dict[str, Any]) -> dict[str, Any]:
     """
     Mask credentials in a dictionary for safe logging.
 
@@ -92,7 +92,7 @@ def mask_credentials_in_string(text: str) -> str:
     return masked_text
 
 
-def sanitize_error_message(error_msg: str, credentials: Dict[str, str] = None) -> str:
+def sanitize_error_message(error_msg: str, credentials: Optional[dict[str, str]] = None) -> str:
     """
     Sanitize error message by masking any credentials.
 
@@ -108,14 +108,14 @@ def sanitize_error_message(error_msg: str, credentials: Dict[str, str] = None) -
 
     # Then, if credentials dict is provided, mask those too
     if credentials:
-        for key, value in credentials.items():
+        for _key, value in credentials.items():
             if value and value in sanitized:
                 sanitized = sanitized.replace(value, mask_api_key(value))
 
     return sanitized
 
 
-def validate_api_key_format(api_key: str, expected_length: int = None) -> bool:
+def validate_api_key_format(api_key: str, expected_length: Optional[int] = None) -> bool:
     """
     Validate API key format.
 
@@ -138,7 +138,4 @@ def validate_api_key_format(api_key: str, expected_length: int = None) -> bool:
         return False
 
     # Minimum length check
-    if len(api_key) < 8:
-        return False
-
-    return True
+    return not len(api_key) < 8

@@ -4,7 +4,7 @@ Provides Pydantic models for seed validation.
 """
 
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -18,7 +18,7 @@ class Seed(BaseModel):
 
     # Optional fields
     priority: Optional[int] = Field(default=1, ge=1, le=10, description="Priority level (1-10)")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
+    metadata: Optional[dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
 
     @field_validator("id")
     @classmethod
@@ -75,7 +75,7 @@ class Seed(BaseModel):
 
     @field_validator("metadata")
     @classmethod
-    def validate_metadata(cls, v: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    def validate_metadata(cls, v: Optional[dict[str, Any]]) -> dict[str, Any]:
         """Validate metadata structure."""
         if v is None:
             return {}

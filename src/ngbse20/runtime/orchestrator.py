@@ -5,7 +5,7 @@ Order: validate -> collect -> score -> history -> forecast -> propose -> blindsp
 -> BALLM -> scenarios -> export.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Optional
 
 from ..config.loader import ConfigLoader
 from ..logging import get_logger
@@ -27,10 +27,10 @@ class PipelineOrchestrator:
 
     def run_pipeline(
         self,
-        seeds: List[Dict[str, Any]] = None,
-        rules: List[Dict[str, Any]] = None,
-        metrics: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        seeds: Optional[list[dict[str, Any]]] = None,
+        rules: Optional[list[dict[str, Any]]] = None,
+        metrics: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """Run the complete NGBSE pipeline."""
         # Load configuration if not provided
         if seeds is None:
@@ -39,7 +39,7 @@ class PipelineOrchestrator:
             rules = self.config_loader.load_rules()
 
         metrics = metrics or {}
-        traces: List[Dict[str, Any]] = []
+        traces: list[dict[str, Any]] = []
         allowlist = self.config.allowlist
 
         LOGGER.info(f"Starting pipeline with {len(seeds)} seeds and {len(rules)} rules")
@@ -145,11 +145,11 @@ class PipelineOrchestrator:
 
 # Backward compatibility function
 def run_pipeline(
-    seeds: List[Dict[str, Any]],
-    rules: List[Dict[str, Any]],
-    metrics: Dict[str, Any] = None,
-    config: Dict[str, Any] = None,
-) -> Dict[str, Any]:
+    seeds: list[dict[str, Any]],
+    rules: list[dict[str, Any]],
+    metrics: Optional[dict[str, Any]] = None,
+    config: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """Backward compatibility function for the old API."""
     orchestrator = PipelineOrchestrator()
     if config:
