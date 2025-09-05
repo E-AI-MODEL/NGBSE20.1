@@ -39,7 +39,14 @@ class CollectorManager:
 
     def build_collectors(self, allowlist: list[str]) -> list[BaseCollector]:
         """Build and validate collector instances."""
-        enabled_collectors = self.config.get("collectors", {}).get("enabled", list(self.COLLECTOR_REGISTRY.keys()))
+        # Handle both dict and Pydantic model config
+        if hasattr(self.config, 'collectors'):
+            # Pydantic model
+            collectors_config = self.config.collectors
+            enabled_collectors = collectors_config.enabled if collectors_config.enabled else list(self.COLLECTOR_REGISTRY.keys())
+        else:
+            # Dictionary
+            enabled_collectors = self.config.get("collectors", {}).get("enabled", list(self.COLLECTOR_REGISTRY.keys()))
         active_collectors = []
 
         for collector_name in enabled_collectors:
