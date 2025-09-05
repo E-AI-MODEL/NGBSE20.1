@@ -5,6 +5,7 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
+from .base import BaseCollector
 from ..logging import get_logger
 from ..utils.hash import content_hash
 
@@ -61,17 +62,9 @@ def extract_domain(url: str) -> str:
     return host
 
 
-class HttpWebCollector:
-    def __init__(self, allowlist_domains: list[str]):
-        self.allow_domains = [d.lower() for d in allowlist_domains]
-
-    def _is_allowed(self, domain: str) -> bool:
-        d = (domain or "").lower()
-        if not self.allow_domains or "*" in self.allow_domains:
-            return True
-        if d in self.allow_domains:
-            return True
-        return any(entry.startswith(".") and d.endswith(entry) for entry in self.allow_domains)
+class HttpWebCollector(BaseCollector):
+    def __init__(self, config: dict[str, Any], allowlist_domains: list[str]):
+        super().__init__(config, allowlist_domains)
 
     def collect(self, seed: dict[str, Any], now_iso: str) -> list[dict[str, Any]]:
         query = seed.get("query", "")

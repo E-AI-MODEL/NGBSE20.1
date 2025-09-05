@@ -5,7 +5,7 @@ import os
 class SecurityFilter(logging.Filter):
     """Filter to redact sensitive information from logs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # Patterns to redact
         self.sensitive_patterns = [
@@ -15,7 +15,7 @@ class SecurityFilter(logging.Filter):
             r'password["\']?\s*[:=]\s*["\']?([a-zA-Z0-9_-]{8,})["\']?',
         ]
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         """Filter log records to redact sensitive information."""
         if hasattr(record, "getMessage"):
             message = record.getMessage()

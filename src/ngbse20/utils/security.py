@@ -81,7 +81,7 @@ def mask_credentials_in_string(text: str) -> str:
     masked_text = text
     for pattern in patterns:
 
-        def replace_match(match):
+        def replace_match(match: re.Match[str]) -> str:
             full_match = match.group(0)
             credential = match.group(1)
             masked_credential = mask_api_key(credential)
