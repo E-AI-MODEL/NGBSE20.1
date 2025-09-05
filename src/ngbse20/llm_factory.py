@@ -44,7 +44,7 @@ def get_provider_client(provider_name: str) -> Union[OpenAIClient, AnthropicClie
 def build_llm(config: LLMConfig, 
               profile: Optional[ProfileConfig] = None,
               overrides: Optional[Dict[str, Any]] = None,
-              env: Optional[Dict[str, str]] = None) -> Any:
+              env: Optional[Dict[str, str]] = None):
     """
     Build LLM handle from configuration.
     
@@ -179,7 +179,7 @@ def get_default_model(provider: str) -> str:
 
 def create_llm_handle(provider: str, model: Optional[str] = None, 
                      temperature: float = 0.0, top_p: float = 1.0,
-                     max_tokens: int = 400, seed: Optional[int] = None) -> Any:
+                     max_tokens: int = 400, seed: Optional[int] = None):
     """
     Create LLM handle with direct parameters (convenience method).
     

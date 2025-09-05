@@ -3,10 +3,14 @@ JSON schema validation and normalization utilities for NGBSE 20.2.
 Provides deterministic output formatting and validation.
 """
 
+import hashlib
 import json
 from typing import Any, Dict, List, Union
 
-import jsonschema
+try:
+    import jsonschema
+except ImportError:
+    jsonschema = None
 
 
 def validate_and_normalize(obj: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
@@ -24,6 +28,8 @@ def validate_and_normalize(obj: Dict[str, Any], schema: Dict[str, Any]) -> Dict[
         jsonschema.ValidationError: If object doesn't match schema
     """
     # Validate against schema
+    if jsonschema is None:
+        raise ImportError("jsonschema is required for validation")
     jsonschema.validate(instance=obj, schema=schema)
     
     # Normalize for deterministic output
@@ -64,8 +70,6 @@ def create_hash(obj: Any) -> str:
     Returns:
         Hexadecimal hash string
     """
-    import hashlib
-    
     # Convert to JSON with sorted keys for deterministic hashing
     json_str = json.dumps(obj, sort_keys=True, separators=(',', ':'))
     return hashlib.sha256(json_str.encode('utf-8')).hexdigest()

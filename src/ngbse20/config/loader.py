@@ -43,11 +43,13 @@ class BALLMConfig:
     model: str = "gpt-4"
 
 
-@dataclass
+@dataclass 
 class NGBSEConfig:
     """Main NGBSE configuration schema."""
 
     output_dir: str = "out"
+    llm: Optional[LLMConfig] = None
+    profiles: Dict[str, ProfileConfig] = None
     allowlist: List[str] = None
     collectors: CollectorConfig = None
     scoring: ScoringConfig = None

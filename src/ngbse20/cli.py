@@ -9,14 +9,14 @@ from pathlib import Path
 import click
 import requests
 
-from ngbse20.collectors.http_web import HttpWebCollector
-from ngbse20.config.loader import validate_files
-from ngbse20.export.stix import findings_to_stix
-from ngbse20.monitoring.health import get_health_status
-from ngbse20.runtime.logger import configure_logging
-from ngbse20.runtime.orchestrator import run_pipeline
-from ngbse20.utils.validation import validate_allowlist
-from ngbse20.llm_factory import list_models, get_default_model
+from .collectors.http_web import HttpWebCollector
+from .config.loader import validate_files
+from .export.stix import findings_to_stix  
+from .monitoring.health import get_health_status
+from .runtime.logger import configure_logging
+from .runtime.orchestrator import run_pipeline
+from .utils.validation import validate_allowlist
+from .llm_factory import list_models, get_default_model
 
 LOGGER = logging.getLogger(__name__)
 
