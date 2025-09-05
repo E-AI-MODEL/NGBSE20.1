@@ -181,8 +181,11 @@ def ballm_analyze(findings: str, out: str, depth: int):
     # Generate BALLM meta-layer
     from ngbse20.ballm.meta_layer_generator import BALLMMetaLayerGenerator
     from ngbse20.llm_client import LLMClient
+    from ngbse20.config.loader import load_config
 
-    ballm_generator = BALLMMetaLayerGenerator(LLMClient())
+    # Load configuration for BALLM
+    config = load_config()
+    ballm_generator = BALLMMetaLayerGenerator(LLMClient(config=config.__dict__))
     meta_layer = ballm_generator.generate_meta_layer(findings_data, blindspots_data, asset_scores_data)
 
     # Save BALLM output

@@ -34,8 +34,9 @@ LOGGER = get_logger(__name__)
 class PipelineStages:
     """Manages individual pipeline stages."""
 
-    def __init__(self, output_dir: str):
+    def __init__(self, output_dir: str, config: Dict[str, Any] | None = None):
         self.output_dir = output_dir
+        self.config = config or {}
         os.makedirs(output_dir, exist_ok=True)
 
     def validate_stage(self, rules: List[Dict[str, Any]], metrics: Dict[str, Any]) -> Dict[str, Any]:
@@ -236,7 +237,7 @@ class PipelineStages:
     ) -> Dict[str, Any]:
         """BALLM meta-layer generation stage."""
         try:
-            ballm_generator = BALLMMetaLayerGenerator(LLMClient())
+            ballm_generator = BALLMMetaLayerGenerator(LLMClient(config=self.config))
             meta_layer = ballm_generator.generate_meta_layer(scored_findings, blindspots, asset_scores)
 
             trace = event(

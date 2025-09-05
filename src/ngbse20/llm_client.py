@@ -4,7 +4,7 @@ import json
 import os
 import time
 from json import JSONDecodeError
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -21,8 +21,124 @@ except Exception:  # pragma: no cover - fallback for stubbed requests
 
 
 class LLMClient:
-    def __init__(self, provider_priority: list[str] | None = None):
+    def __init__(self, provider_priority: list[str] | None = None, config: Dict[str, Any] | None = None):
         self.providers = provider_priority
+        self.config = config or {}
+        self._determine_provider_priority()
+
+    def _determine_provider_priority(self) -> None:
+        """Determine provider priority based on available API keys and configuration."""
+        if self.providers is not None:
+            # Use explicitly provided priority
+            return
+        
+        # Check which API keys are available
+        available_providers = []
+        
+        # Check for OpenAI
+        if os.getenv("OPENAI_API_KEY"):
+            available_providers.append("openai")
+        
+        # Check for Azure OpenAI
+        if os.getenv("AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_ENDPOINT"):
+            available_providers.append("azure_openai")
+        
+        # Check for Anthropic
+        if os.getenv("ANTHROPIC_API_KEY"):
+            available_providers.append("anthropic")
+        
+        # Check for Cohere
+        if os.getenv("COHERE_API_KEY"):
+            available_providers.append("cohere")
+        
+        # Check for Google
+        if os.getenv("GOOGLE_API_KEY"):
+            available_providers.append("google")
+        
+        # If no providers available, use default priority
+        if not available_providers:
+            self.providers = ["openai", "azure_openai", "anthropic", "cohere", "google"]
+            LOGGER.warning("No API keys found, using default provider priority")
+        else:
+            self.providers = available_providers
+            LOGGER.info(f"Using available providers: {', '.join(available_providers)}")
+
+    def _get_model_for_provider(self, provider: str) -> str:
+        """Get the appropriate model for a given provider based on configuration."""
+        # Check if there's a specific model preference in config
+        ballm_config = self.config.get("ballm", {})
+        preferred_model = ballm_config.get("model", "")
+        
+        # Model mapping based on preferred model
+        if preferred_model:
+            model_mapping = {
+                "gpt-4": {
+                    "openai": "gpt-4",
+                    "azure_openai": "gpt-4",
+                    "anthropic": "claude-3-5-sonnet-20240620",
+                    "cohere": "command-r7b-12-2024",
+                    "google": "gemini-1.5-pro"
+                },
+                "gpt-4o": {
+                    "openai": "gpt-4o",
+                    "azure_openai": "gpt-4o",
+                    "anthropic": "claude-3-5-sonnet-20240620",
+                    "cohere": "command-r7b-12-2024",
+                    "google": "gemini-1.5-pro"
+                },
+                "gpt-4o-mini": {
+                    "openai": "gpt-4o-mini",
+                    "azure_openai": "gpt-4o-mini",
+                    "anthropic": "claude-3-5-haiku-20240307",
+                    "cohere": "command-r7b-12-2024",
+                    "google": "gemini-1.5-flash"
+                },
+                "claude": {
+                    "openai": "gpt-4o-mini",
+                    "azure_openai": "gpt-4o-mini",
+                    "anthropic": "claude-3-5-sonnet-20240620",
+                    "cohere": "command-r7b-12-2024",
+                    "google": "gemini-1.5-pro"
+                },
+                "gemini": {
+                    "openai": "gpt-4o-mini",
+                    "azure_openai": "gpt-4o-mini",
+                    "anthropic": "claude-3-5-haiku-20240307",
+                    "cohere": "command-r7b-12-2024",
+                    "google": "gemini-1.5-pro"
+                }
+            }
+            
+            # Find the best match for the preferred model (exact match first, then partial)
+            exact_matches = []
+            partial_matches = []
+            
+            for model_key, provider_models in model_mapping.items():
+                if model_key == preferred_model.lower():
+                    exact_matches.append((model_key, provider_models))
+                elif model_key in preferred_model.lower():
+                    partial_matches.append((model_key, provider_models))
+            
+            # Try exact matches first
+            for model_key, provider_models in exact_matches:
+                if provider in provider_models:
+                    return provider_models[provider]
+            
+            # Then try partial matches
+            for model_key, provider_models in partial_matches:
+                if provider in provider_models:
+                    return provider_models[provider]
+        
+        # Fallback to environment variables or defaults
+        env_model_mapping = {
+            "openai": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            "azure_openai": os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini"),
+            "anthropic": os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620"),
+            "cohere": os.getenv("COHERE_MODEL", "command-r7b-12-2024"),
+            "google": os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
+        }
+        
+        return env_model_mapping.get(provider, "gpt-4o-mini")
 
     def call(
         self,
@@ -81,7 +197,7 @@ class LLMClient:
 
     def _call_openai(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("OPENAI_API_KEY")
-        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        model = self._get_model_for_provider("openai")
         if not api_key:
             return None
         data = self._post_json(
@@ -104,7 +220,7 @@ class LLMClient:
     ) -> str | None:
         api_key = os.getenv("AZURE_OPENAI_API_KEY")
         endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-        deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini")
+        deployment = self._get_model_for_provider("azure_openai")
         if not api_key or not endpoint:
             return None
         url = f"{endpoint}/openai/deployments/{deployment}/chat/completions" f"?api-version=2024-02-15-preview"
@@ -124,7 +240,7 @@ class LLMClient:
 
     def _call_anthropic(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("ANTHROPIC_API_KEY")
-        model = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
+        model = self._get_model_for_provider("anthropic")
         if not api_key:
             return None
         data = self._post_json(
@@ -152,7 +268,7 @@ class LLMClient:
         if the API call is not implemented in this environment.
         """
         api_key = os.getenv("COHERE_API_KEY")
-        model = os.getenv("COHERE_MODEL", "command-r7b-12-2024")
+        model = self._get_model_for_provider("cohere")
         if not api_key:
             # No key provided; return a consistent, safe fallback structure
             LOGGER.warning("Cohere API key not set. Using fallback response.")
@@ -175,7 +291,7 @@ class LLMClient:
 
     def _call_google(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str | None:
         api_key = os.getenv("GOOGLE_API_KEY")
-        model = os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
+        model = self._get_model_for_provider("google")
         if not api_key:
             return None
         url = "https://generativelanguage.googleapis.com/v1beta/models/" f"{model}:generateContent?key={api_key}"

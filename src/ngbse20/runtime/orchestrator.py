@@ -23,7 +23,7 @@ class PipelineOrchestrator:
         self.config = self.config_loader.load_config()
         self.credentials = self.config_loader.get_credentials()
         self.collector_manager = CollectorManager(self.config.__dict__, self.credentials)
-        self.pipeline_stages = PipelineStages(self.config.output_dir)
+        self.pipeline_stages = PipelineStages(self.config.output_dir, self.config.__dict__)
 
     def run_pipeline(
         self,
