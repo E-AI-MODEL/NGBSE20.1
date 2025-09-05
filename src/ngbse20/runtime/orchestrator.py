@@ -1,5 +1,5 @@
 """
-Pipeline orchestrator for NGBSE 20.2 (GA Version).
+Pipeline orchestrator for NGBSE 20.3 (GA Version).
 Modularized orchestrator with separated concerns and improved testability.
 Order: validate -> collect -> score -> history -> forecast -> propose -> blindspots
 -> BALLM -> scenarios -> export.
@@ -16,7 +16,7 @@ LOGGER = get_logger(__name__)
 
 
 class PipelineOrchestrator:
-    """Main pipeline orchestrator for NGBSE 20.2."""
+    """Main pipeline orchestrator for NGBSE 20.3."""
 
     def __init__(self, config_dir: str = "config"):
         self.config_loader = ConfigLoader(config_dir)

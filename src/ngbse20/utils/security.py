@@ -1,5 +1,5 @@
 """
-Security utilities for NGBSE 20.2.
+Security utilities for NGBSE 20.3.
 Provides API key masking and security-related helper functions.
 """
 

@@ -1,5 +1,5 @@
 """
-Collector manager for NGBSE 20.2.
+Collector manager for NGBSE 20.3.
 Manages collector lifecycle and credential validation.
 """
 

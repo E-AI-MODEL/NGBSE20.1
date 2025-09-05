@@ -1,5 +1,5 @@
 """
-Input validation utilities for NGBSE 20.2.
+Input validation utilities for NGBSE 20.3.
 Provides validation for user inputs to prevent security issues.
 """
 

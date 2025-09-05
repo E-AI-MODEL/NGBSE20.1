@@ -1,5 +1,5 @@
 """
-Pipeline stages for NGBSE 20.2.
+Pipeline stages for NGBSE 20.3.
 Separates pipeline logic into distinct, testable stages.
 """
 

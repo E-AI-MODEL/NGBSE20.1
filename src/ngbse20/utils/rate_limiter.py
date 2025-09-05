@@ -1,5 +1,5 @@
 """
-Rate limiting utilities for NGBSE 20.2.
+Rate limiting utilities for NGBSE 20.3.
 Provides rate limiting and retry logic for API calls.
 """
 
