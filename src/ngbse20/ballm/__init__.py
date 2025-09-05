@@ -1,4 +1,4 @@
-"""BALLM (Blindspot-Aware Large Language Models) module for NGBSE 20.1."""
+"""BALLM (Blindspot-Aware Large Language Models) module for NGBSE 20.3."""
 
 from .blindspot_interpreter import BlindspotInterpretationEngine
 from .curiosity_generator import CuriosityGenerationEngine

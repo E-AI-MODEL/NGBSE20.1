@@ -1,5 +1,5 @@
 """
-Seed data models for NGBSE 20.2.
+Seed data models for NGBSE 20.3.
 Provides Pydantic models for seed validation.
 """
 

@@ -1,4 +1,4 @@
-"""NGBSE 20.1 Seeds Package."""
+"""NGBSE 20.3 Seeds Package."""
 
 from .proposer import propose_next_seeds
 

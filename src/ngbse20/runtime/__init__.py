@@ -1,4 +1,4 @@
-"""NGBSE 20.1 Runtime Package."""
+"""NGBSE 20.3 Runtime Package."""
 
 from .orchestrator import run_pipeline
 

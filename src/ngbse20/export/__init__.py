@@ -1,4 +1,4 @@
-"""NGBSE 20.1 Export Package."""
+"""NGBSE 20.3 Export Package."""
 
 from .stix import to_stix_bundle
 

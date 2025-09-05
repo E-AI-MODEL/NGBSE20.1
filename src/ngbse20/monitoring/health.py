@@ -1,5 +1,5 @@
 """
-Health monitoring for NGBSE 20.2.
+Health monitoring for NGBSE 20.3.
 Provides health checks and monitoring capabilities.
 """
 

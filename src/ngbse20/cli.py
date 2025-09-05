@@ -49,7 +49,7 @@ def cli(log_level: str):
 @click.option("--metrics", default="{}", help="JSON string of runtime metrics")
 def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str):
     """Run the full NGBSE pipeline from collection to reporting."""
-    click.echo("Starting NGBSE 20.1 pipeline...")
+    click.echo("Starting NGBSE 20.3 pipeline...")
 
     try:
         # Load and parse input files
@@ -220,7 +220,7 @@ def list_collectors():
         ("News", NewsCollector, ["NEWS_API_KEY"]),
     ]
 
-    click.echo("Available NGBSE 20.1 Collectors:")
+    click.echo("Available NGBSE 20.3 Collectors:")
     click.echo("=" * 50)
 
     for name, _collector_class, required_envs in collectors:
