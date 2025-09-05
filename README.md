@@ -102,8 +102,8 @@ The easiest way to get started is with Docker Compose. This ensures the environm
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/E-AI-MODEL/NGBSE20.1.git
-   cd NGBSE20.1
+   git clone https://github.com/E-AI-MODEL/NGBSE20.3.git
+   cd NGBSE20.3
    ```
 
 2. **Configure your environment:**
@@ -129,10 +129,16 @@ The easiest way to get started is with Docker Compose. This ensures the environm
 
 For local installation, Python 3.11+ is required.
 
+**Python Version Compatibility:**
+- **Minimum**: Python 3.11
+- **Recommended**: Python 3.12 or 3.13
+- **Docker**: Uses Python 3.11-slim base image
+- **CI/CD**: Tests on Python 3.11, 3.12, 3.13
+
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/E-AI-MODEL/NGBSE20.1.git
-   cd NGBSE20.1
+   git clone https://github.com/E-AI-MODEL/NGBSE20.3.git
+   cd NGBSE20.3
    ```
 
 2. **Install dependencies:**

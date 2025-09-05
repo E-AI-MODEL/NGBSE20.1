@@ -35,7 +35,7 @@ cat out/findings.json
 ## 📋 **What You Need**
 
 ### **Required:**
-- Python 3.11+ or Docker
+- Python 3.11+ or Docker (Python 3.11-slim base image)
 - At least one OSINT API key (see options below)
 
 ### **Recommended API Keys (choose 2-3):**

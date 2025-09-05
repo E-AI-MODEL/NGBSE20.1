@@ -86,7 +86,7 @@ NGBSE 20.1 is a comprehensive Open-Source Intelligence (OSINT) engine that:
 ## 📋 **Prerequisites**
 
 ### **Required**
-- Python 3.11+ or Docker
+- Python 3.11+ or Docker (Python 3.11-slim base image)
 - At least one OSINT API key
 
 ### **Recommended**
