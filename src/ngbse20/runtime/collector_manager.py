@@ -36,11 +36,18 @@ class CollectorManager:
             enabled_collectors = self.config.get("collectors", {}).get("enabled", self.registry.list_collectors())
         
         active_collectors = []
+        missing_credentials = []
 
         for collector_name in enabled_collectors:
             collector_class = self.registry.get_collector(collector_name)
             if not collector_class:
                 LOGGER.warning(f"Unknown collector: {collector_name}")
+                continue
+
+            # Check credentials before creating collector instance
+            if not self._has_required_credentials(collector_name):
+                missing_credentials.append(collector_name)
+                LOGGER.warning(f"Collector {collector_name} disabled - missing API credentials")
                 continue
 
             try:
@@ -51,29 +58,83 @@ class CollectorManager:
                 else:
                     collector = collector_class(self.config, allowlist)
 
-                # Validate credentials
+                # Additional validation after creation
                 if self._has_valid_credentials(collector):
                     active_collectors.append(collector)
                     LOGGER.info(f"Activated collector: {collector_name}")
                 else:
-                    LOGGER.warning(f"Collector {collector_name} disabled - missing credentials")
+                    LOGGER.warning(f"Collector {collector_name} disabled - credential validation failed")
 
             except Exception as e:
                 LOGGER.error(f"Failed to initialize collector {collector_name}: {e}")
 
+        # Log summary
+        if missing_credentials:
+            LOGGER.info(f"Collectors disabled due to missing credentials: {missing_credentials}")
+        
         self._collectors = active_collectors
         LOGGER.info(f"Active collectors: {[c.__class__.__name__ for c in active_collectors]}")
         return active_collectors
 
     def _has_valid_credentials(self, collector: BaseCollector) -> bool:
         """Check if collector has valid credentials."""
+        # HttpWebCollector doesn't need API keys
+        if isinstance(collector, HttpWebCollector):
+            return True
+        
+        # Check collector-specific credential attributes
         if hasattr(collector, "api_key") and collector.api_key:
             return True
         if hasattr(collector, "token") and collector.token:
             return True
         if hasattr(collector, "api_id") and collector.api_id:
             return True
-        return bool(isinstance(collector, HttpWebCollector))
+        
+        # Check if credentials are available in self.credentials
+        collector_name = collector.__class__.__name__.lower().replace("collector", "")
+        if collector_name in self.credentials and self.credentials[collector_name]:
+            return True
+        
+        # Check for common API key patterns in credentials
+        api_key_patterns = [
+            f"{collector_name}_api_key",
+            f"{collector_name}_token",
+            f"{collector_name}_key",
+            "api_key",
+            "token"
+        ]
+        
+        for pattern in api_key_patterns:
+            if pattern in self.credentials and self.credentials[pattern]:
+                return True
+        
+        return False
+    
+    def _has_required_credentials(self, collector_name: str) -> bool:
+        """Check if required credentials are available before creating collector."""
+        # HttpWebCollector doesn't need API keys
+        if collector_name == "http_web":
+            return True
+        
+        # Check for collector-specific credentials
+        if collector_name in self.credentials and self.credentials[collector_name]:
+            return True
+        
+        # Check for common API key patterns
+        api_key_patterns = [
+            f"{collector_name}_api_key",
+            f"{collector_name}_token", 
+            f"{collector_name}_key",
+            f"{collector_name}_id",
+            "api_key",
+            "token"
+        ]
+        
+        for pattern in api_key_patterns:
+            if pattern in self.credentials and self.credentials[pattern]:
+                return True
+        
+        return False
 
     def collect_all(self, seeds: list[dict[str, Any]], timestamp: str) -> list[dict[str, Any]]:
         """Run collection across all active collectors."""
