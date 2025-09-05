@@ -27,7 +27,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
+                f.write(json.dumps({"id": "test_seed", "query": "example.com", "type": "web"}) + "\n")
 
             # Test rules
             rules_file = config_dir / "rules.json"
@@ -70,7 +70,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
+                f.write(json.dumps({"id": "test_seed", "query": "example.com", "type": "web"}) + "\n")
 
             # Test rules with hard block
             rules_file = config_dir / "rules.json"
@@ -115,7 +115,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
+                f.write(json.dumps({"id": "test_seed", "query": "example.com", "type": "web"}) + "\n")
 
             # Test rules
             rules_file = config_dir / "rules.json"
@@ -163,7 +163,7 @@ class TestPipelineIntegration:
             # Test seeds
             seeds_file = config_dir / "seeds.jsonl"
             with open(seeds_file, "w") as f:
-                f.write(json.dumps({"id": "test_seed", "type": "domain", "value": "example.com"}) + "\n")
+                f.write(json.dumps({"id": "test_seed", "query": "example.com", "type": "web"}) + "\n")
 
             # Test rules
             rules_file = config_dir / "rules.json"

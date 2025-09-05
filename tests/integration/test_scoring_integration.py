@@ -99,7 +99,7 @@ class TestScoringIntegration:
             w_recency=0.5
         )
         
-        result_new = score_findings(findings, cfg_new, source_trust.dict(), rules)
+        result_new = score_findings(findings, cfg_new, source_trust.model_dump(), rules)
         assert len(result_new) == 3
         
         for finding in result_new:
@@ -174,7 +174,7 @@ class TestScoringIntegration:
             weights={"source": 0.3, "keywords": 0.3, "recency": 0.4}
         )
         
-        result_new = score_findings(findings, cfg_new, source_trust.dict(), rules)
+        result_new = score_findings(findings, cfg_new, source_trust.model_dump(), rules)
         
         # Scores should be identical when flags are off
         assert result_legacy[0]["score"] == result_new[0]["score"]

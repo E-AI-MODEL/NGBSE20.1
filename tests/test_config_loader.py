@@ -8,7 +8,7 @@ def test_validate_files(tmp_path: Path):
     seeds = tmp_path / "seeds.json"
     rules = tmp_path / "rules.json"
     seeds.write_text(
-        json.dumps([{"url": "https://example.com", "asset_id": "a1", "tags": ["x"]}]),
+        json.dumps({"id": "test_seed", "query": "https://example.com", "type": "web", "asset_id": "a1", "tags": ["x"]}),
         encoding="utf-8",
     )
     rules.write_text(
@@ -23,7 +23,7 @@ def test_validate_files(tmp_path: Path):
 def test_invalid_seed_url(tmp_path: Path):
     seeds = tmp_path / "seeds.json"
     rules = tmp_path / "rules.json"
-    seeds.write_text(json.dumps([{"url": "not-a-url"}]), encoding="utf-8")
+    seeds.write_text(json.dumps({"id": "test_seed", "query": "not-a-url", "type": "web"}), encoding="utf-8")
     rules.write_text(json.dumps([]), encoding="utf-8")
     try:
         validate_files(str(seeds), str(rules))
