@@ -1,10 +1,11 @@
 """Tests for source trust configuration validation."""
 
-import pytest
 import json
 from pathlib import Path
-from src.ngbse20.config.models import SourceTrustConfig
+
+import pytest
 from src.ngbse20.config.loader import load_source_trust
+from src.ngbse20.config.models import SourceTrustConfig
 
 
 class TestSourceTrustConfig:
@@ -43,10 +44,10 @@ class TestSourceTrustConfig:
     
     def test_default_trust_level_bounds(self):
         """Test default trust level bounds validation."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Input should be less than or equal to 1"):
             SourceTrustConfig(default_trust_level=1.5)
         
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Input should be greater than or equal to 0"):
             SourceTrustConfig(default_trust_level=-0.1)
 
 

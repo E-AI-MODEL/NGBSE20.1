@@ -2,16 +2,15 @@
 Integration tests for the complete NGBSE pipeline.
 """
 
-import pytest
-
-pytestmark = pytest.mark.integration
-
 import json
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import pytest
 from src.ngbse20.runtime.orchestrator import PipelineOrchestrator
+
+pytestmark = pytest.mark.integration
 
 
 class TestPipelineIntegration:
@@ -149,7 +148,7 @@ class TestPipelineIntegration:
                 assert Path(result["output_files"]["history"]).exists()
 
                 # Verify file contents
-                with open(result["output_files"]["findings"], "r") as f:
+                with open(result["output_files"]["findings"]) as f:
                     findings_data = json.load(f)
                     assert len(findings_data) == 1
                     assert findings_data[0]["id"] == "finding1"
@@ -182,21 +181,20 @@ class TestPipelineIntegration:
                     f,
                 )
 
-            # Mock environment variables for credentials
-            with patch.dict(
-                "os.environ",
-                {
-                    "SHODAN_API_KEY": "test_shodan_key",
-                    "CENSYS_API_ID": "test_censys_id",
-                    "CENSYS_API_SECRET": "test_censys_secret",
-                },
+            # Mock environment variables for credentials and collectors
+            with (
+                patch.dict(
+                    "os.environ",
+                    {
+                        "SHODAN_API_KEY": "test_shodan_key",
+                        "CENSYS_API_ID": "test_censys_id",
+                        "CENSYS_API_SECRET": "test_censys_secret",
+                    },
+                ),
+                patch("src.ngbse20.runtime.collector_manager.HttpWebCollector") as mock_http,
+                patch("src.ngbse20.runtime.collector_manager.ShodanCollector") as mock_shodan,
+                patch("src.ngbse20.runtime.collector_manager.CensysCollector") as mock_censys,
             ):
-                # Mock collectors
-                with (
-                    patch("src.ngbse20.runtime.collector_manager.HttpWebCollector") as mock_http,
-                    patch("src.ngbse20.runtime.collector_manager.ShodanCollector") as mock_shodan,
-                    patch("src.ngbse20.runtime.collector_manager.CensysCollector") as mock_censys,
-                ):
 
                     # Setup mock instances
                     mock_http_instance = Mock()

@@ -1,11 +1,12 @@
 """Integration tests for scoring v18.1."""
 
-import pytest
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+
+import pytest
+from src.ngbse20.config.loader import load_rules, load_source_trust
 from src.ngbse20.scoring.v18 import ScoringConfig, score_findings
-from src.ngbse20.config.loader import load_source_trust, load_rules
 
 
 class TestScoringIntegration:

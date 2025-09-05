@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from ngbse20.config.loader import validate_files
 
 
@@ -17,7 +19,8 @@ def test_validate_files(tmp_path: Path):
     )
 
     n_seeds, n_rules = validate_files(str(seeds), str(rules))
-    assert n_seeds == 1 and n_rules == 1
+    assert n_seeds == 1
+    assert n_rules == 1
 
 
 def test_invalid_seed_url(tmp_path: Path):
@@ -25,8 +28,9 @@ def test_invalid_seed_url(tmp_path: Path):
     rules = tmp_path / "rules.json"
     seeds.write_text(json.dumps({"id": "test_seed", "query": "not-a-url", "type": "web"}), encoding="utf-8")
     rules.write_text(json.dumps([]), encoding="utf-8")
-    try:
+    with pytest.raises(ValueError, match="url") as exc_info:
         validate_files(str(seeds), str(rules))
-    except Exception as e:
-        assert "VALIDATION" not in str(e)  # ValueError met pydantic-inhoud
-        assert "url" in str(e)
+    
+    error_msg = str(exc_info.value)
+    assert "VALIDATION" not in error_msg  # ValueError met pydantic-inhoud
+    assert "url" in error_msg

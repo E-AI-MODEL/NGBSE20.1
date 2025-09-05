@@ -2,10 +2,10 @@
 Test fixtures and sample data for NGBSE tests.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 
-def get_sample_seeds() -> List[Dict[str, Any]]:
+def get_sample_seeds() -> list[dict[str, Any]]:
     """Get sample seeds for testing."""
     return [
         {
@@ -29,7 +29,7 @@ def get_sample_seeds() -> List[Dict[str, Any]]:
     ]
 
 
-def get_sample_rules() -> List[Dict[str, Any]]:
+def get_sample_rules() -> list[dict[str, Any]]:
     """Get sample rules for testing."""
     return [
         {
@@ -52,7 +52,7 @@ def get_sample_rules() -> List[Dict[str, Any]]:
     ]
 
 
-def get_sample_findings() -> List[Dict[str, Any]]:
+def get_sample_findings() -> list[dict[str, Any]]:
     """Get sample findings for testing."""
     return [
         {
@@ -80,7 +80,7 @@ def get_sample_findings() -> List[Dict[str, Any]]:
     ]
 
 
-def get_sample_config() -> Dict[str, Any]:
+def get_sample_config() -> dict[str, Any]:
     """Get sample configuration for testing."""
     return {
         "output_dir": "test_output",
@@ -91,7 +91,7 @@ def get_sample_config() -> Dict[str, Any]:
     }
 
 
-def get_sample_metrics() -> Dict[str, Any]:
+def get_sample_metrics() -> dict[str, Any]:
     """Get sample metrics for testing."""
     return {
         "total_findings": 2,
@@ -101,7 +101,7 @@ def get_sample_metrics() -> Dict[str, Any]:
     }
 
 
-def get_sample_asset_scores() -> Dict[str, Any]:
+def get_sample_asset_scores() -> dict[str, Any]:
     """Get sample asset scores for testing."""
     return {
         "example.com": {
@@ -121,7 +121,7 @@ def get_sample_asset_scores() -> Dict[str, Any]:
     }
 
 
-def get_sample_blindspots() -> Dict[str, Any]:
+def get_sample_blindspots() -> dict[str, Any]:
     """Get sample blindspots for testing."""
     return {
         "coverage": {
@@ -145,7 +145,7 @@ def get_sample_blindspots() -> Dict[str, Any]:
     }
 
 
-def get_sample_ballm_meta_layer() -> Dict[str, Any]:
+def get_sample_ballm_meta_layer() -> dict[str, Any]:
     """Get sample BALLM meta-layer for testing."""
     return {
         "epistemic_humility_score": 0.75,

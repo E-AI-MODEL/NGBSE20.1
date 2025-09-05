@@ -1,13 +1,14 @@
 """Tests for scoring v18.1 with source trust and keyword scoring."""
 
-import pytest
 from datetime import datetime, timezone
+
+import pytest
 from src.ngbse20.scoring.v18 import (
-    ScoringConfig, 
-    score_findings, 
-    _source_trust_score, 
+    ScoringConfig,
+    _extract_domain,
     _keyword_pattern_score,
-    _extract_domain
+    _source_trust_score,
+    score_findings,
 )
 
 
