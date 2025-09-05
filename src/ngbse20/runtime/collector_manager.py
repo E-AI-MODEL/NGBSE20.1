@@ -58,7 +58,11 @@ class CollectorManager:
 
             try:
                 # Create collector instance
-                collector = collector_class(self.config, allowlist)
+                # RESTORED: Speciale behandeling voor http_web collector
+                if collector_name == "http_web":
+                    collector = collector_class(allowlist_domains=allowlist)
+                else:
+                    collector = collector_class(self.config, allowlist)
 
                 # Validate credentials
                 if self._has_valid_credentials(collector):
