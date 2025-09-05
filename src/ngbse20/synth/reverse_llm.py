@@ -5,7 +5,10 @@ import os
 from collections import Counter
 from typing import Any
 
-from ..llm_client import LLMClient
+from ..llm_factory import build_llm
+from ..config.models import LLMConfig, ProfileConfig
+from ..utils.validation import validate_llm_output, RISK_ANALYSIS_SCHEMA
+from ..utils.prompt_hash import hash_prompt
 from ..logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -82,7 +85,8 @@ def synthesize_brief_llm(
     findings: list[dict[str, Any]],
     asset_scores: dict[str, dict[str, float]],
     mode: str = "none",
-    provider_priority: list[str] | None = None,
+    llm_config: LLMConfig = None,
+    profile: ProfileConfig = None,
     out_dir: str | None = None,
 ) -> dict[str, Any]:
     base = synthesize_brief(findings, asset_scores)
@@ -117,34 +121,49 @@ def synthesize_brief_llm(
             pass
         return base
 
-    if mode == "api":
-        client = LLMClient(provider_priority or ["openai", "azure_openai", "anthropic", "cohere", "google"])
+    if mode == "api" and llm_config:
+        llm_handle = build_llm(llm_config, profile)
         system_prompt = (
             "You are a senior cybersecurity threat intelligence analyst. "
             "Produce a concise BLUF (1-2 sentences), a list of top risks, and 3 actionable mitigation steps. "
             "Be factual and grounded in the provided evidence."
         )
         user_prompt = json.dumps(payload, ensure_ascii=False)
-        txt = client.call(system_prompt, user_prompt, max_tokens=600, temperature=0.2)
-
-        # Try to parse structured JSON first
-        if isinstance(txt, str) and txt.strip():
-            try:
-                parsed = json.loads(txt)
-                required = {"BLUF", "TopRisks", "Actions"}
-                if isinstance(parsed, dict) and required.issubset(parsed.keys()):
+        
+        # Generate hash for audit trail
+        prompt_hash = hash_prompt(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            model=llm_handle.model,
+            params=llm_handle.params,
+            seed=llm_config.seed
+        )
+        
+        try:
+            raw_response = llm_handle.generate(system_prompt, user_prompt)
+            
+            # Try to parse structured JSON first
+            if isinstance(raw_response, str) and raw_response.strip():
+                try:
+                    validated_response = validate_llm_output(raw_response, RISK_ANALYSIS_SCHEMA)
                     return {
-                        "BLUF": parsed.get("BLUF", base["BLUF"]),
-                        "TopRisks": parsed.get("TopRisks", base["TopRisks"]),
-                        "Actions": parsed.get("Actions", base["Actions"]),
+                        "BLUF": validated_response.get("BLUF", base["BLUF"]),
+                        "TopRisks": validated_response.get("TopRisks", base["TopRisks"]),
+                        "Actions": validated_response.get("Actions", base["Actions"]),
+                        "prompt_hash": prompt_hash,
+                        "model_info": {
+                            "provider": llm_handle.provider,
+                            "model": llm_handle.model,
+                            "params": llm_handle.params
+                        }
                     }
-                # If model returned plain text instead of JSON, fall back to BLUF-only merge
-                LOGGER.warning("LLM returned non-conforming JSON. Falling back to base + BLUF text.")
-                return {**base, "BLUF": txt.strip()}
-            except Exception:
-                # Not JSON - treat as plain BLUF text
-                LOGGER.warning("LLM output not JSON. Using BLUF text fallback.")
-                return {**base, "BLUF": txt.strip()}
+                except (json.JSONDecodeError, Exception):
+                    # If model returned plain text instead of JSON, fall back to BLUF-only merge
+                    LOGGER.warning("LLM returned non-conforming JSON. Falling back to base + BLUF text.")
+                    return {**base, "BLUF": raw_response.strip()}
+        except Exception as e:
+            LOGGER.error(f"LLM call failed: {e}")
+            return base
 
     # Ultimate fallback
     return base

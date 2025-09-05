@@ -11,6 +11,9 @@ This tool is the practical implementation of the research paper "From Closure to
 - **Epistemic Scoring**: Evaluate findings based on source credibility, content, and recency
 - **Blindspot Analysis**: Identify gaps in collected data regarding coverage, recency, and reliability
 - **BALLM Integration**: Blindspot-Aware Large Language Models that interpret blindspots and generate curiosity questions
+- **Centralized LLM Management**: Unified configuration and provider abstraction for all LLM operations
+- **Deterministic Output**: Reproducible results with fixed seeds and parameter validation
+- **JSON Schema Validation**: Structured output validation and normalization
 - **STIX 2.1 Export**: Export results in a standardized format for cybersecurity applications
 - **Reproducible & Scalable**: Fully containerized with Docker for consistent and easy deployment
 
@@ -52,6 +55,67 @@ The BALLM (Blindspot-Aware Large Language Models) layer transforms raw blindspot
 - **Curiosity Questions**: Automatically generated questions to explore blind spots
 - **Epistemic Humility**: Quantified awareness of knowledge limitations
 - **Productive Failures**: Identification of learning opportunities from gaps
+
+## LLM Management
+
+NGBSE 20.2 introduces centralized LLM management with provider abstraction and deterministic output:
+
+### **Supported Providers**
+- **OpenAI**: GPT-4o, GPT-4o-mini, GPT-4, GPT-3.5-turbo
+- **Anthropic**: Claude-3.5-Sonnet, Claude-3.5-Haiku, Claude-3-Opus
+- **Mistral**: Mistral-Large, Mistral-Medium, Mistral-Small
+- **Ollama**: Local models (Llama, Mistral, CodeLlama, Phi3)
+
+### **Configuration**
+LLM settings are centrally managed in `config/ngbse.config.yml`:
+
+```yaml
+llm:
+  provider: openai
+  model: gpt-4o-mini
+  params:
+    temperature: 0.0
+    top_p: 1.0
+    max_tokens: 400
+  seed: 42
+
+profiles:
+  deterministic:
+    temperature: 0.0
+    top_p: 1.0
+  extract:
+    temperature: 0.0
+    top_p: 1.0
+    max_tokens: 2000
+  creative:
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 600
+```
+
+### **CLI Commands**
+```bash
+# List available models for a provider
+ngbse llm list-models --provider openai
+
+# Get default model for a provider
+ngbse llm default-model --provider anthropic
+
+# Run with LLM overrides
+ngbse run --seeds seeds.jsonl --rules rules.json \
+  --llm.provider mistral --llm.model mistral-small-latest \
+  --llm.temperature 0.3 --profile creative
+```
+
+### **Environment Variables**
+Override configuration via environment variables:
+```bash
+export NGBSE_LLM_PROVIDER=anthropic
+export NGBSE_LLM_MODEL=claude-3-5-sonnet-20241022
+export NGBSE_LLM_TEMPERATURE=0.0
+export NGBSE_LLM_MAX_TOKENS=800
+export NGBSE_LLM_SEED=42
+```
 
 ## Quickstart
 

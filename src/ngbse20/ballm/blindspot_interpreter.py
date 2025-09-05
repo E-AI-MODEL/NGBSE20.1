@@ -5,15 +5,23 @@ This engine uses LLM to interpret blindspots and extract deeper epistemic insigh
 
 from __future__ import annotations
 
+import json
 from typing import Any, Dict, List
+
+from ..llm_factory import build_llm
+from ..config.models import LLMConfig, ProfileConfig
+from ..utils.validation import validate_llm_output, BLINDSPOT_SCHEMA
+from ..utils.prompt_hash import hash_prompt
 
 
 class BlindspotInterpretationEngine:
     """Interprets blindspots using LLM to extract epistemic insights."""
 
-    def __init__(self, llm_client: Any) -> None:
-        """Initialize with LLM client."""
-        self.llm_client = llm_client
+    def __init__(self, llm_config: LLMConfig, profile: ProfileConfig = None) -> None:
+        """Initialize with LLM configuration."""
+        self.llm_config = llm_config
+        self.profile = profile
+        self.llm_handle = build_llm(llm_config, profile)
 
     def interpret_blindspots_with_llm(
         self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]
@@ -22,23 +30,50 @@ class BlindspotInterpretationEngine:
 
         # Create comprehensive prompt for LLM interpretation
         prompt = self._create_interpretation_prompt(blindspots, findings)
+        system_prompt = "You are an epistemic analyst. Analyze blindspots for deeper insights."
+
+        # Generate hash for audit trail
+        prompt_hash = hash_prompt(
+            system_prompt=system_prompt,
+            user_prompt=prompt,
+            model=self.llm_handle.model,
+            params=self.llm_handle.params,
+            seed=self.llm_config.seed
+        )
 
         # Get LLM interpretation
-        interpretation = (
-            self.llm_client.call(
-                "You are an epistemic analyst. Analyze blindspots for deeper insights.",
-                prompt,
-                max_tokens=400,
-                temperature=0.3,
-            )
-            or "Unable to interpret blindspots with LLM."
-        )
+        try:
+            raw_response = self.llm_handle.generate(system_prompt, prompt)
+            
+            # Try to parse as JSON first
+            try:
+                parsed_response = json.loads(raw_response)
+                validated_response = validate_llm_output(raw_response, BLINDSPOT_SCHEMA)
+                interpretation = validated_response.get("interpretation", raw_response)
+                epistemic_insights = validated_response.get("epistemic_insights", [])
+                confidence_level = validated_response.get("confidence_level", 0.5)
+            except (json.JSONDecodeError, Exception):
+                # Fallback to text parsing
+                interpretation = raw_response or "Unable to interpret blindspots with LLM."
+                epistemic_insights = self._extract_epistemic_insights_from_text(interpretation)
+                confidence_level = self._assess_interpretation_confidence(blindspots)
+        except Exception as e:
+            # Fallback on error
+            interpretation = "Unable to interpret blindspots with LLM."
+            epistemic_insights = []
+            confidence_level = 0.0
 
         return {
             "interpretation": interpretation,
-            "epistemic_insights": self._extract_epistemic_insights_from_text(interpretation),
-            "confidence_level": self._assess_interpretation_confidence(blindspots),
+            "epistemic_insights": epistemic_insights,
+            "confidence_level": confidence_level,
             "interpretation_method": "llm_analysis",
+            "prompt_hash": prompt_hash,
+            "model_info": {
+                "provider": self.llm_handle.provider,
+                "model": self.llm_handle.model,
+                "params": self.llm_handle.params
+            }
         }
 
     def extract_epistemic_insights(self, blindspots: Dict[str, Any], findings: List[Dict[str, Any]]) -> Dict[str, Any]:

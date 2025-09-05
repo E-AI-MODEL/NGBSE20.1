@@ -5,15 +5,23 @@ This engine generates curiosity-driven questions based on blindspots and finding
 
 from __future__ import annotations
 
+import json
 from typing import Any, Dict, List
+
+from ..llm_factory import build_llm
+from ..config.models import LLMConfig, ProfileConfig
+from ..utils.validation import validate_llm_output, CURIOSITY_SCHEMA
+from ..utils.prompt_hash import hash_prompt
 
 
 class CuriosityGenerationEngine:
     """Generates curiosity-driven questions based on blindspots and findings."""
 
-    def __init__(self, llm_client: Any) -> None:
-        """Initialize with LLM client."""
-        self.llm_client = llm_client
+    def __init__(self, llm_config: LLMConfig, profile: ProfileConfig = None) -> None:
+        """Initialize with LLM configuration."""
+        self.llm_config = llm_config
+        self.profile = profile
+        self.llm_handle = build_llm(llm_config, profile)
 
     def generate_curiosity_questions(
         self, findings: List[Dict[str, Any]], blindspots: Dict[str, Any]
@@ -175,18 +183,30 @@ class CuriosityGenerationEngine:
         """Generate curiosity questions using LLM."""
 
         prompt = self._create_curiosity_prompt(findings, blindspots)
+        system_prompt = "You are a curiosity-driven researcher. Generate probing questions."
+
+        # Generate hash for audit trail
+        prompt_hash = hash_prompt(
+            system_prompt=system_prompt,
+            user_prompt=prompt,
+            model=self.llm_handle.model,
+            params=self.llm_handle.params,
+            seed=self.llm_config.seed
+        )
 
         try:
-            response = self.llm_client.call(
-                "You are a curiosity-driven researcher. Generate probing questions.",
-                prompt,
-                max_tokens=300,
-                temperature=0.4,
-            )
-
-            if response:
-                return self._parse_llm_curiosity_questions(response)
-        except Exception:
+            raw_response = self.llm_handle.generate(system_prompt, prompt)
+            
+            if raw_response:
+                # Try to parse as structured JSON first
+                try:
+                    validated_response = validate_llm_output(raw_response, CURIOSITY_SCHEMA)
+                    return validated_response.get("questions", [])
+                except (json.JSONDecodeError, Exception):
+                    # Fallback to text parsing
+                    return self._parse_llm_curiosity_questions(raw_response)
+        except Exception as e:
+            # Log error but don't fail completely
             pass
 
         return []

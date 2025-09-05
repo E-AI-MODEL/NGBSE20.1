@@ -23,3 +23,12 @@ repos:
     hooks:
       - id: detect-secrets
         args: [--baseline, .secrets.baseline]
+  
+  - repo: local
+    hooks:
+      - id: lint-llm-usage
+        name: Lint LLM Usage
+        entry: python scripts/lint_llm_usage.py
+        language: system
+        files: \.py$
+        pass_filenames: false

@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 from typing import Any, Literal
 
-from ..llm_client import LLMClient
+from ..llm_factory import build_llm
+from ..config.models import LLMConfig, ProfileConfig
+from ..utils.validation import validate_llm_output, SCENARIO_SCHEMA
+from ..utils.prompt_hash import hash_prompt
 
 HIGH_RISK_THRESHOLD = 0.75
 
@@ -44,15 +47,15 @@ def group_by_themes(findings: list[dict[str, Any]]) -> dict[str, list[dict[str, 
 def build_scenarios(
     findings: list[dict[str, Any]],
     mode: Literal["none", "prompt", "api"] = "none",
-    provider_priority: list[str] | None = None,
+    llm_config: LLMConfig = None,
+    profile: ProfileConfig = None,
 ) -> dict[str, dict[str, Any]]:
     groups = group_by_themes(findings)
     out: dict[str, dict[str, Any]] = {}
-    client = (
-        LLMClient(provider_priority or ["openai", "azure_openai", "anthropic", "cohere", "google"])
-        if mode == "api"
-        else None
-    )
+    llm_handle = None
+    
+    if mode == "api" and llm_config:
+        llm_handle = build_llm(llm_config, profile)
 
     for theme, items in groups.items():
         avg = sum(i.get("score", 0.0) for i in items) / max(1, len(items))
@@ -81,10 +84,30 @@ def build_scenarios(
                 ],
                 "instructions": ("Make a concise summary (2-3 sentences), without secrets."),
             }
-            if mode == "api" and client:
+            if mode == "api" and llm_handle:
                 system_prompt = "You are a security analyst. Write concise, factual risk summaries."
                 user_prompt = json.dumps(payload, ensure_ascii=False)
-                summary = client.call(system_prompt, user_prompt, max_tokens=300, temperature=0.2) or ""
+                
+                # Generate hash for audit trail
+                prompt_hash = hash_prompt(
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    model=llm_handle.model,
+                    params=llm_handle.params,
+                    seed=llm_config.seed if llm_config else None
+                )
+                
+                try:
+                    raw_response = llm_handle.generate(system_prompt, user_prompt)
+                    
+                    # Try to parse as structured JSON first
+                    try:
+                        validated_response = validate_llm_output(raw_response, SCENARIO_SCHEMA)
+                        summary = validated_response.get("summary", raw_response)
+                    except (json.JSONDecodeError, Exception):
+                        summary = raw_response or ""
+                except Exception:
+                    summary = ""
             else:
                 try:
                     with open("out/prompt.scenarios.json", "w", encoding="utf-8") as h:

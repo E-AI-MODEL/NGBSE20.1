@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -65,6 +65,46 @@ class CollectorConfig(BaseModel):
     options: dict = Field(default_factory=dict, description="Collector-specific options")
 
 
+class LLMParams(BaseModel):
+    """LLM parameters configuration."""
+    
+    temperature: float = Field(0.0, ge=0.0, le=2.0, description="Sampling temperature")
+    top_p: float = Field(1.0, ge=0.0, le=1.0, description="Top-p sampling parameter")
+    max_tokens: int = Field(400, ge=1, le=32000, description="Maximum tokens to generate")
+    
+    @field_validator("temperature")
+    @classmethod
+    def validate_temperature(cls, v: float) -> float:
+        if v < 0.0 or v > 2.0:
+            raise ValueError("Temperature must be between 0.0 and 2.0")
+        return v
+
+
+class LLMConfig(BaseModel):
+    """LLM configuration for centralized model management."""
+    
+    provider: str = Field(..., description="LLM provider (openai, anthropic, mistral, ollama)")
+    model: Optional[str] = Field(None, description="Specific model ID (optional, uses default if not set)")
+    params: LLMParams = Field(default_factory=LLMParams, description="LLM parameters")
+    seed: Optional[int] = Field(None, ge=0, description="Random seed for deterministic output")
+    
+    @field_validator("provider")
+    @classmethod
+    def validate_provider(cls, v: str) -> str:
+        valid_providers = ["openai", "anthropic", "mistral", "ollama"]
+        if v.lower() not in valid_providers:
+            raise ValueError(f"Invalid provider. Must be one of: {', '.join(valid_providers)}")
+        return v.lower()
+
+
+class ProfileConfig(BaseModel):
+    """Profile configuration for parameter overrides."""
+    
+    temperature: Optional[float] = Field(None, ge=0.0, le=2.0, description="Override temperature")
+    top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Override top_p")
+    max_tokens: Optional[int] = Field(None, ge=1, le=32000, description="Override max_tokens")
+
+
 class SourceTrustConfig(BaseModel):
     """Source trust configuration for scoring v18.1."""
     
@@ -92,13 +132,17 @@ class SourceTrustConfig(BaseModel):
 
 
 class Config(BaseModel):
-    """Main configuration for NGBSE 20.1."""
+    """Main configuration for NGBSE 20.2."""
 
     seeds: list[Seed] = Field(default_factory=list, description="List of seeds to process")
     rules: list[Rule] = Field(default_factory=list, description="List of rules to apply")
     collectors: list[CollectorConfig] = Field(default_factory=list, description="Collector configurations")
     options: dict[str, str] = Field(default_factory=dict, description="General options")
     source_trust: Optional[SourceTrustConfig] = Field(None, description="Source trust configuration")
+    
+    # LLM configuration
+    llm: Optional[LLMConfig] = Field(None, description="LLM configuration")
+    profiles: Dict[str, ProfileConfig] = Field(default_factory=dict, description="Named parameter profiles")
 
     # Pipeline options
     max_concurrent_collectors: int = Field(5, ge=1, description="Maximum concurrent collectors")

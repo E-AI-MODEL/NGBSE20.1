@@ -1,134 +1,168 @@
 """
-Input validation utilities for NGBSE 20.2.
-Provides validation for user inputs to prevent security issues.
+JSON schema validation and normalization utilities for NGBSE 20.2.
+Provides deterministic output formatting and validation.
 """
 
-import re
-from typing import Any, List
+import json
+from typing import Any, Dict, List, Union
 
-from ..logging import get_logger
-
-LOGGER = get_logger(__name__)
+import jsonschema
 
 
-def validate_domain_name(domain: str) -> bool:
+def validate_and_normalize(obj: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Validate domain name format.
-
+    Validate object against JSON schema and normalize for deterministic output.
+    
     Args:
-        domain: Domain name to validate
-
+        obj: Object to validate and normalize
+        schema: JSON schema for validation
+        
     Returns:
-        True if valid, False otherwise
-    """
-    if not domain or domain == "*":
-        return True  # Allow wildcard
-
-    # Basic domain validation regex
-    domain_pattern = (
-        r"^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?" r"(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$"
-    )
-
-    # Check for suspicious patterns
-    suspicious_patterns = [
-        r"\.\.",  # Double dots
-        r"^\.",  # Starts with dot
-        r"\.$",  # Ends with dot
-        r"\.-",  # Dot followed by dash
-        r"-\.",  # Dash followed by dot
-        r"--",  # Double dashes
-    ]
-
-    for pattern in suspicious_patterns:
-        if re.search(pattern, domain):
-            LOGGER.warning(f"Domain contains suspicious pattern '{pattern}': {domain}")
-            return False
-
-    return bool(re.match(domain_pattern, domain))
-
-
-def validate_allowlist(allowlist: List[str]) -> List[str]:
-    """
-    Validate and sanitize allowlist domains.
-
-    Args:
-        allowlist: List of domain names
-
-    Returns:
-        Validated and sanitized allowlist
-
+        Normalized and validated object
+        
     Raises:
-        ValueError: If invalid domains are found
+        jsonschema.ValidationError: If object doesn't match schema
     """
-    if not allowlist:
-        return ["*"]  # Default to allow all
-
-    validated_domains = []
-    invalid_domains = []
-
-    for domain in allowlist:
-        domain = domain.strip()
-        if not domain:
-            continue
-
-        if validate_domain_name(domain):
-            validated_domains.append(domain)
-        else:
-            invalid_domains.append(domain)
-
-    if invalid_domains:
-        error_msg = f"Invalid domains in allowlist: {', '.join(invalid_domains)}"
-        LOGGER.error(error_msg)
-        raise ValueError(error_msg)
-
-    LOGGER.info(f"Allowlist validated: {len(validated_domains)} domains")
-    return validated_domains
+    # Validate against schema
+    jsonschema.validate(instance=obj, schema=schema)
+    
+    # Normalize for deterministic output
+    return _sort_object(obj)
 
 
-def validate_json_input(data: Any, expected_type: str = "object") -> bool:
+def _sort_object(obj: Any) -> Any:
     """
-    Validate JSON input structure.
-
+    Recursively sort object keys and lists for deterministic output.
+    
     Args:
-        data: JSON data to validate
-        expected_type: Expected type ("object", "array", "string")
-
+        obj: Object to sort
+        
     Returns:
-        True if valid, False otherwise
+        Sorted object
     """
-    if expected_type == "object" and not isinstance(data, dict):
-        LOGGER.error(f"Expected object, got {type(data)}")
-        return False
-    elif expected_type == "array" and not isinstance(data, list):
-        LOGGER.error(f"Expected array, got {type(data)}")
-        return False
-    elif expected_type == "string" and not isinstance(data, str):
-        LOGGER.error(f"Expected string, got {type(data)}")
-        return False
+    if isinstance(obj, dict):
+        return {k: _sort_object(v) for k in sorted(obj.keys())}
+    elif isinstance(obj, list):
+        try:
+            # Try to sort list elements if they're comparable
+            return sorted((_sort_object(item) for item in obj), 
+                         key=lambda e: json.dumps(e, sort_keys=True))
+        except TypeError:
+            # If not comparable, just sort the items
+            return [_sort_object(item) for item in obj]
+    else:
+        return obj
 
-    return True
 
-
-def sanitize_string_input(value: str, max_length: int = 1000) -> str:
+def create_hash(obj: Any) -> str:
     """
-    Sanitize string input for safe processing.
-
+    Create a deterministic hash of an object.
+    
     Args:
-        value: String to sanitize
-        max_length: Maximum allowed length
-
+        obj: Object to hash
+        
     Returns:
-        Sanitized string
+        Hexadecimal hash string
     """
-    if not value:
-        return ""
+    import hashlib
+    
+    # Convert to JSON with sorted keys for deterministic hashing
+    json_str = json.dumps(obj, sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(json_str.encode('utf-8')).hexdigest()
 
-    # Remove null bytes and control characters
-    sanitized = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", str(value))
 
-    # Limit length
-    if len(sanitized) > max_length:
-        sanitized = sanitized[:max_length]
-        LOGGER.warning(f"Input truncated to {max_length} characters")
+def validate_llm_output(output: str, expected_schema: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Parse and validate LLM output against expected schema.
+    
+    Args:
+        output: Raw LLM output string
+        expected_schema: JSON schema for validation
+        
+    Returns:
+        Parsed and validated output
+        
+    Raises:
+        json.JSONDecodeError: If output is not valid JSON
+        jsonschema.ValidationError: If output doesn't match schema
+    """
+    # Parse JSON
+    try:
+        parsed = json.loads(output)
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f"LLM output is not valid JSON: {e.msg}", e.doc, e.pos)
+    
+    # Validate and normalize
+    return validate_and_normalize(parsed, expected_schema)
 
-    return sanitized
+
+# Common schemas for NGBSE modules
+BLINDSPOT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "interpretation": {"type": "string"},
+        "epistemic_insights": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "confidence_level": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "required": ["interpretation", "epistemic_insights", "confidence_level"],
+    "additionalProperties": False
+}
+
+CURIOSITY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "questions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "question": {"type": "string"},
+                    "category": {"type": "string"},
+                    "priority": {"type": "integer", "minimum": 1, "maximum": 10}
+                },
+                "required": ["question", "category", "priority"],
+                "additionalProperties": False
+            }
+        }
+    },
+    "required": ["questions"],
+    "additionalProperties": False
+}
+
+SCENARIO_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "future_scenario": {"type": "string"},
+        "summary": {"type": "string"},
+        "key_indicators": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "mitigation_strategies": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
+    },
+    "required": ["future_scenario", "summary", "key_indicators", "mitigation_strategies"],
+    "additionalProperties": False
+}
+
+RISK_ANALYSIS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "BLUF": {"type": "string"},
+        "TopRisks": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "Actions": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
+    },
+    "required": ["BLUF", "TopRisks", "Actions"],
+    "additionalProperties": False
+}

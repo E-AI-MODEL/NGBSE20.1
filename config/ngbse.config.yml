@@ -34,10 +34,34 @@ scoring:
     recency: 0.3     # Timeliness
     confidence: 0.4  # Reliability
 
+# LLM configuration
+llm:
+  provider: openai
+  model: gpt-4o-mini
+  params:
+    temperature: 0.0
+    top_p: 1.0
+    max_tokens: 400
+  seed: 42
+
+# Profiles for different use cases
+profiles:
+  deterministic:
+    temperature: 0.0
+    top_p: 1.0
+  extract:
+    temperature: 0.0
+    top_p: 1.0
+    max_tokens: 2000
+  creative:
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 600
+
 # BALLM (Bayesian Analysis and LLM Meta-layer) configuration
 ballm:
   enabled: true
-  model: "gpt-4"     # LLM model for meta-layer generation
+  model: "gpt-4"     # LLM model for meta-layer generation (deprecated, use llm section)
 
 # Optional: Advanced settings
 advanced:

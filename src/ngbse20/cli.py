@@ -16,6 +16,7 @@ from ngbse20.monitoring.health import get_health_status
 from ngbse20.runtime.logger import configure_logging
 from ngbse20.runtime.orchestrator import run_pipeline
 from ngbse20.utils.validation import validate_allowlist
+from ngbse20.llm_factory import list_models, get_default_model
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,7 +48,18 @@ def cli(log_level: str):
     help="Comma-separated list of allowed domains",
 )
 @click.option("--metrics", default="{}", help="JSON string of runtime metrics")
-def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str):
+@click.option("--llm.provider", help="Override LLM provider")
+@click.option("--llm.model", help="Override LLM model")
+@click.option("--llm.temperature", type=float, help="Override LLM temperature")
+@click.option("--llm.top_p", type=float, help="Override LLM top_p")
+@click.option("--llm.max_tokens", type=int, help="Override LLM max_tokens")
+@click.option("--llm.seed", type=int, help="Override LLM seed")
+@click.option("--profile", help="Use named parameter profile")
+def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metrics: str,
+                    llm_provider: str = None, llm_model: str = None, 
+                    llm_temperature: float = None, llm_top_p: float = None,
+                    llm_max_tokens: int = None, llm_seed: int = None,
+                    profile: str = None):
     """Run the full NGBSE pipeline from collection to reporting."""
     click.echo("Starting NGBSE 20.1 pipeline...")
 
@@ -280,5 +292,41 @@ def health_check(output_format: str):
         raise click.Abort()
 
 
-if __name__ == "__main__":
-    cli()
+@cli.group("llm")
+def llm_group():
+    """LLM management commands."""
+    pass
+
+
+@llm_group.command("list-models")
+@click.option("--provider", required=True, help="Provider name (openai, anthropic, mistral, ollama)")
+def list_models_cmd(provider: str):
+    """List available models for a provider."""
+    try:
+        models = list_models(provider)
+        if models:
+            click.echo(f"Available models for {provider}:")
+            for model in models:
+                click.echo(f"  - {model}")
+        else:
+            click.echo(f"No models found for {provider}")
+    except Exception as e:
+        click.echo(f"Failed to list models: {e}", err=True)
+        raise click.Abort()
+
+
+@llm_group.command("default-model")
+@click.option("--provider", required=True, help="Provider name (openai, anthropic, mistral, ollama)")
+def default_model_cmd(provider: str):
+    """Get default model for a provider."""
+    try:
+        model = get_default_model(provider)
+        if model:
+            click.echo(f"Default model for {provider}: {model}")
+        else:
+            click.echo(f"No default model found for {provider}")
+    except Exception as e:
+        click.echo(f"Failed to get default model: {e}", err=True)
+        raise click.Abort()
+
+

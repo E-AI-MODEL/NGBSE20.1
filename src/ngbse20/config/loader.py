@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from ..logging import get_logger
 from ..models.seed import Seed
 from ..utils.validation import validate_allowlist
-from .models import SourceTrustConfig
+from .models import SourceTrustConfig, LLMConfig, ProfileConfig
 
 LOGGER = get_logger(__name__)
 
@@ -183,6 +183,8 @@ class ConfigLoader:
             scoring = self._validate_scoring_config(raw_config)
             ballm = self._validate_ballm_config(raw_config)
             allowlist = self._validate_allowlist_config(raw_config)
+            llm = self._validate_llm_config(raw_config)
+            profiles = self._validate_profiles_config(raw_config)
 
             # Create main config
             config = NGBSEConfig(
@@ -191,6 +193,8 @@ class ConfigLoader:
                 collectors=collectors,
                 scoring=scoring,
                 ballm=ballm,
+                llm=llm,
+                profiles=profiles,
             )
 
             LOGGER.info("Configuration loaded and validated successfully")
@@ -221,6 +225,33 @@ class ConfigLoader:
         return ScoringConfig(
             default_weights=scoring_config.get("default_weights", {"coverage": 0.3, "recency": 0.3, "confidence": 0.4})
         )
+
+    def _validate_llm_config(self, raw_config: Dict[str, Any]) -> Optional[LLMConfig]:
+        """Validate and convert LLM configuration."""
+        llm_config = raw_config.get("llm")
+        if not llm_config or not isinstance(llm_config, dict):
+            return None
+            
+        try:
+            return LLMConfig(**llm_config)
+        except Exception as e:
+            LOGGER.warning(f"Invalid LLM configuration: {e}")
+            return None
+
+    def _validate_profiles_config(self, raw_config: Dict[str, Any]) -> Dict[str, ProfileConfig]:
+        """Validate and convert profiles configuration."""
+        profiles_config = raw_config.get("profiles", {})
+        if not isinstance(profiles_config, dict):
+            return {}
+            
+        profiles = {}
+        for name, profile_data in profiles_config.items():
+            if isinstance(profile_data, dict):
+                try:
+                    profiles[name] = ProfileConfig(**profile_data)
+                except Exception as e:
+                    LOGGER.warning(f"Invalid profile '{name}': {e}")
+        return profiles
 
     def _validate_ballm_config(self, raw_config: Dict[str, Any]) -> BALLMConfig:
         """Validate and convert BALLM configuration."""
