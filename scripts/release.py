@@ -4,10 +4,10 @@ Release script for NGBSE 20.2.0-GA.
 Automates the release process with validation and safety checks.
 """
 import argparse
+import re
 import subprocess
 import sys
 from typing import List
-import re
 
 
 def run_command(
@@ -103,7 +103,7 @@ def check_version_consistency() -> bool:
     print("🔢 Checking version consistency...")
 
     # Read version from pyproject.toml
-    with open("pyproject.toml", "r") as f:
+    with open("pyproject.toml") as f:
         content = f.read()
         match = re.search(r'version = "([^"]+)"', content)
         if not match:
@@ -119,7 +119,7 @@ def check_version_consistency() -> bool:
         return False
 
     # Check CHANGELOG.md
-    with open("CHANGELOG.md", "r") as f:
+    with open("CHANGELOG.md") as f:
         changelog = f.read()
         if f"[{version}]" not in changelog:
             print(f"❌ Version {version} not found in CHANGELOG.md")
@@ -201,7 +201,7 @@ def validate_release() -> bool:
 
 def get_version() -> str:
     """Get current version from pyproject.toml."""
-    with open("pyproject.toml", "r") as f:
+    with open("pyproject.toml") as f:
         content = f.read()
         match = re.search(r'version = "([^"]+)"', content)
         if match:

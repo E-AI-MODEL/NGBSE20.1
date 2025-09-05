@@ -5,9 +5,9 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from .base import BaseCollector
 from ..logging import get_logger
 from ..utils.hash import content_hash
+from .base import BaseCollector
 
 LOGGER = get_logger(__name__)
 

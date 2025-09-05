@@ -5,7 +5,6 @@ Simple BALLM Demo - No external dependencies required.
 
 import json
 import sys
-from pathlib import Path
 
 # Add src to path for imports
 sys.path.insert(0, 'src')
@@ -130,7 +129,7 @@ def demo_ballm_analysis():
     
     # Blindspot Interpretation
     interpretation = meta_layer.get("blindspot_interpretation", {})
-    print(f"\n🔍 Blindspot Interpretation:")
+    print("\n🔍 Blindspot Interpretation:")
     print(f"   Method: {interpretation.get('interpretation_method', 'N/A')}")
     print(f"   Confidence: {interpretation.get('confidence_level', 0.0):.3f}")
     

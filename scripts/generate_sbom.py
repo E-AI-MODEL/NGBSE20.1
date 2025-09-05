@@ -3,12 +3,12 @@
 SBOM (Software Bill of Materials) generation script for NGBSE 20.2.
 Generates CycloneDX and SPDX format SBOMs for supply chain security.
 """
+import argparse
 import json
 import subprocess
 import sys
 from pathlib import Path
 from typing import List
-import argparse
 
 
 def run_command(
@@ -127,7 +127,7 @@ def generate_python_sbom(output_file: str) -> None:
 def validate_sbom(sbom_file: str) -> bool:
     """Validate SBOM file format."""
     try:
-        with open(sbom_file, "r") as f:
+        with open(sbom_file) as f:
             data = json.load(f)
 
         # Basic validation
@@ -159,7 +159,7 @@ def generate_sbom_summary(sbom_files: List[str], output_file: str) -> None:
     for sbom_file in sbom_files:
         if Path(sbom_file).exists():
             try:
-                with open(sbom_file, "r") as f:
+                with open(sbom_file) as f:
                     data = json.load(f)
 
                 file_info = {
