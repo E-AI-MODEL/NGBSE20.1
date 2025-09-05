@@ -1,4 +1,4 @@
-"""BALLM Meta-Layer Generator for NGBSE 20.1.
+"""BALLM Meta-Layer Generator for NGBSE 20.3.
 
 This module implements the core BALLM functionality: transforming blindspots into
 epistemic insights and curiosity-generating questions using Large Language Models.

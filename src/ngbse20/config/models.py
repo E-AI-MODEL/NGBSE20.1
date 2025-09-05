@@ -92,7 +92,7 @@ class SourceTrustConfig(BaseModel):
 
 
 class Config(BaseModel):
-    """Main configuration for NGBSE 20.1."""
+    """Main configuration for NGBSE 20.3."""
 
     seeds: list[Seed] = Field(default_factory=list, description="List of seeds to process")
     rules: list[Rule] = Field(default_factory=list, description="List of rules to apply")

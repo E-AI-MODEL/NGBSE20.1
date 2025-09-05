@@ -1,5 +1,5 @@
 """
-Configuration loader for NGBSE 20.2.
+Configuration loader for NGBSE 20.3.
 Centralizes configuration management and credential handling.
 """
 

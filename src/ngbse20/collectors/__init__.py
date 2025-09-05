@@ -1,4 +1,4 @@
-"""NGBSE 20.1 Collectors Package."""
+"""NGBSE 20.3 Collectors Package."""
 
 from .base import BaseCollector
 from .censys import CensysCollector

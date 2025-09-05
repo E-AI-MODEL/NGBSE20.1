@@ -5,6 +5,30 @@ All notable changes to NGBSE will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.3.0] - 2025-01-05
+
+### Added
+- **Dynamic LLM Configuration**: Enhanced LLM client with dynamic provider selection
+  - Automatic provider detection based on available API keys
+  - Model mapping system for cross-provider compatibility
+  - Configuration-driven LLM selection instead of hardcoded defaults
+  - Support for multiple LLM providers (OpenAI, Azure OpenAI, Anthropic, Cohere, Google)
+- **Enhanced Configuration System**: Improved configuration passing through pipeline
+  - Configuration propagation from CLI to LLM client
+  - Better separation of concerns in pipeline stages
+  - Improved error handling and validation
+
+### Changed
+- **LLM Client**: Refactored to accept configuration dictionary
+- **Pipeline Stages**: Updated to pass configuration to LLM components
+- **CLI Interface**: Enhanced to load and pass configuration to components
+
+### Fixed
+- **Test Data**: Corrected Pydantic model usage in integration tests
+- **Linting**: Resolved 79% of code quality issues (442 → 94 errors)
+- **Type Annotations**: Updated deprecated type hints to modern Python syntax
+- **Exception Handling**: Improved error handling with specific exception types
+
 ## [Unreleased]
 
 ### Added

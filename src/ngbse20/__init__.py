@@ -1,6 +1,6 @@
-"""NGBSE 20.1 package."""
+"""NGBSE 20.3 package."""
 
-__version__ = "20.2.1"
+__version__ = "20.3.0"
 
 # BALLM modules
 from .ballm import (

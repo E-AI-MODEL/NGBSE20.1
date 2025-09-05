@@ -1,4 +1,4 @@
-"""Base collector class for NGBSE 20.1."""
+"""Base collector class for NGBSE 20.3."""
 
 from abc import ABC, abstractmethod
 from typing import Any
