@@ -1,8 +1,8 @@
-name: NGBSE 20.2 CI/CD Pipeline
+name: NGBSE 20.3 CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, '20.2*' ]
+    branches: [ main, develop, '20.3*' ]
   pull_request:
     branches: [ main, develop ]
   release:
