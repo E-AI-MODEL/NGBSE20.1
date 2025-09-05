@@ -11,6 +11,72 @@ NGBSE introduces significant architectural improvements while maintaining backwa
 - **Enhanced Security**: Improved credential handling and security scanning
 - **Comprehensive Testing**: Full test suite with CI/CD pipeline
 - **BALLM Integration**: Advanced meta-layer generation capabilities
+- **Python 3.11+ Requirement**: Minimum Python version upgraded from 3.9 to 3.11
+
+## Python Version Migration (3.9 → 3.11+)
+
+### **Breaking Change: Python Version Requirement**
+
+NGBSE 20.3.0 requires Python 3.11 or higher. This is a breaking change from previous versions that supported Python 3.9+.
+
+### **Migration Steps for Python Version**
+
+#### 1. **Check Current Python Version**
+```bash
+python3 --version
+# Should show Python 3.11+ for NGBSE 20.3.0
+```
+
+#### 2. **Upgrade Python (if needed)**
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install python3.11 python3.11-venv python3.11-pip
+
+# macOS (with Homebrew)
+brew install python@3.11
+
+# Windows (with Chocolatey)
+choco install python311
+```
+
+#### 3. **Update Virtual Environment**
+```bash
+# Remove old virtual environment
+rm -rf venv
+
+# Create new virtual environment with Python 3.11+
+python3.11 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Reinstall dependencies
+pip install --upgrade pip
+pip install -e .
+```
+
+#### 4. **Update Docker Configuration**
+If using Docker, update your Dockerfile:
+```dockerfile
+# Old (NGBSE 20.2 and earlier)
+FROM python:3.9-slim AS base
+
+# New (NGBSE 20.3+)
+FROM python:3.11-slim AS base
+```
+
+#### 5. **Verify Installation**
+```bash
+python3 --version  # Should show 3.11+
+python3 -c "import ngbse20; print('NGBSE 20.3.0 installed successfully')"
+```
+
+### **Compatibility Notes**
+
+- **Python 3.9/3.10**: No longer supported
+- **Python 3.11**: Minimum supported version
+- **Python 3.12/3.13**: Fully supported and recommended
+- **Docker**: Uses Python 3.11-slim base image
+- **CI/CD**: Tests on Python 3.11, 3.12, 3.13
 
 ## Step-by-Step Migration
 

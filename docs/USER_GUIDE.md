@@ -427,9 +427,59 @@ python -m ngbse20.cli run \
 
 ## 🔧 **Troubleshooting**
 
+### **Python Version Issues**
+
+#### **1. Python Version Too Old**
+```bash
+# Error: Python 3.9/3.10 not supported
+# Solution: Upgrade to Python 3.11+
+
+# Check current version
+python3 --version
+
+# Upgrade Python (Ubuntu/Debian)
+sudo apt update
+sudo apt install python3.11 python3.11-venv python3.11-pip
+
+# Upgrade Python (macOS)
+brew install python@3.11
+
+# Upgrade Python (Windows)
+choco install python311
+```
+
+#### **2. Virtual Environment Issues**
+```bash
+# Error: Virtual environment using old Python version
+# Solution: Recreate virtual environment
+
+# Remove old virtual environment
+rm -rf venv
+
+# Create new virtual environment with Python 3.11+
+python3.11 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Reinstall dependencies
+pip install --upgrade pip
+pip install -e .
+```
+
+#### **3. Docker Python Version Issues**
+```bash
+# Error: Docker using Python 3.9
+# Solution: Update Dockerfile
+
+# Old Dockerfile
+FROM python:3.9-slim AS base
+
+# New Dockerfile
+FROM python:3.11-slim AS base
+```
+
 ### **Common Issues**
 
-#### **1. Collector Not Working**
+#### **4. Collector Not Working**
 ```bash
 # Check API key configuration
 python -m ngbse20.cli collectors
@@ -439,7 +489,7 @@ echo $LEAKIX_API_KEY
 echo $SHODAN_API_KEY
 ```
 
-#### **2. Pipeline Fails**
+#### **5. Pipeline Fails**
 ```bash
 # Check logs
 tail -f logs/ngbse20.log

@@ -38,6 +38,24 @@ cat out/findings.json
 - Python 3.11+ or Docker (Python 3.11-slim base image)
 - At least one OSINT API key (see options below)
 
+### **Python Version Requirements:**
+- **Minimum**: Python 3.11 (required)
+- **Recommended**: Python 3.12 or 3.13
+- **Not Supported**: Python 3.9 or 3.10 (legacy versions)
+- **Docker**: Uses Python 3.11-slim base image
+- **CI/CD**: Tests on Python 3.11, 3.12, 3.13
+
+### **Environment Setup:**
+```bash
+# Check Python version
+python3 --version  # Should show 3.11+
+
+# If using Python 3.9/3.10, upgrade first:
+# Ubuntu/Debian: sudo apt install python3.11
+# macOS: brew install python@3.11
+# Windows: choco install python311
+```
+
 ### **Recommended API Keys (choose 2-3):**
 - **LeakIX** (`LEAKIX_API_KEY`) - Data breaches
 - **Shodan** (`SHODAN_API_KEY`) - Infrastructure
