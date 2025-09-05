@@ -16,7 +16,7 @@ This tool is the practical implementation of the research paper "From Closure to
 
 ## OSINT Collectors
 
-NGBSE 20.2.0-GA includes comprehensive OSINT collectors for threat intelligence:
+NGBSE 20.3.0-GA includes comprehensive OSINT collectors for threat intelligence:
 
 ### **Core Collectors**
 - **HttpWebCollector**: Web scraping and content analysis
@@ -55,7 +55,7 @@ The BALLM (Blindspot-Aware Large Language Models) layer transforms raw blindspot
 
 ## Quickstart
 
-There are two ways to use NGBSE20.1: locally via Python or via Docker (recommended).
+There are two ways to use NGBSE20.3: locally via Python or via Docker (recommended).
 
 ### Docker (Recommended)
 
