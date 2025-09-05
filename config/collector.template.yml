@@ -1,0 +1,140 @@
+# Collector Configuration Template for NGBSE 20.3
+# Copy this file and customize for your needs
+
+collector_manager:
+  # List of enabled collectors (empty = all available)
+  enabled_collectors: []
+  
+  # External collector configurations
+  external_collectors:
+    # Example external collector:
+    # - name: "custom_collector"
+    #   module_path: "/path/to/custom_collector.py"
+    #   class_name: "CustomCollector"
+  
+  # Enable automatic collector discovery
+  auto_discovery: true
+  
+  # Directory for collector plugins
+  plugin_directory: null
+  
+  # Default collector timeout in seconds
+  collector_timeout: 300
+  
+  # Maximum concurrent collectors
+  max_concurrent_collectors: 5
+
+# Individual Collector Configurations
+collectors:
+  - name: "http_web"
+    enabled: true
+    api_key: null
+    rate_limit: null
+    timeout: 30
+    max_retries: 3
+    options:
+      user_agent: "NGBSE/20.3"
+      follow_redirects: true
+      verify_ssl: true
+  
+  - name: "leakix"
+    enabled: true
+    api_key: null  # Set your LeakIX API key
+    rate_limit: 60
+    timeout: 30
+    max_retries: 3
+    options:
+      search_type: "subdomain"
+      max_results: 100
+  
+  - name: "shodan"
+    enabled: true
+    api_key: null  # Set your Shodan API key
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options:
+      facets: ["country", "org", "os"]
+      minify: true
+  
+  - name: "censys"
+    enabled: true
+    api_key: null  # Set your Censys API key
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options:
+      index: "ipv4"
+      per_page: 100
+  
+  - name: "urlscan"
+    enabled: true
+    api_key: null  # Set your URLScan API key
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options:
+      visibility: "public"
+      country: "US"
+  
+  - name: "github"
+    enabled: true
+    api_key: null  # Set your GitHub API key
+    rate_limit: 60
+    timeout: 30
+    max_retries: 3
+    options:
+      search_type: "code"
+      sort: "indexed"
+  
+  - name: "news"
+    enabled: true
+    api_key: null  # Set your news API key
+    rate_limit: 60
+    timeout: 30
+    max_retries: 3
+    options:
+      language: "en"
+      country: "us"
+
+# Example configurations for different scenarios:
+
+# High-Volume Collection
+# collector_manager:
+#   max_concurrent_collectors: 10
+#   collector_timeout: 600
+# 
+# collectors:
+#   - name: "http_web"
+#     rate_limit: null
+#     timeout: 60
+#     max_retries: 5
+
+# Security-Focused Collection
+# collector_manager:
+#   enabled_collectors: ["shodan", "censys", "leakix"]
+#   max_concurrent_collectors: 3
+# 
+# collectors:
+#   - name: "shodan"
+#     rate_limit: 1
+#     timeout: 45
+#     options:
+#       facets: ["vuln", "cve", "port"]
+
+# Custom Collector Integration
+# collector_manager:
+#   external_collectors:
+#     - name: "custom_threat_intel"
+#       module_path: "/opt/ngbse/collectors/threat_intel.py"
+#       class_name: "ThreatIntelCollector"
+# 
+# collectors:
+#   - name: "custom_threat_intel"
+#     enabled: true
+#     api_key: "your_api_key"
+#     rate_limit: 10
+#     timeout: 30
+#     options:
+#       source: "threat_feed"
+#       confidence_threshold: 0.8

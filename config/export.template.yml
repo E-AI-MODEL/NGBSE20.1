@@ -1,0 +1,60 @@
+# Export Configuration Template for NGBSE 20.3
+# Copy this file and customize for your needs
+
+export:
+  # Export formats to generate
+  formats: ["csv", "html", "docx", "stix"]
+  
+  # Output directory for exported files
+  output_dir: "output"
+  
+  # CSV Configuration
+  csv_delimiter: ","
+  csv_quote_char: '"'
+  csv_encoding: "utf-8"
+  
+  # HTML Configuration
+  html_theme: "default"  # default, dark, light, corporate
+  html_title: "NGBSE 20.3 Security Analysis Report"
+  html_template_path: null  # Path to custom HTML template
+  
+  # DOCX Configuration
+  docx_template_path: null  # Path to custom DOCX template
+  include_charts: true
+  include_tables: true
+  
+  # STIX Configuration
+  stix_version: "2.1"  # 2.0 or 2.1
+  include_indicators: true
+  include_observables: true
+  include_relationships: true
+
+# Example configurations for different use cases:
+
+# Minimal Export (CSV only)
+# export:
+#   formats: ["csv"]
+#   output_dir: "output"
+
+# Business Report (HTML + DOCX)
+# export:
+#   formats: ["html", "docx"]
+#   html_theme: "corporate"
+#   html_title: "Security Assessment Report"
+#   include_charts: true
+#   include_tables: true
+
+# Threat Intelligence (STIX only)
+# export:
+#   formats: ["stix"]
+#   stix_version: "2.1"
+#   include_indicators: true
+#   include_observables: true
+#   include_relationships: true
+
+# Full Export (All formats)
+# export:
+#   formats: ["csv", "html", "docx", "stix"]
+#   output_dir: "reports"
+#   html_theme: "default"
+#   stix_version: "2.1"

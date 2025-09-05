@@ -1,62 +1,109 @@
-# NGBSE 20.3 Configuration
-# Main configuration file for the Next-Generation Business Security Engine
+# NGBSE 20.3 Configuration File
+# Next Generation Business Security Engine
 
-# Output directory for results
-output_dir: "out"
-
-# Domain allowlist (use ["*"] for all domains)
+# General Settings
+output_dir: "output"
 allowlist: ["*"]
 
-# Collector configuration
+# Pipeline Options
+max_concurrent_collectors: 5
+output_format: "json"
+enable_ballm: true
+enable_forecasting: true
+enable_scenarios: true
+
+# Export Configuration
+export:
+  formats: ["csv", "html", "docx"]
+  output_dir: "output"
+  csv_delimiter: ","
+  csv_quote_char: '"'
+  csv_encoding: "utf-8"
+  html_theme: "default"
+  html_title: "NGBSE 20.3 Security Analysis Report"
+  html_template_path: null
+  docx_template_path: null
+  include_charts: true
+  include_tables: true
+  stix_version: "2.1"
+  include_indicators: true
+  include_observables: true
+  include_relationships: true
+
+# Collector Manager Configuration
+collector_manager:
+  enabled_collectors: []
+  external_collectors: []
+  auto_discovery: true
+  plugin_directory: null
+  collector_timeout: 300
+  max_concurrent_collectors: 5
+
+# Source Trust Configuration
+source_trust:
+  default_trust_level: 0.5
+  domains: {}
+
+# Collector Configurations
 collectors:
-  enabled:
-    - "http_web"
-    - "shodan"
-    - "censys"
-    - "leakix"
-    - "urlscan"
-    - "github"
-    - "news"
+  - name: "http_web"
+    enabled: true
+    api_key: null
+    rate_limit: null
+    timeout: 30
+    max_retries: 3
+    options: {}
   
-  # Optional: Custom rate limits per collector (requests per minute)
-  rate_limits:
-    shodan: 60
-    censys: 300
-    leakix: 600
-    urlscan: 60
-    github: 600
-    news: 600
+  - name: "leakix"
+    enabled: true
+    api_key: null
+    rate_limit: 60
+    timeout: 30
+    max_retries: 3
+    options: {}
+  
+  - name: "shodan"
+    enabled: true
+    api_key: null
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options: {}
+  
+  - name: "censys"
+    enabled: true
+    api_key: null
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options: {}
+  
+  - name: "urlscan"
+    enabled: true
+    api_key: null
+    rate_limit: 1
+    timeout: 30
+    max_retries: 3
+    options: {}
+  
+  - name: "github"
+    enabled: true
+    api_key: null
+    rate_limit: 60
+    timeout: 30
+    max_retries: 3
+    options: {}
+  
+  - name: "news"
+    enabled: true
+    api_key: null
+    rate_limit: 60
+    timeout: 30
+    max_retries: 3
+    options: {}
 
-# Scoring configuration
-scoring:
-  default_weights:
-    coverage: 0.3    # Breadth of coverage
-    recency: 0.3     # Timeliness
-    confidence: 0.4  # Reliability
-
-# BALLM (Bayesian Analysis and LLM Meta-layer) configuration
-ballm:
-  enabled: true
-  # LLM configuration - system automatically selects provider based on available API keys
-  model: "gpt-4"     # Preferred model (will be mapped to available provider)
-  
-  # Optional: Provider-specific model preferences
-  # These override the generic model preference if the provider is available
-  provider_models:
-    openai: "gpt-4o-mini"           # OpenAI models: gpt-4, gpt-3.5-turbo, gpt-4o-mini
-    azure_openai: "gpt-4"           # Azure OpenAI models: gpt-4, gpt-3.5-turbo
-    anthropic: "claude-3.5-sonnet"  # Anthropic models: claude-3.5-sonnet, claude-3-haiku
-    cohere: "command"               # Cohere models: command, command-light
-    google: "gemini-pro"            # Google models: gemini-pro, gemini-pro-vision
-
-# Optional: Advanced settings
-advanced:
-  # Maximum findings per collector
-  max_findings_per_collector: 100
-  
-  # Timeout settings (seconds)
-  request_timeout: 30
-  collection_timeout: 300
-  
-  # Logging level
+# General Options
+options:
+  debug: "false"
+  verbose: "false"
   log_level: "INFO"

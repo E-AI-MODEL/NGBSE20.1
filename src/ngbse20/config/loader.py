@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from ..logging import get_logger
 from ..models.seed import Seed
 from ..utils.validation import validate_allowlist
-from .models import SourceTrustConfig
+from .models import SourceTrustConfig, ExportConfig, CollectorManagerConfig, Config
 
 LOGGER = get_logger(__name__)
 
@@ -147,6 +147,84 @@ class ConfigLoader:
 
         LOGGER.info(f"Loaded and validated {len(seeds)} seeds")
         return seeds
+    
+    def load_export_config(self, config_file: str = "export.template.yml") -> ExportConfig:
+        """Load export configuration with defaults."""
+        config_path = self.config_dir / config_file
+        
+        if not config_path.exists():
+            LOGGER.info(f"Export config {config_path} not found, using defaults")
+            return ExportConfig()
+        
+        try:
+            with open(config_path, encoding="utf-8") as f:
+                if config_path.suffix in [".yml", ".yaml"]:
+                    raw_config = yaml.safe_load(f)
+                elif config_path.suffix == ".json":
+                    raw_config = json.load(f)
+                else:
+                    raw_config = yaml.safe_load(f)
+            
+            # Extract export config
+            export_data = raw_config.get("export", {})
+            return ExportConfig(**export_data)
+            
+        except Exception as e:
+            LOGGER.warning(f"Failed to load export config: {e}, using defaults")
+            return ExportConfig()
+    
+    def load_collector_manager_config(self, config_file: str = "collector.template.yml") -> CollectorManagerConfig:
+        """Load collector manager configuration with defaults."""
+        config_path = self.config_dir / config_file
+        
+        if not config_path.exists():
+            LOGGER.info(f"Collector config {config_path} not found, using defaults")
+            return CollectorManagerConfig()
+        
+        try:
+            with open(config_path, encoding="utf-8") as f:
+                if config_path.suffix in [".yml", ".yaml"]:
+                    raw_config = yaml.safe_load(f)
+                elif config_path.suffix == ".json":
+                    raw_config = json.load(f)
+                else:
+                    raw_config = yaml.safe_load(f)
+            
+            # Extract collector manager config
+            collector_data = raw_config.get("collector_manager", {})
+            return CollectorManagerConfig(**collector_data)
+            
+        except Exception as e:
+            LOGGER.warning(f"Failed to load collector manager config: {e}, using defaults")
+            return CollectorManagerConfig()
+    
+    def load_full_config(self, config_file: str = "ngbse.config.yml") -> Config:
+        """Load complete configuration with all modules."""
+        config_path = self.config_dir / config_file
+        
+        if not config_path.exists():
+            LOGGER.warning(f"Config file {config_path} not found, using defaults")
+            return self._get_default_full_config()
+        
+        try:
+            with open(config_path, encoding="utf-8") as f:
+                if config_path.suffix in [".yml", ".yaml"]:
+                    raw_config = yaml.safe_load(f)
+                elif config_path.suffix == ".json":
+                    raw_config = json.load(f)
+                else:
+                    raw_config = yaml.safe_load(f)
+            
+            # Validate with Pydantic
+            return Config(**raw_config)
+            
+        except Exception as e:
+            LOGGER.error(f"Failed to load full config: {e}, using defaults")
+            return self._get_default_full_config()
+    
+    def _get_default_full_config(self) -> Config:
+        """Get default full configuration."""
+        return Config()
 
     def get_credentials(self) -> dict[str, str]:
         """Extract credentials from environment variables."""
