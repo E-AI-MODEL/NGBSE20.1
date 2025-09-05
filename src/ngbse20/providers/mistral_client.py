@@ -5,8 +5,14 @@ Mistral provider client for NGBSE 20.2.
 import os
 from typing import Any, Dict, List, Optional
 
-import requests
-from requests.exceptions import RequestException
+try:
+    import requests
+    from requests.exceptions import RequestException
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+    class RequestException(Exception):
+        pass
 
 from .base import BaseLLMProvider, LLMHandle
 from ..logging import get_logger

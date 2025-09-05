@@ -1,10 +1,11 @@
 """
-JSON schema validation and normalization utilities for NGBSE 20.2.
-Provides deterministic output formatting and validation.
+Validation utilities for NGBSE 20.2.
+Provides input validation, sanitization, and JSON schema validation.
 """
 
 import hashlib
 import json
+import re
 from typing import Any, Dict, List, Union
 
 try:
@@ -170,3 +171,81 @@ RISK_ANALYSIS_SCHEMA = {
     "required": ["BLUF", "TopRisks", "Actions"],
     "additionalProperties": False
 }
+
+
+# Legacy validation functions for backward compatibility
+def sanitize_string_input(input_str: str, max_length: int = 1000):
+    """
+    Sanitize string input by removing dangerous characters and limiting length.
+    
+    Args:
+        input_str: Input string to sanitize
+        max_length: Maximum allowed length
+        
+    Returns:
+        Sanitized string
+    """
+    if not isinstance(input_str, str):
+        return ""
+    
+    # Remove control characters and limit length
+    sanitized = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', input_str)
+    return sanitized[:max_length]
+
+
+def validate_domain_name(domain: str):
+    """
+    Validate domain name format.
+    
+    Args:
+        domain: Domain name to validate
+        
+    Returns:
+        True if valid domain name
+    """
+    if not isinstance(domain, str):
+        return False
+    
+    # Basic domain validation regex
+    domain_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$'
+    return bool(re.match(domain_pattern, domain))
+
+
+def validate_json_input(json_str: str):
+    """
+    Validate if string is valid JSON.
+    
+    Args:
+        json_str: String to validate as JSON
+        
+    Returns:
+        True if valid JSON
+    """
+    if not isinstance(json_str, str):
+        return False
+    
+    try:
+        json.loads(json_str)
+        return True
+    except (json.JSONDecodeError, ValueError):
+        return False
+
+
+def validate_allowlist(allowlist: Union[str, List[str]]):
+    """
+    Validate and normalize allowlist configuration.
+    
+    Args:
+        allowlist: Allowlist as string or list
+        
+    Returns:
+        Normalized allowlist as list of strings
+    """
+    if isinstance(allowlist, str):
+        if allowlist == "*":
+            return ["*"]
+        return [item.strip() for item in allowlist.split(",") if item.strip()]
+    elif isinstance(allowlist, list):
+        return [str(item).strip() for item in allowlist if str(item).strip()]
+    else:
+        return ["*"]

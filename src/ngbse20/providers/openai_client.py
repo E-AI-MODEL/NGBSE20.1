@@ -5,8 +5,15 @@ OpenAI provider client for NGBSE 20.2.
 import os
 from typing import Any, Dict, List, Optional
 
-import requests
-from requests.exceptions import RequestException
+try:
+    import requests
+    from requests.exceptions import RequestException
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+    # Create dummy classes for when requests is not available
+    class RequestException(Exception):
+        pass
 
 from .base import BaseLLMProvider, LLMHandle
 from ..logging import get_logger
@@ -68,6 +75,9 @@ class OpenAIClient(BaseLLMProvider):
                   top_p: float = 1.0, max_tokens: int = 400,
                   seed: Optional[int] = None):
         """Make API call to OpenAI."""
+        if not REQUESTS_AVAILABLE:
+            raise ImportError("requests library is required for OpenAI API calls")
+            
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -134,6 +144,9 @@ class OpenAIHandle(LLMHandle):
                   top_p: float = 1.0, max_tokens: int = 400,
                   seed: Optional[int] = None):
         """Make API call to OpenAI."""
+        if not REQUESTS_AVAILABLE:
+            raise ImportError("requests library is required for OpenAI API calls")
+            
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
