@@ -31,30 +31,30 @@ class LLMClient:
         if self.providers is not None:
             # Use explicitly provided priority
             return
-        
+
         # Check which API keys are available
         available_providers = []
-        
+
         # Check for OpenAI
         if os.getenv("OPENAI_API_KEY"):
             available_providers.append("openai")
-        
+
         # Check for Azure OpenAI
         if os.getenv("AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_ENDPOINT"):
             available_providers.append("azure_openai")
-        
+
         # Check for Anthropic
         if os.getenv("ANTHROPIC_API_KEY"):
             available_providers.append("anthropic")
-        
+
         # Check for Cohere
         if os.getenv("COHERE_API_KEY"):
             available_providers.append("cohere")
-        
+
         # Check for Google
         if os.getenv("GOOGLE_API_KEY"):
             available_providers.append("google")
-        
+
         # If no providers available, use default priority
         if not available_providers:
             self.providers = ["openai", "azure_openai", "anthropic", "cohere", "google"]
@@ -68,7 +68,7 @@ class LLMClient:
         # Check if there's a specific model preference in config
         ballm_config = self.config.get("ballm", {})
         preferred_model = ballm_config.get("model", "")
-        
+
         # Model mapping based on preferred model
         if preferred_model:
             model_mapping = {
@@ -77,67 +77,67 @@ class LLMClient:
                     "azure_openai": "gpt-4",
                     "anthropic": "claude-3-5-sonnet-20240620",
                     "cohere": "command-r7b-12-2024",
-                    "google": "gemini-1.5-pro"
+                    "google": "gemini-1.5-pro",
                 },
                 "gpt-4o": {
                     "openai": "gpt-4o",
                     "azure_openai": "gpt-4o",
                     "anthropic": "claude-3-5-sonnet-20240620",
                     "cohere": "command-r7b-12-2024",
-                    "google": "gemini-1.5-pro"
+                    "google": "gemini-1.5-pro",
                 },
                 "gpt-4o-mini": {
                     "openai": "gpt-4o-mini",
                     "azure_openai": "gpt-4o-mini",
                     "anthropic": "claude-3-5-haiku-20240307",
                     "cohere": "command-r7b-12-2024",
-                    "google": "gemini-1.5-flash"
+                    "google": "gemini-1.5-flash",
                 },
                 "claude": {
                     "openai": "gpt-4o-mini",
                     "azure_openai": "gpt-4o-mini",
                     "anthropic": "claude-3-5-sonnet-20240620",
                     "cohere": "command-r7b-12-2024",
-                    "google": "gemini-1.5-pro"
+                    "google": "gemini-1.5-pro",
                 },
                 "gemini": {
                     "openai": "gpt-4o-mini",
                     "azure_openai": "gpt-4o-mini",
                     "anthropic": "claude-3-5-haiku-20240307",
                     "cohere": "command-r7b-12-2024",
-                    "google": "gemini-1.5-pro"
-                }
+                    "google": "gemini-1.5-pro",
+                },
             }
-            
+
             # Find the best match for the preferred model (exact match first, then partial)
             exact_matches = []
             partial_matches = []
-            
+
             for model_key, provider_models in model_mapping.items():
                 if model_key == preferred_model.lower():
                     exact_matches.append((model_key, provider_models))
                 elif model_key in preferred_model.lower():
                     partial_matches.append((model_key, provider_models))
-            
+
             # Try exact matches first
             for _model_key, provider_models in exact_matches:
                 if provider in provider_models:
                     return provider_models[provider]
-            
+
             # Then try partial matches
             for _model_key, provider_models in partial_matches:
                 if provider in provider_models:
                     return provider_models[provider]
-        
+
         # Fallback to environment variables or defaults
         env_model_mapping = {
             "openai": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
             "azure_openai": os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini"),
             "anthropic": os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620"),
             "cohere": os.getenv("COHERE_MODEL", "command-r7b-12-2024"),
-            "google": os.getenv("GOOGLE_MODEL", "gemini-1.5-pro")
+            "google": os.getenv("GOOGLE_MODEL", "gemini-1.5-pro"),
         }
-        
+
         return env_model_mapping.get(provider, "gpt-4o-mini")
 
     def call(

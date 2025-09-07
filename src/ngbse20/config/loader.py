@@ -147,15 +147,15 @@ class ConfigLoader:
 
         LOGGER.info(f"Loaded and validated {len(seeds)} seeds")
         return seeds
-    
+
     def load_export_config(self, config_file: str = "export.template.yml") -> ExportConfig:
         """Load export configuration with defaults."""
         config_path = self.config_dir / config_file
-        
+
         if not config_path.exists():
             LOGGER.info(f"Export config {config_path} not found, using defaults")
             return ExportConfig()
-        
+
         try:
             with open(config_path, encoding="utf-8") as f:
                 if config_path.suffix in [".yml", ".yaml"]:
@@ -164,23 +164,23 @@ class ConfigLoader:
                     raw_config = json.load(f)
                 else:
                     raw_config = yaml.safe_load(f)
-            
+
             # Extract export config
             export_data = raw_config.get("export", {})
             return ExportConfig(**export_data)
-            
+
         except Exception as e:
             LOGGER.warning(f"Failed to load export config: {e}, using defaults")
             return ExportConfig()
-    
+
     def load_collector_manager_config(self, config_file: str = "collector.template.yml") -> CollectorManagerConfig:
         """Load collector manager configuration with defaults."""
         config_path = self.config_dir / config_file
-        
+
         if not config_path.exists():
             LOGGER.info(f"Collector config {config_path} not found, using defaults")
             return CollectorManagerConfig()
-        
+
         try:
             with open(config_path, encoding="utf-8") as f:
                 if config_path.suffix in [".yml", ".yaml"]:
@@ -189,23 +189,23 @@ class ConfigLoader:
                     raw_config = json.load(f)
                 else:
                     raw_config = yaml.safe_load(f)
-            
+
             # Extract collector manager config
             collector_data = raw_config.get("collector_manager", {})
             return CollectorManagerConfig(**collector_data)
-            
+
         except Exception as e:
             LOGGER.warning(f"Failed to load collector manager config: {e}, using defaults")
             return CollectorManagerConfig()
-    
+
     def load_full_config(self, config_file: str = "ngbse.config.yml") -> Config:
         """Load complete configuration with all modules."""
         config_path = self.config_dir / config_file
-        
+
         if not config_path.exists():
             LOGGER.warning(f"Config file {config_path} not found, using defaults")
             return self._get_default_full_config()
-        
+
         try:
             with open(config_path, encoding="utf-8") as f:
                 if config_path.suffix in [".yml", ".yaml"]:
@@ -214,14 +214,14 @@ class ConfigLoader:
                     raw_config = json.load(f)
                 else:
                     raw_config = yaml.safe_load(f)
-            
+
             # Validate with Pydantic
             return Config(**raw_config)
-            
+
         except Exception as e:
             LOGGER.error(f"Failed to load full config: {e}, using defaults")
             return self._get_default_full_config()
-    
+
     def _get_default_full_config(self) -> Config:
         """Get default full configuration."""
         return Config()
@@ -476,10 +476,10 @@ def load_source_trust(sources_file: str = "sources.json", config_dir: str = "con
     try:
         with open(sources_path, encoding="utf-8") as f:
             raw_config = json.load(f)
-        
+
         # Validate with Pydantic
         return SourceTrustConfig(**raw_config)
-    
+
     except (FileNotFoundError, json.JSONDecodeError, ValidationError) as e:
         LOGGER.error(f"Failed to load source trust config from {sources_path}: {e}")
         LOGGER.info("Using default source trust configuration")

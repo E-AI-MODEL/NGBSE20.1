@@ -149,5 +149,6 @@ def synthesize_brief_llm(
     # Ultimate fallback
     return base
 
+
 HIGH_SCORE_THRESHOLD = 0.7
 LOW_QUALITY_THRESHOLD = 0.5

@@ -30,7 +30,7 @@ def test_invalid_seed_url(tmp_path: Path):
     rules.write_text(json.dumps([]), encoding="utf-8")
     with pytest.raises(ValueError, match="url") as exc_info:
         validate_files(str(seeds), str(rules))
-    
+
     error_msg = str(exc_info.value)
     assert "VALIDATION" not in error_msg  # ValueError met pydantic-inhoud
     assert "url" in error_msg

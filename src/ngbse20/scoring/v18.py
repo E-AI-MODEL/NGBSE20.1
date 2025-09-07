@@ -83,12 +83,12 @@ def _source_trust_score(f: dict[str, Any], source_trust_config: dict[str, Any] |
     """Compute source trust score based on domain trust levels."""
     if not source_trust_config:
         return 0.0
-    
+
     url = f.get("url", "")
     domain = _extract_domain(url)
     if not domain:
         return source_trust_config.get("default_trust_level", 0.5)
-    
+
     domains = source_trust_config.get("domains", {})
     domain_config = domains.get(domain, {})
     return domain_config.get("trust_level", source_trust_config.get("default_trust_level", 0.5))
@@ -98,7 +98,7 @@ def _keyword_pattern_score(f: dict[str, Any], rules: list[dict[str, Any]]) -> tu
     """Compute keyword pattern score and return contributors."""
     if not rules:
         return 0.0, []
-    
+
     # Build searchable text
     searchable_fields = ["title", "description", "content", "summary", "text"]
     searchable_text = ""
@@ -106,11 +106,11 @@ def _keyword_pattern_score(f: dict[str, Any], rules: list[dict[str, Any]]) -> tu
         value = f.get(field_name, "")
         if isinstance(value, str):
             searchable_text += " " + value.lower()
-    
+
     searchable_text = searchable_text.strip()
     if not searchable_text:
         return 0.0, []
-    
+
     # Precompile patterns
     compiled_rules = []
     for rule in rules:
@@ -122,26 +122,28 @@ def _keyword_pattern_score(f: dict[str, Any], rules: list[dict[str, Any]]) -> tu
         except re.error as e:
             LOGGER.warning(f"Invalid regex pattern in rule {rule.get('id', 'unknown')}: {e}")
             continue
-    
+
     # Compute scores
     total_score = 0.0
     contributors = []
-    
+
     for pattern, rule in compiled_rules:
         matches = pattern.findall(searchable_text)
         if matches:
             weight = rule.get("weight", 1.0)
             score = len(matches) * weight
             total_score += score
-            
-            contributors.append({
-                "rule_id": rule.get("id", "unknown"),
-                "rule_name": rule.get("name", "Unknown"),
-                "weight": weight,
-                "matches": len(matches),
-                "score": score
-            })
-    
+
+            contributors.append(
+                {
+                    "rule_id": rule.get("id", "unknown"),
+                    "rule_name": rule.get("name", "Unknown"),
+                    "weight": weight,
+                    "matches": len(matches),
+                    "score": score,
+                }
+            )
+
     return total_score, contributors
 
 
@@ -186,14 +188,14 @@ def _parse_ts(ts_raw: Any) -> datetime | None:
 
 
 def score_findings(
-    findings: list[dict[str, Any]], 
+    findings: list[dict[str, Any]],
     cfg: ScoringConfig = DEFAULT,
     source_trust_config: dict[str, Any] | None = None,
-    rules: list[dict[str, Any]] | None = None
+    rules: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     LOGGER.debug(f"Scoring {len(findings)} findings with config: {cfg}")
-    
+
     # Metrics collection
     metrics = {
         "total_findings": len(findings),
@@ -202,17 +204,18 @@ def score_findings(
         "scoring_version": cfg.scoring_version,
         "source_trust_scores": [],
         "keyword_scores": [],
-        "processing_time_ms": 0
+        "processing_time_ms": 0,
     }
-    
+
     import time
+
     start_time = time.time()
 
     for f in findings:
         m = dict(f.get("metrics", {}))
         ts_dt = _parse_ts(f.get("timestamp"))
         rec = _recency_score(ts_dt, cfg.half_life_days) if ts_dt else 0.0
-        
+
         # Legacy scoring (when flags are off)
         if not cfg.enable_source_trust and not cfg.enable_keyword_score:
             base = (
@@ -233,15 +236,17 @@ def score_findings(
         else:
             # New v18.1 scoring with S_s and S_k
             s_source = _source_trust_score(f, source_trust_config) if cfg.enable_source_trust else 0.0
-            s_keywords_raw, contributors = _keyword_pattern_score(f, rules or []) if cfg.enable_keyword_score else (0.0, [])
+            s_keywords_raw, contributors = (
+                _keyword_pattern_score(f, rules or []) if cfg.enable_keyword_score else (0.0, [])
+            )
             s_keywords = _clamp(s_keywords_raw / cfg.keyword_normalization_max) if cfg.enable_keyword_score else 0.0
-            
+
             # Collect metrics
             if cfg.enable_source_trust:
                 metrics["source_trust_scores"].append(s_source)
             if cfg.enable_keyword_score:
                 metrics["keyword_scores"].append(s_keywords)
-            
+
             # Use new weights when flags are enabled
             if cfg.enable_source_trust or cfg.enable_keyword_score:
                 w_source = cfg.w_source
@@ -251,12 +256,8 @@ def score_findings(
                 w_source = cfg.weights.get("source", 0)
                 w_keywords = cfg.weights.get("keywords", 0)
                 w_recency = cfg.weights.get("recency", 0)
-            
-            base = (
-                w_source * _clamp(s_source)
-                + w_keywords * _clamp(s_keywords)
-                + w_recency * _clamp(rec)
-            )
+
+            base = w_source * _clamp(s_source) + w_keywords * _clamp(s_keywords) + w_recency * _clamp(rec)
             extras = (
                 cfg.extras.get("novelty", 0) * _clamp(m.get("novelty", 0))
                 + cfg.extras.get("symbolic_consistency", 0) * _clamp(m.get("symbolic_consistency", 0))
@@ -264,7 +265,7 @@ def score_findings(
                 + cfg.extras.get("abduction_value", 0) * _clamp(m.get("abduction_value", 0))
             )
             score = _clamp(base + extras)
-            
+
             # Enhanced score breakdown for v18.1
             f["score_breakdown"] = {
                 "base": base,
@@ -273,11 +274,7 @@ def score_findings(
                 "source_trust": s_source,
                 "keyword_score": s_keywords,
                 "keyword_raw": s_keywords_raw,
-                "weights": {
-                    "w_source": w_source,
-                    "w_keywords": w_keywords,
-                    "w_recency": w_recency
-                }
+                "weights": {"w_source": w_source, "w_keywords": w_keywords, "w_recency": w_recency},
             }
             f["score"] = score
             f["scoring_version"] = cfg.scoring_version
@@ -288,20 +285,26 @@ def score_findings(
     # Calculate final metrics
     end_time = time.time()
     metrics["processing_time_ms"] = (end_time - start_time) * 1000
-    
+
     # Log metrics
     if metrics["source_trust_scores"]:
         avg_source_trust = sum(metrics["source_trust_scores"]) / len(metrics["source_trust_scores"])
-        LOGGER.info(f"Source trust scores - avg: {avg_source_trust:.3f}, min: {min(metrics['source_trust_scores']):.3f}, max: {max(metrics['source_trust_scores']):.3f}")
-    
+        LOGGER.info(
+            f"Source trust scores - avg: {avg_source_trust:.3f}, min: {min(metrics['source_trust_scores']):.3f}, max: {max(metrics['source_trust_scores']):.3f}"
+        )
+
     if metrics["keyword_scores"]:
         avg_keyword_score = sum(metrics["keyword_scores"]) / len(metrics["keyword_scores"])
-        LOGGER.info(f"Keyword scores - avg: {avg_keyword_score:.3f}, min: {min(metrics['keyword_scores']):.3f}, max: {max(metrics['keyword_scores']):.3f}")
-    
-    LOGGER.info(f"Successfully scored {len(out)} findings with {cfg.scoring_version} in {metrics['processing_time_ms']:.1f}ms")
-    
+        LOGGER.info(
+            f"Keyword scores - avg: {avg_keyword_score:.3f}, min: {min(metrics['keyword_scores']):.3f}, max: {max(metrics['keyword_scores']):.3f}"
+        )
+
+    LOGGER.info(
+        f"Successfully scored {len(out)} findings with {cfg.scoring_version} in {metrics['processing_time_ms']:.1f}ms"
+    )
+
     # Add metrics to first finding for observability
     if out:
         out[0]["_scoring_metrics"] = metrics
-    
+
     return out

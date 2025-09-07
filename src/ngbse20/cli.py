@@ -80,12 +80,9 @@ def run_pipeline_cmd(seeds: str, rules: str, outdir: str, allowlist: str, metric
             export_formats_list = [f for f in export_formats_list if f in valid_formats]
 
     config = {
-        "output_dir": outdir, 
+        "output_dir": outdir,
         "allowlist": allowlist_domains,
-        "export": {
-            "formats": export_formats_list,
-            "output_dir": outdir
-        }
+        "export": {"formats": export_formats_list, "output_dir": outdir},
     }
 
     # Run the complete pipeline
@@ -171,43 +168,35 @@ def collect(seeds: str, out: str, collector: str, allowlist: str):
 @cli.command("export")
 @click.option("--findings", required=True, type=click.Path(exists=True), help="Path to findings.json file")
 @click.option("--output", required=True, type=click.Path(), help="Output path for exported file")
-@click.option(
-    "--format",
-    type=click.Choice(["csv", "html", "docx", "stix"]),
-    default="html",
-    help="Export format"
-)
+@click.option("--format", type=click.Choice(["csv", "html", "docx", "stix"]), default="html", help="Export format")
 @click.option("--target", default="Unknown", help="Target name for the report")
 def export_cmd(findings: str, output: str, format: str, target: str):
     """Export findings to various formats."""
     try:
         from ngbse20.runtime.orchestrator import PipelineOrchestrator
-        
+
         # Load findings
         findings_data = json.loads(Path(findings).read_text("utf-8"))
-        
+
         # Create orchestrator for export functionality
         orchestrator = PipelineOrchestrator()
-        
+
         # Prepare export data
         export_data = {
             "findings": findings_data,
-            "config": {
-                "target": target,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
+            "config": {"target": target, "timestamp": datetime.now(timezone.utc).isoformat()},
         }
-        
+
         # Export data
         output_path = Path(output)
         success = orchestrator.export_data(export_data, output_path, format)
-        
+
         if success:
             click.echo(f"Export successful: {output_path}")
         else:
             click.echo(f"Export failed: {output_path}", err=True)
             raise click.Abort()
-            
+
     except Exception as e:
         click.echo(f"Export error: {e}", err=True)
         raise click.Abort()

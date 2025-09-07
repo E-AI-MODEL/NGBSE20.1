@@ -49,18 +49,14 @@ class CuriosityGenerationEngine:
         return [
             {
                 "type": "confidence_gap",
-                "question": (
-                    "What data quality issues might reduce confidence in these findings?"
-                ),
+                "question": ("What data quality issues might reduce confidence in these findings?"),
                 "curiosity_level": "high",
                 "exploration_value": "High - raises overall evidence quality",
                 "category": "data_quality",
             },
             {
                 "type": "confidence_gap",
-                "question": (
-                    "Which sources should be re-validated to improve reliability and attribution?"
-                ),
+                "question": ("Which sources should be re-validated to improve reliability and attribution?"),
                 "curiosity_level": "medium",
                 "exploration_value": "Medium - improves source reliability",
                 "category": "source_reliability",
@@ -231,7 +227,8 @@ class CuriosityGenerationEngine:
         for line in lines:
             stripped_line = line.strip()
             if stripped_line and any(
-                stripped_line.startswith(prefix) for prefix in ["What if", "How might", "Why does", "What are", "How do"]
+                stripped_line.startswith(prefix)
+                for prefix in ["What if", "How might", "Why does", "What are", "How do"]
             ):
                 questions.append(
                     {
@@ -281,9 +278,7 @@ class CuriosityGenerationEngine:
             questions.append(
                 {
                     "type": "productive_failure",
-                    "question": (
-                        "How can we harden processes to withstand news-driven spikes in activity?"
-                    ),
+                    "question": ("How can we harden processes to withstand news-driven spikes in activity?"),
                     "curiosity_level": "medium",
                     "exploration_value": "Medium - identifies process resilience gaps",
                     "category": "learning_opportunity",
@@ -297,18 +292,14 @@ class CuriosityGenerationEngine:
         return [
             {
                 "type": "productive_failure",
-                "question": (
-                    "Which security controls may have failed given the observed findings, and why?"
-                ),
+                "question": ("Which security controls may have failed given the observed findings, and why?"),
                 "curiosity_level": "high",
                 "exploration_value": "High - uncovers mitigation gaps",
                 "category": "mitigation_failure",
             },
             {
                 "type": "productive_failure",
-                "question": (
-                    "Where did incident response appear inadequate, and what evidence supports that?"
-                ),
+                "question": ("Where did incident response appear inadequate, and what evidence supports that?"),
                 "curiosity_level": "medium",
                 "exploration_value": "Medium - improves response procedures",
                 "category": "process_gap",

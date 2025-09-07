@@ -115,10 +115,10 @@ class PipelineOrchestrator:
             ballm_meta_layer=meta_layer,
             bundle=bundle,
             next_seeds=next_seeds,
-            traces=traces
+            traces=traces,
         )
         traces.append(modular_export_result["trace"])
-        
+
         # 13. Report Stage (DOCX) - Legacy
         report_result = self.pipeline_stages.report_stage(
             brief=brief,
@@ -158,7 +158,7 @@ class PipelineOrchestrator:
             "scenarios": scenarios,
             "brief": brief,
         }
-    
+
     def _run_modular_export_stage(
         self,
         scored_findings: list[dict[str, Any]],
@@ -169,12 +169,12 @@ class PipelineOrchestrator:
         ballm_meta_layer: dict[str, Any],
         bundle: Any,
         next_seeds: list[dict[str, Any]],
-        traces: list[dict[str, Any]]
+        traces: list[dict[str, Any]],
     ) -> dict[str, Any]:
         """Run modular export stage with multiple formats."""
         try:
             LOGGER.info("Starting modular export stage")
-            
+
             # Prepare export data
             export_data = {
                 "findings": scored_findings,
@@ -187,31 +187,29 @@ class PipelineOrchestrator:
                 "next_seeds": next_seeds,
                 "traces": traces,
                 "config": {
-                    "target": getattr(self.config, 'target', 'Unknown'),
+                    "target": getattr(self.config, "target", "Unknown"),
                     "collectors": self.collector_manager.list_available_collectors(),
-                    "timestamp": traces[0].get("timestamp") if traces else None
-                }
+                    "timestamp": traces[0].get("timestamp") if traces else None,
+                },
             }
-            
+
             # Get export configuration
-            export_config = getattr(self.config, 'export', {})
+            export_config = getattr(self.config, "export", {})
             if isinstance(export_config, dict):
-                formats = export_config.get('formats', ['csv', 'html', 'docx'])
-                output_dir = Path(export_config.get('output_dir', self.config.output_dir))
+                formats = export_config.get("formats", ["csv", "html", "docx"])
+                output_dir = Path(export_config.get("output_dir", self.config.output_dir))
             else:
-                formats = ['csv', 'html', 'docx']
+                formats = ["csv", "html", "docx"]
                 output_dir = Path(self.config.output_dir)
-            
+
             # Create output directory
             output_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Export in multiple formats
             export_results = self.export_manager.export_multiple(
-                data=export_data,
-                output_dir=output_dir,
-                formats=formats
+                data=export_data, output_dir=output_dir, formats=formats
             )
-            
+
             # Generate output files info
             output_files = {}
             for format, success in export_results.items():
@@ -220,7 +218,7 @@ class PipelineOrchestrator:
                     output_files[format] = str(output_dir / f"{base_name}.{format}")
                 else:
                     LOGGER.warning(f"Export failed for format: {format}")
-            
+
             # Create trace
             trace = {
                 "stage": "modular_export",
@@ -228,45 +226,38 @@ class PipelineOrchestrator:
                 "timestamp": traces[0].get("timestamp") if traces else None,
                 "formats_exported": [f for f, s in export_results.items() if s],
                 "formats_failed": [f for f, s in export_results.items() if not s],
-                "output_files": output_files
+                "output_files": output_files,
             }
-            
-            LOGGER.info(f"Modular export completed: {len([f for f, s in export_results.items() if s])} formats exported")
-            
+
+            LOGGER.info(
+                f"Modular export completed: {len([f for f, s in export_results.items() if s])} formats exported"
+            )
+
             return {
                 "status": "completed",
                 "output_files": output_files,
                 "export_results": export_results,
-                "trace": trace
+                "trace": trace,
             }
-            
+
         except Exception as e:
             LOGGER.error(f"Modular export stage failed: {e}")
             trace = {
                 "stage": "modular_export",
                 "status": "failed",
                 "error": str(e),
-                "timestamp": traces[0].get("timestamp") if traces else None
+                "timestamp": traces[0].get("timestamp") if traces else None,
             }
-            return {
-                "status": "failed",
-                "error": str(e),
-                "trace": trace
-            }
-    
-    def export_data(
-        self,
-        data: dict[str, Any],
-        output_path: Path,
-        format: str
-    ) -> bool:
+            return {"status": "failed", "error": str(e), "trace": trace}
+
+    def export_data(self, data: dict[str, Any], output_path: Path, format: str) -> bool:
         """Export data using the specified format."""
         return self.export_manager.export(data, output_path, format)
-    
+
     def get_available_export_formats(self) -> list[str]:
         """Get list of available export formats."""
         return self.export_manager.get_available_formats()
-    
+
     def get_export_summary(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get export summary for data."""
         return self.export_manager.get_export_summary(data)

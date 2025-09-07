@@ -196,24 +196,24 @@ class TestPipelineIntegration:
                 patch("src.ngbse20.runtime.collector_manager.CensysCollector") as mock_censys,
             ):
 
-                    # Setup mock instances
-                    mock_http_instance = Mock()
-                    mock_http_instance.collect.return_value = [{"id": "http_finding", "type": "web"}]
-                    mock_http.return_value = mock_http_instance
+                # Setup mock instances
+                mock_http_instance = Mock()
+                mock_http_instance.collect.return_value = [{"id": "http_finding", "type": "web"}]
+                mock_http.return_value = mock_http_instance
 
-                    mock_shodan_instance = Mock()
-                    mock_shodan_instance.api_key = "test_shodan_key"
-                    mock_shodan_instance.collect.return_value = [{"id": "shodan_finding", "type": "shodan"}]
-                    mock_shodan.return_value = mock_shodan_instance
+                mock_shodan_instance = Mock()
+                mock_shodan_instance.api_key = "test_shodan_key"
+                mock_shodan_instance.collect.return_value = [{"id": "shodan_finding", "type": "shodan"}]
+                mock_shodan.return_value = mock_shodan_instance
 
-                    mock_censys_instance = Mock()
-                    mock_censys_instance.api_id = "test_censys_id"
-                    mock_censys_instance.collect.return_value = [{"id": "censys_finding", "type": "censys"}]
-                    mock_censys.return_value = mock_censys_instance
+                mock_censys_instance = Mock()
+                mock_censys_instance.api_id = "test_censys_id"
+                mock_censys_instance.collect.return_value = [{"id": "censys_finding", "type": "censys"}]
+                mock_censys.return_value = mock_censys_instance
 
-                    orchestrator = PipelineOrchestrator(str(config_dir))
-                    result = orchestrator.run_pipeline()
+                orchestrator = PipelineOrchestrator(str(config_dir))
+                result = orchestrator.run_pipeline()
 
-                    assert result["status"] == "ok"
-                    # Should have findings from all three collectors
-                    assert len(result["findings"]) == 3
+                assert result["status"] == "ok"
+                # Should have findings from all three collectors
+                assert len(result["findings"]) == 3

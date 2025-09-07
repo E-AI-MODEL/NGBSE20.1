@@ -13,7 +13,7 @@ from .base import Exporter, ExportError, DataValidationError
 
 class HTMLExporter(Exporter):
     """Exports data to HTML format with templates."""
-    
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.template_path = config.get("html_template_path")
@@ -21,54 +21,54 @@ class HTMLExporter(Exporter):
         self.include_tables = config.get("include_tables", True)
         self.theme = config.get("html_theme", "default")
         self.title = config.get("html_title", "NGBSE 20.3 Security Analysis Report")
-    
+
     def export(self, data: Dict[str, Any], output_path: Path) -> bool:
         """Export data to HTML format."""
         try:
             if not self.validate_data(data):
                 raise DataValidationError("Data validation failed")
-            
+
             # Ensure output directory exists
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Generate HTML content
             html_content = self._generate_html(data)
-            
+
             # Write HTML file
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
-            
+
             self.logger.info(f"HTML export completed: {output_path}")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"HTML export failed: {e}")
             raise ExportError(f"HTML export failed: {e}")
-    
+
     def get_file_extension(self) -> str:
         """Get HTML file extension."""
         return ".html"
-    
+
     def get_mime_type(self) -> str:
         """Get HTML MIME type."""
         return "text/html"
-    
+
     def validate_data(self, data: Dict[str, Any]) -> bool:
         """Validate data for HTML export."""
         if not isinstance(data, dict):
             return False
-        
+
         findings = data.get("findings", [])
         if not isinstance(findings, list):
             return False
-        
+
         return True  # HTML can handle any data structure
-    
+
     def _generate_html(self, data: Dict[str, Any]) -> str:
         """Generate HTML content from data."""
         findings = data.get("findings", [])
         config_info = data.get("config", {})
-        
+
         # Generate HTML
         html = f"""
 <!DOCTYPE html>
@@ -109,9 +109,9 @@ class HTMLExporter(Exporter):
 </body>
 </html>
         """
-        
+
         return html
-    
+
     def _get_css_styles(self) -> str:
         """Get CSS styles for the HTML report."""
         return """
@@ -288,54 +288,57 @@ class HTMLExporter(Exporter):
             }
         }
         """
-    
+
     def _generate_summary_section(self, findings: List[Dict[str, Any]]) -> str:
         """Generate summary section HTML."""
         if not findings:
             return '<div class="section"><h2>Summary</h2><p>No findings to summarize.</p></div>'
-        
+
         # Count by severity
         severity_counts = {}
         type_counts = {}
-        
+
         for finding in findings:
             severity = finding.get("severity", "Unknown").lower()
             finding_type = finding.get("type", "Unknown")
-            
+
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
             type_counts[finding_type] = type_counts.get(finding_type, 0) + 1
-        
+
         # Generate summary cards
         summary_cards = []
         for severity, count in severity_counts.items():
-            summary_cards.append(f'''
+            summary_cards.append(
+                f"""
                 <div class="summary-card">
                     <h3>{count}</h3>
                     <p>{severity.title()} Severity</p>
                 </div>
-            ''')
-        
-        return f'''
+            """
+            )
+
+        return f"""
         <div class="section">
             <h2>Summary</h2>
             <div class="summary-grid">
                 {''.join(summary_cards)}
             </div>
         </div>
-        '''
-    
+        """
+
     def _generate_findings_section(self, findings: List[Dict[str, Any]]) -> str:
         """Generate findings section HTML."""
         if not findings:
             return '<div class="section"><h2>Findings</h2><p>No findings generated during analysis.</p></div>'
-        
+
         findings_html = []
         for i, finding in enumerate(findings, 1):
             finding_type = finding.get("type", "Unknown")
             severity = finding.get("severity", "Unknown").lower()
             description = finding.get("description", "")
-            
-            findings_html.append(f'''
+
+            findings_html.append(
+                f"""
                 <div class="finding">
                     <div class="finding-header">
                         <div class="finding-type">Finding {i}: {finding_type}</div>
@@ -348,35 +351,38 @@ class HTMLExporter(Exporter):
                         {f'<p><strong>Description:</strong> {description}</p>' if description else ''}
                     </div>
                 </div>
-            ''')
-        
-        return f'''
+            """
+            )
+
+        return f"""
         <div class="section">
             <h2>Findings</h2>
             {''.join(findings_html)}
         </div>
-        '''
-    
+        """
+
     def _generate_recommendations_section(self, findings: List[Dict[str, Any]]) -> str:
         """Generate recommendations section HTML."""
         if not findings:
             return '<div class="section"><h2>Recommendations</h2><p>No recommendations available.</p></div>'
-        
+
         high_severity_count = sum(1 for f in findings if f.get("severity", "").lower() == "high")
-        
+
         recommendations = []
         if high_severity_count > 0:
             recommendations.append(f"Address {high_severity_count} high-severity findings immediately")
-        
-        recommendations.extend([
-            "Review all findings and implement appropriate security measures",
-            "Consider implementing additional monitoring for identified vulnerabilities",
-            "Schedule regular security assessments to maintain security posture"
-        ])
-        
-        recommendations_html = ''.join(f'<li>{rec}</li>' for rec in recommendations)
-        
-        return f'''
+
+        recommendations.extend(
+            [
+                "Review all findings and implement appropriate security measures",
+                "Consider implementing additional monitoring for identified vulnerabilities",
+                "Schedule regular security assessments to maintain security posture",
+            ]
+        )
+
+        recommendations_html = "".join(f"<li>{rec}</li>" for rec in recommendations)
+
+        return f"""
         <div class="section">
             <h2>Recommendations</h2>
             <div class="recommendations">
@@ -385,8 +391,8 @@ class HTMLExporter(Exporter):
                 </ul>
             </div>
         </div>
-        '''
-    
+        """
+
     def _get_javascript(self) -> str:
         """Get JavaScript for the HTML report."""
         return """

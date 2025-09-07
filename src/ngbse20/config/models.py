@@ -67,18 +67,10 @@ class CollectorConfig(BaseModel):
 
 class SourceTrustConfig(BaseModel):
     """Source trust configuration for scoring v18.1."""
-    
-    domains: dict[str, dict[str, Any]] = Field(
-        default_factory=dict,
-        description="Domain-specific trust levels"
-    )
-    default_trust_level: float = Field(
-        0.5,
-        ge=0.0,
-        le=1.0,
-        description="Default trust level for unknown domains"
-    )
-    
+
+    domains: dict[str, dict[str, Any]] = Field(default_factory=dict, description="Domain-specific trust levels")
+    default_trust_level: float = Field(0.5, ge=0.0, le=1.0, description="Default trust level for unknown domains")
+
     @field_validator("domains")
     @classmethod
     def validate_domains(cls, v: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -93,68 +85,23 @@ class SourceTrustConfig(BaseModel):
 
 class ExportConfig(BaseModel):
     """Export configuration for modular export system."""
-    
-    formats: list[str] = Field(
-        default=["csv", "html", "docx"],
-        description="List of export formats to generate"
-    )
-    output_dir: str = Field(
-        "output",
-        description="Output directory for exported files"
-    )
-    csv_delimiter: str = Field(
-        ",",
-        description="CSV delimiter character"
-    )
-    csv_quote_char: str = Field(
-        '"',
-        description="CSV quote character"
-    )
-    csv_encoding: str = Field(
-        "utf-8",
-        description="CSV file encoding"
-    )
-    html_theme: str = Field(
-        "default",
-        description="HTML report theme"
-    )
-    html_title: str = Field(
-        "NGBSE 20.3 Security Analysis Report",
-        description="HTML report title"
-    )
-    html_template_path: str | None = Field(
-        None,
-        description="Custom HTML template path"
-    )
-    docx_template_path: str | None = Field(
-        None,
-        description="Custom DOCX template path"
-    )
-    include_charts: bool = Field(
-        True,
-        description="Include charts in HTML/DOCX reports"
-    )
-    include_tables: bool = Field(
-        True,
-        description="Include tables in HTML/DOCX reports"
-    )
-    stix_version: str = Field(
-        "2.1",
-        description="STIX version for export"
-    )
-    include_indicators: bool = Field(
-        True,
-        description="Include indicators in STIX export"
-    )
-    include_observables: bool = Field(
-        True,
-        description="Include observables in STIX export"
-    )
-    include_relationships: bool = Field(
-        True,
-        description="Include relationships in STIX export"
-    )
-    
+
+    formats: list[str] = Field(default=["csv", "html", "docx"], description="List of export formats to generate")
+    output_dir: str = Field("output", description="Output directory for exported files")
+    csv_delimiter: str = Field(",", description="CSV delimiter character")
+    csv_quote_char: str = Field('"', description="CSV quote character")
+    csv_encoding: str = Field("utf-8", description="CSV file encoding")
+    html_theme: str = Field("default", description="HTML report theme")
+    html_title: str = Field("NGBSE 20.3 Security Analysis Report", description="HTML report title")
+    html_template_path: str | None = Field(None, description="Custom HTML template path")
+    docx_template_path: str | None = Field(None, description="Custom DOCX template path")
+    include_charts: bool = Field(True, description="Include charts in HTML/DOCX reports")
+    include_tables: bool = Field(True, description="Include tables in HTML/DOCX reports")
+    stix_version: str = Field("2.1", description="STIX version for export")
+    include_indicators: bool = Field(True, description="Include indicators in STIX export")
+    include_observables: bool = Field(True, description="Include observables in STIX export")
+    include_relationships: bool = Field(True, description="Include relationships in STIX export")
+
     @field_validator("formats")
     @classmethod
     def validate_formats(cls, v: list[str]) -> list[str]:
@@ -163,7 +110,7 @@ class ExportConfig(BaseModel):
         if invalid_formats:
             raise ValueError(f"Invalid export formats: {invalid_formats}. Valid formats: {valid_formats}")
         return v
-    
+
     @field_validator("stix_version")
     @classmethod
     def validate_stix_version(cls, v: str) -> str:
@@ -175,34 +122,16 @@ class ExportConfig(BaseModel):
 
 class CollectorManagerConfig(BaseModel):
     """Configuration for enhanced collector manager."""
-    
-    enabled_collectors: list[str] = Field(
-        default_factory=list,
-        description="List of enabled collector names"
-    )
+
+    enabled_collectors: list[str] = Field(default_factory=list, description="List of enabled collector names")
     external_collectors: list[dict[str, str]] = Field(
-        default_factory=list,
-        description="External collector configurations"
+        default_factory=list, description="External collector configurations"
     )
-    auto_discovery: bool = Field(
-        True,
-        description="Enable automatic collector discovery"
-    )
-    plugin_directory: str | None = Field(
-        None,
-        description="Directory for collector plugins"
-    )
-    collector_timeout: int = Field(
-        300,
-        ge=1,
-        description="Default collector timeout in seconds"
-    )
-    max_concurrent_collectors: int = Field(
-        5,
-        ge=1,
-        description="Maximum concurrent collectors"
-    )
-    
+    auto_discovery: bool = Field(True, description="Enable automatic collector discovery")
+    plugin_directory: str | None = Field(None, description="Directory for collector plugins")
+    collector_timeout: int = Field(300, ge=1, description="Default collector timeout in seconds")
+    max_concurrent_collectors: int = Field(5, ge=1, description="Maximum concurrent collectors")
+
     @field_validator("external_collectors")
     @classmethod
     def validate_external_collectors(cls, v: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -222,7 +151,7 @@ class Config(BaseModel):
     collectors: list[CollectorConfig] = Field(default_factory=list, description="Collector configurations")
     options: dict[str, str] = Field(default_factory=dict, description="General options")
     source_trust: SourceTrustConfig | None = Field(None, description="Source trust configuration")
-    
+
     # New modular configurations
     export: ExportConfig | None = Field(None, description="Export configuration")
     collector_manager: CollectorManagerConfig | None = Field(None, description="Collector manager configuration")
@@ -233,7 +162,7 @@ class Config(BaseModel):
     enable_ballm: bool = Field(True, description="Enable BALLM meta-layer generation")
     enable_forecasting: bool = Field(True, description="Enable trend forecasting")
     enable_scenarios: bool = Field(True, description="Enable scenario synthesis")
-    
+
     # Legacy fields for backward compatibility
     output_dir: str = Field("output", description="Output directory for results")
     allowlist: list[str] = Field(default_factory=list, description="Domain allowlist")
@@ -245,13 +174,13 @@ class Config(BaseModel):
         if v.lower() not in valid_formats:
             raise ValueError(f"Invalid output format. Must be one of: {', '.join(valid_formats)}")
         return v.lower()
-    
+
     def get_export_config(self) -> ExportConfig:
         """Get export configuration with defaults."""
         if self.export:
             return self.export
         return ExportConfig()
-    
+
     def get_collector_manager_config(self) -> CollectorManagerConfig:
         """Get collector manager configuration with defaults."""
         if self.collector_manager:
