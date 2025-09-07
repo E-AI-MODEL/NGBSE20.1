@@ -43,24 +43,6 @@ include = ["ngbse20*"]
 exclude = ["tests*", "docs*", "data*"]
 
 
-[tool.black]
-line-length = 120
-target-version = ['py39']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
 [tool.mypy]
 python_version = "3.11"
 warn_unused_configs = true
