@@ -24,9 +24,15 @@ class PipelineOrchestrator:
         self.config_loader = ConfigLoader(config_dir)
         self.config = self.config_loader.load_config()
         self.credentials = self.config_loader.get_credentials()
-        self.collector_manager = CollectorManager(self.config.model_dump(), self.credentials)
-        self.pipeline_stages = PipelineStages(self.config.output_dir, self.config.model_dump())
-        self.export_manager = ExportManager(self.config.model_dump())
+        # Handle both Pydantic models and regular classes
+        if hasattr(self.config, 'model_dump'):
+            config_dict = self.config.model_dump()
+        else:
+            config_dict = self.config.__dict__
+            
+        self.collector_manager = CollectorManager(config_dict, self.credentials)
+        self.pipeline_stages = PipelineStages(self.config.output_dir, config_dict)
+        self.export_manager = ExportManager(config_dict)
 
     def run_pipeline(
         self,
