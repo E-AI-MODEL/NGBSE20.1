@@ -74,9 +74,9 @@ python3 -c "import ngbse20; print('NGBSE 20.3.0 installed successfully')"
 
 - **Python 3.9/3.10**: No longer supported
 - **Python 3.11**: Minimum supported version
-- **Python 3.12/3.13**: Fully supported and recommended
+- **Python 3.12**: Fully supported and recommended
 - **Docker**: Uses Python 3.11-slim base image
-- **CI/CD**: Tests on Python 3.11, 3.12, 3.13
+- **CI/CD**: Tests on Python 3.11, 3.12
 
 ## Step-by-Step Migration
 

@@ -131,9 +131,9 @@ For local installation, Python 3.11+ is required.
 
 **Python Version Compatibility:**
 - **Minimum**: Python 3.11
-- **Recommended**: Python 3.12 or 3.13
+- **Recommended**: Python 3.12
 - **Docker**: Uses Python 3.11-slim base image
-- **CI/CD**: Tests on Python 3.11, 3.12, 3.13
+- **CI/CD**: Tests on Python 3.11, 3.12
 
 **Version Support Matrix:**
 | Python Version | Status | Notes |
@@ -142,7 +142,7 @@ For local installation, Python 3.11+ is required.
 | 3.10.x | ❌ **Not Supported** | Legacy version, use 3.11+ |
 | 3.11.x | ✅ **Fully Supported** | Minimum required version |
 | 3.12.x | ✅ **Fully Supported** | Recommended for development |
-| 3.13.x | ✅ **Fully Supported** | Latest stable version |
+| 3.13.x | ⚠️ **Not Tested** | Compatibility issues with dependencies |
 
 1. **Clone the repository:**
    ```bash

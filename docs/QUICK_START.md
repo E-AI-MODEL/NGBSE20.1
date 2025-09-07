@@ -40,10 +40,10 @@ cat out/findings.json
 
 ### **Python Version Requirements:**
 - **Minimum**: Python 3.11 (required)
-- **Recommended**: Python 3.12 or 3.13
+- **Recommended**: Python 3.12
 - **Not Supported**: Python 3.9 or 3.10 (legacy versions)
 - **Docker**: Uses Python 3.11-slim base image
-- **CI/CD**: Tests on Python 3.11, 3.12, 3.13
+- **CI/CD**: Tests on Python 3.11, 3.12
 
 ### **Environment Setup:**
 ```bash
