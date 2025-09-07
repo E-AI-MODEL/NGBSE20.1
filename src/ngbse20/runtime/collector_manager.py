@@ -34,7 +34,7 @@ class CollectorManager:
             enabled_collectors = (
                 collectors_config.enabled if collectors_config.enabled else self.registry.list_collectors()
             )
-        elif hasattr(self.config, "get"):
+        elif isinstance(self.config, dict):
             # Dictionary
             enabled_collectors = self.config.get("collectors", {}).get("enabled", self.registry.list_collectors())
         else:
@@ -62,7 +62,7 @@ class CollectorManager:
                 if collector_name == "http_web":
                     collector = collector_class(allowlist_domains=allowlist)
                 else:
-                    collector = collector_class(config=self.config, allowlist_domains=allowlist)
+                    collector = collector_class(self.config, allowlist)
 
                 # Additional validation after creation
                 if self._has_valid_credentials(collector):
