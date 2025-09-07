@@ -6,6 +6,7 @@ Manages collector lifecycle, credential validation, and dynamic loading.
 from typing import Any, Dict, List, Optional
 
 from ..collectors.base import BaseCollector
+from ..collectors.http_web import HttpWebCollector
 from ..logging import get_logger
 from .collector_registry import DynamicCollectorRegistry
 
