@@ -151,9 +151,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.lock
-          pip install -r requirements-dev.txt
+          pip install pytest pytest-cov pytest-mock
           pip install .
 
+      - name: Verify pytest installation
+        run: |
+          which pytest
+          pytest --version
 
       - name: Typecheck (mypy)
         env:
