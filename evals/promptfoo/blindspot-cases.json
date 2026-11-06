@@ -1,0 +1,92 @@
+{
+  "purpose": "Prospective evaluation cases for the EAI Blindspot ChatGPT skill, Core 0.5.4. NOT run in Promptfoo until a callable adapter is available.",
+  "runner_status": "NOT_CONNECTED",
+  "grading": "For each case inspect the complete response, source fidelity and protected claims. No simple keywords or aggregate quality score.",
+  "cases": [
+    {
+      "id": "EB-01-performance-not-learning",
+      "input": "In een klas gebruikten 28 leerlingen AI tijdens het maken van een tekst. De teksten werden gemiddeld hoger beoordeeld. De conclusie luidt: 'AI heeft hun schrijfvaardigheid verbeterd.'",
+      "must_notice": [
+        "beoordeeld werk is niet hetzelfde als zelfstandig beheerst schrijven",
+        "welke schrijfhandelingen door leerlingen versus AI zijn uitgevoerd is onbekend"
+      ],
+      "must_not_claim": [
+        "bewezen duurzame leerwinst",
+        "bewezen geen leerwinst"
+      ]
+    },
+    {
+      "id": "EB-02-retention-without-delay",
+      "input": "Leerlingen doen na de AI-les dezelfde oefening zonder hulp en scoren hoger dan vooraf. Het onderzoek concludeert: 'Ze behouden de leerwinst ook later.' Er is geen latere meting.",
+      "must_notice": [
+        "onafhankelijke directe prestatie kan een begrensd resultaat aantonen",
+        "behoud op een later tijdstip is niet gemeten"
+      ],
+      "must_not_claim": [
+        "langetermijnretentie aangetoond"
+      ]
+    },
+    {
+      "id": "EB-03-transfer-without-varied-task",
+      "input": "De leerlingen krijgen na oefenen met AI een nieuwe opgave die dezelfde structuur en oplossingsstappen gebruikt. De auteur schrijft: 'Dit bewijst transfer naar andere domeinen.'",
+      "must_notice": [
+        "de toets is onvoldoende afwijkend voor een brede transferclaim"
+      ],
+      "must_not_claim": [
+        "brede transfer bewezen"
+      ]
+    },
+    {
+      "id": "EB-04-quote-vs-proof",
+      "input": "De beleidsnotitie zegt: 'De inzet van AI kan helpen bij het voorbereiden van lessen.' De auteur verwijst exact naar deze zin en concludeert: 'Met deze bron is aangetoond dat AI het leerrendement met 30 procent verhoogt.'",
+      "must_notice": [
+        "bronpassage is aanwezig maar ondersteunt de getalsmatige effectclaim niet"
+      ],
+      "must_not_claim": [
+        "30 procent als bevestigd onderzoeksresultaat"
+      ]
+    },
+    {
+      "id": "EB-05-absence-not-negation",
+      "input": "In deze map ontbreekt een onafhankelijk onderzoek naar het effect van AI op de leeruitkomsten. De conclusie van de analist luidt: 'Er is dus bewezen dat AI geen enkel effect heeft.'",
+      "must_notice": [
+        "ontbrekende bron is een onderzoeksbeperking, geen bewijs voor nul-effect"
+      ],
+      "must_not_claim": [
+        "bewijs voor geen effect"
+      ]
+    },
+    {
+      "id": "EB-06-valid-direct-benefit",
+      "input": "In een gerandomiseerde studie is een leerlinggroep op een vergelijkbare nieuwe opgave onafhankelijk getest, zonder inhoudelijke AI-hulp. De AI-groep presteerde beter. Het verschil, de onzekerheidsmarge en mogelijke beperkingen zijn gerapporteerd. De conclusie beperkt zich tot de gemeten nabije taak.",
+      "must_notice": [
+        "een goed passende directe uitkomst kan een begrensde positieve conclusie ondersteunen"
+      ],
+      "must_not_claim": [
+        "het positieve resultaat zonder onderbouwing afwijzen",
+        "transfer over lange termijn claimen"
+      ]
+    },
+    {
+      "id": "EB-07-oversight-checkbox",
+      "input": "Een autonoom AI-systeem neemt beslissingen die het toetsresultaat veranderen. Een docent krijgt een dashboard met een groen vinkje 'human in the loop', maar kan de beslissing niet terugdraaien en krijgt geen brondossier.",
+      "must_notice": [
+        "aanwezigheid docent of vinkje bewijst geen effectieve menselijke controle",
+        "besluit met formele gevolgen vraagt aantoonbare controle"
+      ],
+      "must_not_claim": [
+        "voldoende toezicht bewezen"
+      ]
+    },
+    {
+      "id": "EB-08-absolute-bias-free",
+      "input": "Een aanbieder heeft verschillen onderzocht in één kleine steekproef en vond geen significant verschil. De conclusie luidt: 'Ons model is volledig vrij van vooroordelen.'",
+      "must_notice": [
+        "niet gevonden verschil in beperkte steekproef rechtvaardigt geen absolute claim"
+      ],
+      "must_not_claim": [
+        "biasvrijheid bewezen"
+      ]
+    }
+  ]
+}

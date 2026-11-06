@@ -1,0 +1,129 @@
+# Promptfoo executes the checked-out source modules through a Python provider.
+# No LLM, paid API or remote user data in this offline pilot.
+description: "NGBSE/BALLMS and Shadowseed: real-code regression evaluation"
+prompts:
+  - "{{case_json}}"
+providers:
+  - id: file://research_provider.py
+    label: "Actual Python source at pinned GitHub commits"
+tests:
+  - description: "NGBSE: enough coverage gaps push the LLM's question beyond the first ten"
+    vars:
+      case_json: |
+        {"target":"ngbse_legacy","blindspots":{"coverage":{"imbalance":0.8,"max_category":"one category","ratios":{"a":0.01,"b":0.01,"c":0.01,"d":0.01,"e":0.01,"f":0.01,"g":0.01,"h":0.01,"i":0.01,"j":0.01}},"recency":{"spike":true,"detail":{"day1":1,"day3":1}},"confidence":{"n":2,"risky_assets":["asset-1"]}}}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.llm_stub_called && x.all_candidates > 10 &&
+                 x.model_question_in_candidates && x.model_question_selected === false;
+  - description: "NGBSE: with few gaps, LLM-generated question is retained"
+    vars:
+      case_json: |
+        {"target":"ngbse_legacy","blindspots":{"coverage":{"imbalance":0,"ratios":{}},"recency":{"spike":false},"confidence":{"n":0}}}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.llm_stub_called && x.model_question_selected === true && x.selected_count <= 10;
+  - description: "BALLMS 50: duplicated source origin is never counted as independent verification"
+    vars:
+      case_json: |
+        {"target":"ballms50","case":{"question":"Werkt het?","sources":[{"id":"s1","origin_id":"primary-a","type":"report","text":"Bron A beweert dat het werkt."},{"id":"s2","origin_id":"primary-a","type":"report","text":"Bron A beweert dat het werkt."}],"claims":[{"id":"c1","text":"Het werkt","references":[{"source_id":"s1","start":0,"end":6,"quote":"Bron A"},{"source_id":"s2","start":0,"end":6,"quote":"Bron A"}]}]}}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.claim_checks[0].distinct_reported_origins === 1 &&
+                 x.claim_checks[0].semantic_support === "NOT_EVALUATED" &&
+                 x.gaps.some(g => g.kind === "corroboration");
+  - description: "BALLMS 50: invalid quote remains a reference error, not supporting evidence"
+    vars:
+      case_json: |
+        {"target":"ballms50","case":{"sources":[{"id":"s1","type":"report","text":"Bron A beweert dat het werkt."}],"claims":[{"id":"c1","text":"Het werkt","references":[{"source_id":"s1","start":0,"end":6,"quote":"ERROR"}]}]}}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.claim_checks[0].citation_state === "reference_error" &&
+                 x.claim_checks[0].truth_status === "NOT_EVALUATED";
+  - description: "BALLMS 50: no sources is an open investigation, never negative evidence"
+    vars:
+      case_json: |
+        {"target":"ballms50","case":{"question":"Wat weten we?","sources":[],"claims":[]}}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.investigation_status === "not_executed_by_engine" &&
+                 x.gaps.some(g => g.kind === "no_sources");
+  - description: "BALLMS 50: bounded question selection retains excluded candidate trace"
+    vars:
+      case_json: |
+        {"target":"ballms50","budget":2,"case":{"sources":[{"id":"s1","type":"report","text":"Synthetisch rapport"}],"claims":[{"id":"a","text":"Bewering A"},{"id":"b","text":"Bewering B"},{"id":"c","text":"Bewering C"}],"unknowns":[{"id":"u1","question":"Welke andere bron ontbreekt?"}]}}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.selected_questions.length === 2 &&
+                 x.excluded_questions.length > 0 &&
+                 x.questions.length === x.selected_questions.length + x.excluded_questions.length;
+  - description: "Shadowseed: two evidence channels with the same source identity share one authority key"
+    vars:
+      case_json: |
+        {"target":"shadowseed_gate","source_ref":"document:alpha","verified":true}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.retrieval_key === "external:document:alpha" &&
+                 x.ssot_key === x.retrieval_key &&
+                 x.recurrence_key === "recurrence:document:alpha" &&
+                 x.external === true && x.recurrence_external === false;
+  - description: "Shadowseed: unverified support has no authority-bearing external key"
+    vars:
+      case_json: |
+        {"target":"shadowseed_gate","source_ref":"document:alpha","verified":false}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.retrieval_key === null && x.ssot_key === null &&
+                 x.recurrence_external === false;
+  - description: "Shadowseed: opposing external evidence must not contribute support authority key"
+    vars:
+      case_json: |
+        {"target":"shadowseed_gate","source_ref":"document:alpha","verified":true,"direction":"oppose"}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.retrieval_key === null && x.ssot_key === null &&
+                 x.recurrence_key === null;
+  - description: "Shadowseed: sixteen turns produce a half-life from trace 1.0 to 0.5"
+    vars:
+      case_json: |
+        {"target":"shadowseed_lifecycle","turns":16}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.half_life_met === true && x.event_count === 1 && x.status === "NEW";
+  - description: "Shadowseed: zero elapsed time is a true no-op"
+    vars:
+      case_json: |
+        {"target":"shadowseed_lifecycle","turns":0}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.trace === 1 && x.event_count === 0 && x.status === "NEW";
+  - description: "Shadowseed: negative time is explicitly rejected"
+    vars:
+      case_json: |
+        {"target":"shadowseed_lifecycle","turns":-1}
+    assert:
+      - type: javascript
+        value: |
+          const x=JSON.parse(output);
+          return x.rejected === true && x.error_type === "ValueError";
