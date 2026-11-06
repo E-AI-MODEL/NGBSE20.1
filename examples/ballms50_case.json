@@ -1,0 +1,57 @@
+{
+  "study_id": "demo-programma",
+  "question": "Wat kunnen we op basis van de bronnen over de uitkomst zeggen?",
+  "sources": [
+    {
+      "id": "report-1",
+      "origin_id": "publisher-a",
+      "type": "report",
+      "title": "Eerste evaluatie",
+      "text": "De eerste evaluatie noemt een positief resultaat."
+    },
+    {
+      "id": "report-1-copy",
+      "origin_id": "publisher-a",
+      "type": "report",
+      "title": "Kopie eerste evaluatie",
+      "text": "De eerste evaluatie noemt een positief resultaat."
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Het resultaat is positief",
+      "references": [
+        {
+          "source_id": "report-1",
+          "start": 0,
+          "end": 18,
+          "quote": "De eerste evaluatie"
+        },
+        {
+          "source_id": "report-1-copy",
+          "start": 0,
+          "end": 18,
+          "quote": "De eerste evaluatie"
+        }
+      ]
+    }
+  ],
+  "required_source_types": [
+    "report",
+    "study"
+  ],
+  "search_attempts": [
+    {
+      "id": "attempt-1",
+      "query": "onafhankelijke evaluatie",
+      "status": "no_results"
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "u1",
+      "question": "Is het effect zes maanden later nog aantoonbaar?"
+    }
+  ]
+}
