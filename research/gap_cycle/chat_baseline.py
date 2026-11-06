@@ -20,7 +20,7 @@ SYSTEM = (
     "meer conclusies dan de gegevens rechtvaardigen. Antwoord in het Nederlands."
 )
 MAX_USD = 0.25
-MAX_OUTPUT_TOKENS = 600
+MAX_OUTPUT_TOKENS = 1300
 # Conservative input/output cost proxies; not a billing guarantee.
 INPUT_PER_M = 3.0
 OUTPUT_PER_M = 12.0
@@ -119,6 +119,11 @@ def compare_chat(cycle: dict[str, Any], client: Any, output: Path) -> dict[str, 
             handle.write(json.dumps({
                 "kind": "response", **last_response
             }, ensure_ascii=False) + "\n")
+        if response.status != "completed" or not text.strip():
+            raise RuntimeError(
+                f"Model answer incomplete or empty in phase {phase}; "
+                "not a valid completed baseline"
+            )
         if phase == 1:
             answer1 = text
         else:
