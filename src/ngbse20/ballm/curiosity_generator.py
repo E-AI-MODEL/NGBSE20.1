@@ -229,7 +229,7 @@ class CuriosityGenerationEngine:
             stripped_line = line.strip()
             # Models routinely number their answers ("1. How might...").
             # Strip only list markers, not free text or arbitrary commentary.
-            question_line = re.sub(r"^(?:\\d{1,3}[.)]\\s+|[-*]\\s+)", "", stripped_line)
+            question_line = re.sub(r"^(?:\d{1,3}[.)]\s+|[-*]\s+)", "", stripped_line)
             if question_line and any(
                 question_line.startswith(prefix)
                 for prefix in ["What if", "How might", "Why does", "What are", "How do"]
