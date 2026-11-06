@@ -81,7 +81,7 @@ def test_public_method_retains_numbered_model_questions_under_small_budget():
     assert len(selected) == 3
 
 
-def test_crowded_question_selection_remains_a_separate_limit():
+def test_crowded_question_selection_retains_model_questions():
     model = FixedLLM("1. How might we verify a missing alternative?")
     questions = CuriosityGenerationEngine(model).generate_curiosity_questions(
         [], {
@@ -93,7 +93,8 @@ def test_crowded_question_selection_remains_a_separate_limit():
             "confidence": {"n": 1, "risky_assets": ["item"]},
         }
     )
-    # This test records a distinct known problem, NOT a claim it was fixed.
+    # Selection no longer discards every model proposal behind coverage gaps.
     assert model.calls == 1
     assert len(questions) == 10
-    assert not [q for q in questions if q["type"] == "llm_generated"]
+    assert any(q["type"] == "llm_generated" for q in questions)
+    assert len({q["type"] for q in questions}) >= 4
