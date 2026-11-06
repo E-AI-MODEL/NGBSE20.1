@@ -1,0 +1,71 @@
+{
+  "question": "Kan deze evaluatie aantonen dat leerlingen zelfstandig beter zijn gaan leren?",
+  "sources": [
+    {
+      "id": "evaluatie",
+      "design": "observational",
+      "text": "Na de invoering van de digitale oefenomgeving steeg het gemiddelde cijfer voor huiswerkopdrachten. Er is geen toets zonder hulpmiddelen afgenomen."
+    },
+    {
+      "id": "teamverslag",
+      "design": "self_report",
+      "text": "Docenten melden dat leerlingen de oefeningen sneller afronden. Er is geen aparte meting van kennisbehoud."
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Door de oefenomgeving leren leerlingen zelfstandig beter.",
+      "claim_type": "learning",
+      "references": [
+        {
+          "source_id": "evaluatie",
+          "quote": "steeg het gemiddelde cijfer voor huiswerkopdrachten"
+        }
+      ]
+    },
+    {
+      "id": "c2",
+      "text": "Leerlingen ronden oefeningen sneller af.",
+      "claim_type": "descriptive",
+      "references": [
+        {
+          "source_id": "teamverslag",
+          "quote": "leerlingen de oefeningen sneller afronden"
+        }
+      ]
+    },
+    {
+      "id": "c3",
+      "text": "Ook na een maand blijft de kennis beter.",
+      "claim_type": "learning",
+      "references": []
+    }
+  ],
+  "gaps": [
+    {
+      "id": "g1",
+      "description": "Zelfstandig leren zonder hulpmiddelen is niet gemeten.",
+      "why_it_matters": "Het resultaat van huiswerkopdrachten zegt niet vanzelf iets over zelfstandige beheersing.",
+      "next_test": "Hoe presteren dezelfde leerlingen zonder hulpmiddelen op nieuwe opgaven?",
+      "anchors": [
+        {
+          "source_id": "evaluatie",
+          "quote": "Er is geen toets zonder hulpmiddelen afgenomen."
+        }
+      ]
+    },
+    {
+      "id": "g2",
+      "description": "Kennisbehoud op langere termijn is onbekend.",
+      "why_it_matters": "Verbetering direct na oefenen bewijst geen blijvend leereffect.",
+      "next_test": "Welke resultaten zien we bij een toets na vier weken zonder hulp?",
+      "anchors": [
+        {
+          "source_id": "teamverslag",
+          "quote": "Er is geen aparte meting van kennisbehoud."
+        }
+      ]
+    }
+  ]
+}

@@ -53,6 +53,16 @@ The system automatically maps your preferred model to the available provider:
 - If you specify `claude-3.5-sonnet` but only have OpenAI API key → uses `gpt-4o-mini`
 - Configuration in `ngbse.config.yml` allows fine-tuning of model preferences
 
+## Teksten en onderzoek analyseren
+
+NGBSE kan ook buiten OSINT worden gebruikt. De nieuwe opdracht `analyze-document` controleert welke bronpassages bij een bewering zijn aangewezen, waar verwijzingen ontbreken en welke open onderzoeksvragen daaruit volgen. BALLM kan optioneel nieuwe, nog onbewezen mogelijkheden voorstellen.
+
+```bash
+ngbse20 analyze-document --input examples/research_text_packet.json --out out/research_result.json
+```
+
+Zie [de uitleg van documentanalyse](docs/DOCUMENT_BLINDSPOTS.md) voor invoer, uitvoer en de begrenzing van bewijs. Een gevonden broncitaat wordt **niet** automatisch als bewijs van de conclusie behandeld. De OSINT-opdrachten blijven ongewijzigd.
+
 ## OSINT Collectors
 
 NGBSE 20.3.0-GA includes comprehensive OSINT collectors for threat intelligence:
