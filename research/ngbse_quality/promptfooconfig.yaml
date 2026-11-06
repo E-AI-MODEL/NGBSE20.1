@@ -1,0 +1,10 @@
+# Structured validation of real model outputs from run_three_arm.py.
+# The provider reads saved responses; Promptfoo itself sends no new model calls.
+description: "NGBSE quality pilot: 18 actual-output checks, not independent quality judgments"
+prompts:
+  - "{{input_json}}"
+providers:
+  - id: file://receipt_provider.py
+    label: "Real GPT-4.1-mini receipts; read-only"
+tests:
+  - file://promptfoo_tests.py:generate_tests
