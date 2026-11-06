@@ -230,7 +230,7 @@ class CuriosityGenerationEngine:
                     }
                 )
 
-        return questions or self._fallback_confidence_questions()
+        return questions  # No concrete signal: do not invent a problem.
 
     def _generate_llm_curiosity_questions(
         self, findings: list[dict[str, Any]], blindspots: dict[str, Any]
@@ -355,7 +355,7 @@ class CuriosityGenerationEngine:
                 }
             )
 
-        return questions or self._fallback_productive_failure_questions()
+        return questions  # No concrete signal: do not invent a problem.
 
     def _fallback_productive_failure_questions(self) -> list[dict[str, Any]]:
         """Fallback questions when LLM or heuristics provide no results."""
