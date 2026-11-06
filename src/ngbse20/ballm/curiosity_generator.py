@@ -5,6 +5,7 @@ This engine generates curiosity-driven questions based on blindspots and finding
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
@@ -226,14 +227,17 @@ class CuriosityGenerationEngine:
         lines = response.split("\n")
         for line in lines:
             stripped_line = line.strip()
-            if stripped_line and any(
-                stripped_line.startswith(prefix)
+            # Models routinely number their answers ("1. How might...").
+            # Strip only list markers, not free text or arbitrary commentary.
+            question_line = re.sub(r"^(?:\d{1,3}[.)]\s+|[-*]\s+)", "", stripped_line)
+            if question_line and any(
+                question_line.startswith(prefix)
                 for prefix in ["What if", "How might", "Why does", "What are", "How do"]
             ):
                 questions.append(
                     {
                         "type": "llm_generated",
-                        "question": stripped_line,
+                        "question": question_line,
                         "curiosity_level": "high",
                         "exploration_value": "High - LLM-generated insight",
                         "category": "llm_insight",
