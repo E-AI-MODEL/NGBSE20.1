@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -21,7 +22,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 def _shadowseed_imports():
     # The CI workflow checks out a pinned Shadowseed commit. No copied engine.
-    shadowseed_src = Path("/tmp/shadowseed-promptfoo/src")
+    shadowseed_src = Path(os.environ.get("SHADOWSEED_SOURCE_DIR", str(ROOT / "shadowseed-promptfoo"))) / "src"
     if not shadowseed_src.is_dir():
         raise RuntimeError("Shadowseed checkout missing; run via GitHub workflow")
     sys.path.insert(0, str(shadowseed_src))
