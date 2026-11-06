@@ -1,0 +1,419 @@
+{
+  "suite": "ngbse-quality-v1",
+  "created": "2026-11-06",
+  "cases": [
+    {
+      "id": "R1",
+      "title": "Gekopieerde bron versus onafhankelijke bevestiging",
+      "question": "Ondersteunen de logs de conclusie dat de fout structureel is?",
+      "packet": {
+        "study_id": "R1",
+        "question": "Ondersteunen de logs de conclusie dat de fout structureel is?",
+        "sources": [
+          {
+            "id": "s1",
+            "origin_id": "log-primary",
+            "type": "log",
+            "text": "Log A meldt 32 uitgevallen sensoren op maandag."
+          },
+          {
+            "id": "s2",
+            "origin_id": "log-primary",
+            "type": "log",
+            "text": "Log A meldt 32 uitgevallen sensoren op maandag."
+          }
+        ],
+        "claims": [
+          {
+            "id": "c1",
+            "text": "De sensoruitval is structureel",
+            "references": [
+              {
+                "source_id": "s1",
+                "start": 12,
+                "end": 35,
+                "quote": "32 uitgevallen sensoren"
+              },
+              {
+                "source_id": "s2",
+                "start": 12,
+                "end": 35,
+                "quote": "32 uitgevallen sensoren"
+              }
+            ]
+          }
+        ],
+        "required_source_types": [
+          "log",
+          "field_test"
+        ]
+      },
+      "legacy": {
+        "coverage": {
+          "ratios": {
+            "logs": 0.95,
+            "interviews": 0.05
+          },
+          "max_category": "logs",
+          "imbalance": 0.9
+        },
+        "recency": {
+          "spike": false
+        },
+        "confidence": {
+          "n": 1,
+          "risky_assets": [
+            "sensor-1"
+          ]
+        }
+      },
+      "expected_gap_kinds": [
+        "corroboration",
+        "source_coverage"
+      ]
+    },
+    {
+      "id": "R2",
+      "title": "Geen bron is geen weerlegging",
+      "question": "Is de nieuwe beveiligingscontrole aantoonbaar effectief?",
+      "packet": {
+        "study_id": "R2",
+        "question": "Is de nieuwe beveiligingscontrole aantoonbaar effectief?",
+        "sources": [],
+        "claims": [
+          {
+            "id": "c1",
+            "text": "De nieuwe beveiligingscontrole voorkomt alle incidenten"
+          }
+        ],
+        "search_attempts": [
+          {
+            "id": "a1",
+            "query": "testverslag",
+            "status": "no_results"
+          }
+        ]
+      },
+      "legacy": {
+        "coverage": {
+          "ratios": {},
+          "imbalance": 0
+        },
+        "recency": {
+          "spike": false
+        },
+        "confidence": {
+          "n": 0
+        }
+      },
+      "expected_gap_kinds": [
+        "missing_evidence",
+        "no_sources",
+        "search_unresolved"
+      ]
+    },
+    {
+      "id": "R3",
+      "title": "Tegenstrijdige verslagen",
+      "question": "Welk aanvullend bewijs onderscheidt verandering in meldingsgedrag van een werkelijk effect?",
+      "packet": {
+        "study_id": "R3",
+        "question": "Welk aanvullend bewijs onderscheidt verandering in meldingsgedrag van een werkelijk effect?",
+        "sources": [
+          {
+            "id": "s1",
+            "origin_id": "report-r",
+            "type": "report",
+            "text": "Verslag R: na de update kwamen er minder meldingen."
+          },
+          {
+            "id": "s2",
+            "origin_id": "log-s",
+            "type": "log",
+            "text": "Logboek S: na de update kwamen er juist meer meldingen."
+          }
+        ],
+        "claims": [
+          {
+            "id": "c1",
+            "text": "Het aantal meldingen daalde",
+            "references": [
+              {
+                "source_id": "s1",
+                "start": 34,
+                "end": 50,
+                "quote": "minder meldingen"
+              }
+            ],
+            "contradicts": [
+              "c2"
+            ]
+          },
+          {
+            "id": "c2",
+            "text": "Het aantal meldingen steeg",
+            "references": [
+              {
+                "source_id": "s2",
+                "start": 40,
+                "end": 54,
+                "quote": "meer meldingen"
+              }
+            ]
+          }
+        ]
+      },
+      "legacy": {
+        "coverage": {
+          "ratios": {
+            "report": 0.5,
+            "log": 0.5
+          },
+          "imbalance": 0.3
+        },
+        "recency": {
+          "spike": true,
+          "detail": {
+            "2026-10-01": 2,
+            "2026-11-01": 7
+          }
+        },
+        "confidence": {
+          "n": 1,
+          "risky_assets": [
+            "rapport"
+          ]
+        }
+      },
+      "expected_gap_kinds": [
+        "reported_conflict",
+        "corroboration"
+      ]
+    },
+    {
+      "id": "R4",
+      "title": "Negatieve controle: geen automatisch bronhiaat",
+      "question": "Is een aangeleverde meting dubbel geverifieerd?",
+      "packet": {
+        "study_id": "R4",
+        "question": "Is een aangeleverde meting dubbel geverifieerd?",
+        "sources": [
+          {
+            "id": "s1",
+            "origin_id": "site-a",
+            "type": "log",
+            "text": "Testrapport: de verbinding viel drie keer kort uit."
+          },
+          {
+            "id": "s2",
+            "origin_id": "site-b",
+            "type": "log",
+            "text": "Testrapport: de verbinding viel drie keer kort uit."
+          }
+        ],
+        "claims": [
+          {
+            "id": "c1",
+            "text": "Er waren drie korte storingen",
+            "references": [
+              {
+                "source_id": "s1",
+                "start": 32,
+                "end": 50,
+                "quote": "drie keer kort uit"
+              },
+              {
+                "source_id": "s2",
+                "start": 32,
+                "end": 50,
+                "quote": "drie keer kort uit"
+              }
+            ]
+          }
+        ],
+        "required_source_types": [
+          "log"
+        ]
+      },
+      "legacy": {
+        "coverage": {
+          "ratios": {
+            "log": 1
+          },
+          "imbalance": 0
+        },
+        "recency": {
+          "spike": false
+        },
+        "confidence": {
+          "n": 0
+        }
+      },
+      "expected_gap_kinds": []
+    },
+    {
+      "id": "R5",
+      "title": "Mislukte zoekactie en open onderzoeksvraag",
+      "question": "Is er genoeg bekend over de oorzaak van vertraging?",
+      "packet": {
+        "study_id": "R5",
+        "question": "Is er genoeg bekend over de oorzaak van vertraging?",
+        "sources": [
+          {
+            "id": "s1",
+            "origin_id": "source-a",
+            "type": "report",
+            "text": "Een proef registreerde vertraging maar geen temperatuur."
+          }
+        ],
+        "claims": [
+          {
+            "id": "c1",
+            "text": "Een hoge temperatuur veroorzaakt de vertraging"
+          }
+        ],
+        "search_attempts": [
+          {
+            "id": "a1",
+            "query": "temperatuurmetingen",
+            "status": "error"
+          },
+          {
+            "id": "a2",
+            "query": "nieuwe replicaties",
+            "status": "no_results"
+          }
+        ],
+        "unknowns": [
+          {
+            "id": "u1",
+            "question": "Welke andere meetcondities kunnen hetzelfde patroon veroorzaken?"
+          }
+        ]
+      },
+      "legacy": {
+        "coverage": {
+          "ratios": {
+            "report": 1
+          },
+          "imbalance": 0.8,
+          "max_category": "reports"
+        },
+        "recency": {
+          "spike": false
+        },
+        "confidence": {
+          "n": 1,
+          "risky_assets": [
+            "temp"
+          ]
+        }
+      },
+      "expected_gap_kinds": [
+        "missing_evidence",
+        "search_unresolved",
+        "open_question"
+      ]
+    },
+    {
+      "id": "R6",
+      "title": "Veel bronloze claims onder een vraagbudget",
+      "question": "Welke van de onbewezen claims moeten het eerst worden onderzocht?",
+      "packet": {
+        "study_id": "R6",
+        "question": "Welke van de onbewezen claims moeten het eerst worden onderzocht?",
+        "sources": [
+          {
+            "id": "s1",
+            "origin_id": "single-report",
+            "type": "report",
+            "text": "Een nieuw systeem werd twee weken bekeken."
+          }
+        ],
+        "claims": [
+          {
+            "id": "c01",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 1"
+          },
+          {
+            "id": "c02",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 2"
+          },
+          {
+            "id": "c03",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 3"
+          },
+          {
+            "id": "c04",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 4"
+          },
+          {
+            "id": "c05",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 5"
+          },
+          {
+            "id": "c06",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 6"
+          },
+          {
+            "id": "c07",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 7"
+          },
+          {
+            "id": "c08",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 8"
+          },
+          {
+            "id": "c09",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 9"
+          },
+          {
+            "id": "c10",
+            "text": "De proef bewijst algemene werkzaamheid voor onderdeel 10"
+          }
+        ],
+        "unknowns": [
+          {
+            "id": "u1",
+            "question": "Hoe generaliseerbaar is een proef van twee weken?"
+          }
+        ]
+      },
+      "legacy": {
+        "coverage": {
+          "ratios": {
+            "report": 0.97,
+            "other": 0.03
+          },
+          "imbalance": 0.9,
+          "max_category": "reports"
+        },
+        "recency": {
+          "spike": true,
+          "detail": {
+            "2026-10-01": 1,
+            "2026-10-19": 7
+          }
+        },
+        "confidence": {
+          "n": 3,
+          "risky_assets": [
+            "part-1"
+          ]
+        }
+      },
+      "expected_gap_kinds": [
+        "missing_evidence",
+        "open_question"
+      ]
+    }
+  ],
+  "arms": [
+    "plain",
+    "legacy",
+    "ballms50"
+  ],
+  "question_budget": 6,
+  "model": "gpt-6.1-sol",
+  "notes": "Synthetic fictional observations only; no school/person data. Legacy arm is supplied with summarized legacy inputs, as required by its API."
+}

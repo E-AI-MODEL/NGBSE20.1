@@ -1,0 +1,33 @@
+name: NGBSE three-arm quality pilot preflight
+
+on:
+  push:
+    branches:
+      - "research/ngbse-quality-eval-*"
+    paths:
+      - "research/ngbse_quality/**"
+      - ".github/workflows/ngbse-quality-preflight.yml"
+  pull_request:
+    paths:
+      - "research/ngbse_quality/**"
+      - ".github/workflows/ngbse-quality-preflight.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Validate frozen cases and actual engine behavior, no model calls
+        run: python research/ngbse_quality/run_three_arm.py --preflight
+      - name: Check Python source compiles
+        run: python -m py_compile research/ngbse_quality/run_three_arm.py
