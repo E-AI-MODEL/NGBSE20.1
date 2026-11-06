@@ -49,7 +49,7 @@ De Superagent-technische kennisinventaris is gebruikt als vertrekpunt. Voor deze
 
 | Herkomst | Concrete les | Status in BALLMS 50 |
 |---|---|---|
-| [Oude NGBSE](https://github.com/E-AI-MODEL/NGBSE/blob/main/ngbse/blindspot/generator.py) | Ontbrekende resultaten en bronhiaten als onderzoekspunt registreren, niet stil overslaan | Ingevoerd |
+| Oude NGBSE, `ngbse/blindspot/generator.py` (privé-repository) | Ontbrekende resultaten en bronhiaten als onderzoekspunt registreren, niet stil overslaan | Ingevoerd |
 | [BALLM 20.1](https://github.com/E-AI-MODEL/NGBSE20.1/blob/main/src/ngbse20/ballm/curiosity_generator.py) | Meerdere vraagtypen behouden, maar vaste volgorde met top-10-afkap niet herhalen | Ingevoerd via gespreide selectie en zichtbare afwijzingen |
 | [EAIwork](https://github.com/E-AI-MODEL/EAIwork-/blob/main/packages/evidence/src/observe.ts) | Bronhandle, exacte tekst en feitelijke betekenis uit elkaar houden | Ingevoerd voor bronpassages; semantische beoordeling nog niet |
 | [ShadowSeed Pro](https://github.com/E-AI-MODEL/shadowseed-pro/blob/main/src/shadowseed/recurrence_clustering.py) | Eén bron die tweemaal wordt aangeleverd is geen onafhankelijke bevestiging | Ingevoerd voor opgegeven `origin_id`; bronherkomst nog niet geverifieerd |
