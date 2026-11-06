@@ -1,0 +1,46 @@
+name: NGBSE curiosity question selection regression
+
+on:
+  push:
+    branches:
+      - "fix/ngbse-curiosity-selection-*"
+    paths:
+      - "src/ngbse20/ballm/curiosity_generator.py"
+      - "tests/test_curiosity_question_selection.py"
+      - "tests/test_curiosity_numbered_model_questions.py"
+      - ".github/workflows/ngbse-curiosity-selection.yml"
+  pull_request:
+    paths:
+      - "src/ngbse20/ballm/curiosity_generator.py"
+      - "tests/test_curiosity_question_selection.py"
+      - "tests/test_curiosity_numbered_model_questions.py"
+      - ".github/workflows/ngbse-curiosity-selection.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  selection:
+    name: Selected real-code regressions (offline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e . pytest
+      - name: Parser, balanced selection and existing BALLM tests
+        run: |
+          python -m pytest -q \
+            tests/test_curiosity_question_selection.py \
+            tests/test_curiosity_numbered_model_questions.py \
+            tests/test_ballm.py
+      - name: Source compiles
+        run: python -m py_compile src/ngbse20/ballm/curiosity_generator.py

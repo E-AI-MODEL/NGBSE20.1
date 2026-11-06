@@ -19,31 +19,97 @@ class CuriosityGenerationEngine:
     def generate_curiosity_questions(
         self, findings: list[dict[str, Any]], blindspots: dict[str, Any]
     ) -> list[dict[str, Any]]:
-        """Generate curiosity-driven questions based on blindspots and findings."""
+        """Return up to ten questions without letting one family crowd out the rest."""
+        return self.generate_curiosity_questions_with_trace(findings, blindspots)[
+            "selected_questions"
+        ]
 
-        questions = []
+    def generate_curiosity_questions_with_trace(
+        self, findings: list[dict[str, Any]], blindspots: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Keep the familiar list API while exposing why candidates were omitted.
 
-        # 1. Coverage-based curiosity questions
-        coverage_questions = self._generate_coverage_curiosity_questions(blindspots)
-        questions.extend(coverage_questions)
+        The model is called exactly once. No score here is an empirical estimate
+        of question quality; reported curiosity levels only decide order *within*
+        a family when more than ten distinct questions were generated.
+        """
+        candidates: list[dict[str, Any]] = []
+        candidates.extend(self._generate_coverage_curiosity_questions(blindspots))
+        candidates.extend(self._generate_recency_curiosity_questions(blindspots))
+        candidates.extend(self._generate_confidence_curiosity_questions(blindspots))
+        candidates.extend(self._generate_llm_curiosity_questions(findings, blindspots))
+        candidates.extend(self._generate_productive_failure_questions(blindspots))
+        return self._select_curiosity_questions(candidates)
 
-        # 2. Recency-based curiosity questions
-        recency_questions = self._generate_recency_curiosity_questions(blindspots)
-        questions.extend(recency_questions)
+    @staticmethod
+    def _select_curiosity_questions(
+        candidates: list[dict[str, Any]], limit: int = 10
+    ) -> dict[str, Any]:
+        """Deduplicate exact text and balance question families under pressure.
 
-        # 3. Confidence-based curiosity questions
-        confidence_questions = self._generate_confidence_curiosity_questions(blindspots)
-        questions.extend(confidence_questions)
+        Keep input order when the unique candidates fit the budget, for backwards
+        compatibility. When crowded, take one per family per round, preferring
+        reported high before medium/low *within that family*.
+        The discarded questions remain inspectable with explicit reasons.
+        """
+        if type(limit) is not int or limit < 1:
+            raise ValueError("limit must be a positive integer")
 
-        # 4. LLM-generated curiosity questions
-        llm_questions = self._generate_llm_curiosity_questions(findings, blindspots)
-        questions.extend(llm_questions)
+        seen: set[str] = set()
+        unique: list[tuple[int, dict[str, Any]]] = []
+        excluded: list[dict[str, str]] = []
+        for position, question in enumerate(candidates):
+            raw = question.get("question", "")
+            if not isinstance(raw, str) or not raw.strip():
+                excluded.append({
+                    "type": str(question.get("type", "")),
+                    "question": str(raw),
+                    "reason": "empty_or_invalid_question",
+                })
+                continue
+            identity = " ".join(raw.split()).casefold()
+            if identity in seen:
+                excluded.append({
+                    "type": str(question.get("type", "")),
+                    "question": raw,
+                    "reason": "duplicate_question",
+                })
+                continue
+            seen.add(identity)
+            unique.append((position, question))
 
-        # 5. Productive failure questions
-        failure_questions = self._generate_productive_failure_questions(blindspots)
-        questions.extend(failure_questions)
+        if len(unique) <= limit:
+            chosen = unique
+        else:
+            families: dict[str, list[tuple[int, dict[str, Any]]]] = {}
+            for position, question in unique:
+                family = str(question.get("type", "other"))
+                families.setdefault(family, []).append((position, question))
+            rank = {"high": 0, "medium": 1, "low": 2}
+            for questions in families.values():
+                questions.sort(key=lambda entry: (
+                    rank.get(str(entry[1].get("curiosity_level", "")).lower(), 3),
+                    entry[0],
+                ))
+            chosen = []
+            while len(chosen) < limit and any(families.values()):
+                for family_questions in families.values():
+                    if family_questions and len(chosen) < limit:
+                        chosen.append(family_questions.pop(0))
 
-        return questions[:10]  # Limit to top 10 questions
+        selected_positions = {position for position, _ in chosen}
+        excluded.extend({
+            "type": str(question.get("type", "")),
+            "question": question["question"],
+            "reason": "question_budget",
+        } for position, question in unique if position not in selected_positions)
+        return {
+            "selected_questions": [question for _, question in chosen],
+            "excluded_questions": excluded,
+            "candidate_count": len(candidates),
+            "selection_policy": "balanced_families_on_overflow",
+            "question_budget": limit,
+        }
 
     def _fallback_confidence_questions(self) -> list[dict[str, Any]]:
         """Fallback questions for confidence gaps when inputs are insufficient."""
@@ -164,7 +230,7 @@ class CuriosityGenerationEngine:
                     }
                 )
 
-        return questions or self._fallback_confidence_questions()
+        return questions  # No concrete signal: do not invent a problem.
 
     def _generate_llm_curiosity_questions(
         self, findings: list[dict[str, Any]], blindspots: dict[str, Any]
@@ -289,7 +355,7 @@ class CuriosityGenerationEngine:
                 }
             )
 
-        return questions or self._fallback_productive_failure_questions()
+        return questions  # No concrete signal: do not invent a problem.
 
     def _fallback_productive_failure_questions(self) -> list[dict[str, Any]]:
         """Fallback questions when LLM or heuristics provide no results."""
