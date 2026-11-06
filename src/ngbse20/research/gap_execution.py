@@ -286,3 +286,34 @@ def save_cycle(cycle: dict[str, Any], directory: Path) -> None:
         (directory / name).write_text(
             json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
+
+
+def main() -> None:
+    """Run the tightly scoped evidence cycle; export inspectable receipts."""
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=Path("research-artifacts/gap-cycle"))
+    args = parser.parse_args()
+    cycle = execute_cycle()
+    save_cycle(cycle, args.output)
+    print(json.dumps({
+        "study_id": CASE_ID,
+        "initial_gaps": len(cycle["initial_analysis"]["gaps"]),
+        "actual_actions_completed": sum(
+            1 for item in cycle["execution_receipts"]
+            if item["status"] == "completed"
+        ),
+        "document_retrieval_status": cycle["execution_receipts"][2]["status"],
+        "new_sources": len(cycle["after_case"]["sources"]),
+        "verdict_status": cycle["verdict"]["status"],
+        "remaining_unknown": cycle["verdict"]["remaining_unknown"],
+        "source_execution": "real_python_312_and_official_document",
+        "not_yet_comparative": True,
+    }, ensure_ascii=False), flush=True)
+    if cycle["verdict"]["status"] != "absolute_claim_refuted_in_test":
+        raise SystemExit("Pilot inconclusive; cannot claim a tested result")
+
+
+if __name__ == "__main__":
+    main()
