@@ -55,18 +55,9 @@ def compare_chat(cycle: dict[str, Any], client: Any, output: Path) -> dict[str, 
             "Noem ook wat een eventuele uitkomst wel en niet bewijst."
         )},
     ]
-    observations = [
-        {
-            "action_id": r["action_id"],
-            "status": r["status"],
-            "executed_by_runner": r["executed_by_runner"],
-            **({key: r[key] for key in ("returncode", "stdout", "stderr", "condition", "python_version")
-                if key in r}),
-            **({key: r[key] for key in ("url", "extracted_snippets", "raw_sha256", "http_status")
-                if key in r}),
-        }
-        for r in cycle["execution_receipts"]
-    ]
+    # Use the complete, unmodified receipts. Omitting the executed command
+    # would deprive the ordinary chat of information available to NGBSE.
+    observations = cycle["execution_receipts"]
     total_reserved = 0.0
     spent_proxy = 0.0
     answer1 = None
