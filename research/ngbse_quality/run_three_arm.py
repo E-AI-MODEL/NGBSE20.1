@@ -114,7 +114,7 @@ def offline_preflight():
             assert not kinds, (case["id"], kinds)
         assert all(q["semantic_support"] == "NOT_EVALUATED" for q in result["questions"])
         assert len(result["selected_questions"]) <= 6
-    assert all(by_id[c["id"]] is c for c, arm in conditions())
+    assert all(by_id[c["id"]] == c for c, arm in conditions())
     print("PREFLIGHT_OK cases=6 arms=3 planned_provider_calls=18 no_model_calls=1", flush=True)
 
 
