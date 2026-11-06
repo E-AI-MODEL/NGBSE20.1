@@ -2,6 +2,6 @@
 exclude = [
   'https?://[^\s]*google[^\s]*/?.*(EAI|model).*',
 ]
-retry = 2
+max_retries = 2
 timeout = 20
 user_agent = "lychee/0.15"

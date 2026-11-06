@@ -1,0 +1,44 @@
+name: BALLMS 50 research checks
+
+on:
+  pull_request:
+    paths:
+      - "src/ngbse20/ballms50/**"
+      - "tests/test_ballms50.py"
+      - "examples/ballms50_case.json"
+      - ".github/workflows/ballms50.yml"
+  push:
+    branches:
+      - "research/ballms50-*"
+    paths:
+      - "src/ngbse20/ballms50/**"
+      - "tests/test_ballms50.py"
+      - "examples/ballms50_case.json"
+      - ".github/workflows/ballms50.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  research-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install pytest -e .
+      - name: BALLMS 50 contract tests
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q tests/test_ballms50.py
+      - name: Offline CLI smoke
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m ngbse20.ballms50 examples/ballms50_case.json --out "$RUNNER_TEMP/ballms50-output.json"
+          python -c "import json, os; p=os.path.join(os.environ['RUNNER_TEMP'],'ballms50-output.json'); r=json.load(open(p)); assert r['analysis_status']=='analysis_complete'; assert r['investigation_status']=='not_executed_by_engine'; assert r['trace']"
