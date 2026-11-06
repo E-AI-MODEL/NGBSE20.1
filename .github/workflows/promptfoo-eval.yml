@@ -1,0 +1,71 @@
+name: Promptfoo research evaluation (NGBSE and Shadowseed)
+
+on:
+  push:
+    branches:
+      - "eval/promptfoo-research-pilot-*"
+    paths:
+      - "evals/promptfoo/**"
+      - ".github/workflows/promptfoo-eval.yml"
+  pull_request:
+    paths:
+      - "evals/promptfoo/**"
+      - ".github/workflows/promptfoo-eval.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-code-offline-eval:
+    name: Real Python implementations through Promptfoo
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROMPTFOO_DISABLE_TELEMETRY: "1"
+      PROMPTFOO_DISABLE_UPDATE: "1"
+      PROMPTFOO_DISABLE_SHARE_EMAIL: "1"
+      PROMPTFOO_CACHE_ENABLED: "false"
+      SHADOWSEED_SOURCE_DIR: "${{ github.workspace }}/shadowseed-promptfoo"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout specific Shadowseed source (no changes to that repo)
+        uses: actions/checkout@v4
+        with:
+          repository: E-AI-MODEL/shadowseed-pro
+          ref: d9bb562f3df81d5bf1f4bc1389a8ca7e9605e6cd
+          path: shadowseed-promptfoo
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install exact source dependencies
+        run: |
+          python -m pip install -e .
+          python -m pip install -e ./shadowseed-promptfoo
+
+      - name: Run Promptfoo against real source code, no hosted LLM calls
+        run: |
+          npx --yes promptfoo@0.125.1 eval \
+            --config evals/promptfoo/promptfooconfig.yaml \
+            --output "${{ runner.temp }}/promptfoo-results.json" \
+            --no-cache
+
+      - name: Store independent result data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: promptfoo-research-results
+          path: "${{ runner.temp }}/promptfoo-results.json"
+          if-no-files-found: warn
+          retention-days: 14
