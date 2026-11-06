@@ -339,5 +339,44 @@ def health_check(output_format: str):
         raise click.Abort()
 
 
+
+
+@cli.command("analyze-document")
+@click.option("--input", "input_path", required=True, type=click.Path(exists=True, dir_okay=False))
+@click.option("--out", "output_path", required=True, type=click.Path(dir_okay=False))
+@click.option("--ballm", is_flag=True, default=False, help="Generate candidate gaps with a configured LLM.")
+def analyze_document_cmd(input_path: str, output_path: str, ballm: bool):
+    """Inspect claims, source quotations and open questions in a document packet.
+
+    The default path runs without network access or API credentials. BALLM is
+    opt-in and leaves generated suggestions explicitly unverified.
+    """
+    from ngbse20.research.document_blindspots import BALLMDocumentProposer, analyze_document
+
+    try:
+        payload = json.loads(Path(input_path).read_text(encoding="utf-8"))
+        proposer = None
+        if ballm:
+            enabled = (
+                os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
+                or os.getenv("AZURE_OPENAI_API_KEY") or os.getenv("COHERE_API_KEY")
+                or os.getenv("GOOGLE_API_KEY")
+            )
+            if not enabled:
+                raise ValueError("BALLM requires a configured provider key; no API call was made")
+            from ngbse20.llm_client import LLMClient
+            proposer = BALLMDocumentProposer(LLMClient())
+        result = analyze_document(payload, proposer=proposer)
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, TypeError) as exc:
+        raise click.ClickException(f"Document analysis could not start: {exc}") from exc
+
+    destination = Path(output_path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    click.echo(f"Document analysis: {result['status']}. Result: {destination}")
+    if result["status"] != "complete":
+        raise click.ClickException("BALLM proposal failed; partial results have been saved")
+
+
 if __name__ == "__main__":
     cli()
