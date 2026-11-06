@@ -6,6 +6,10 @@ on:
       - feature/document-blindspot-analysis-20261106
     paths:
       - .github/workflows/document-blindspot-tests.yml
+      - src/ngbse20/research/**
+      - src/ngbse20/cli.py
+      - tests/test_document_blindspots.py
+      - pyproject.toml
   pull_request:
     branches:
       - main
