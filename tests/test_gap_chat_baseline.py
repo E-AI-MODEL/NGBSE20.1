@@ -27,7 +27,8 @@ def example_cycle():
             {"action_id": "A2", "status": "completed",
              "executed_by_runner": True, "returncode": 0,
              "stdout": "/setuptools/_distutils/__init__.py", "stderr": "",
-             "condition": "installed_setuptools"},
+             "condition": "installed_setuptools",
+             "command": ["python", "-I", "-c", "import setuptools; import distutils"]},
             {"action_id": "A3", "status": "completed",
              "executed_by_runner": True, "url": "https://docs.python.org/3.12/whatsnew/3.12.html",
              "extracted_snippets": ["setuptools provides distutils"],
@@ -71,6 +72,7 @@ def test_two_completed_chat_rounds_store_verifiable_receipts(tmp_path):
     ]
     assert events[0]["messages"][1]["content"].find("A1") == -1
     assert "A1" in events[2]["messages"][-1]["content"]
+    assert "import setuptools; import distutils" in events[2]["messages"][-1]["content"]
 
 
 def test_incomplete_model_response_is_not_reported_as_completed(tmp_path):
