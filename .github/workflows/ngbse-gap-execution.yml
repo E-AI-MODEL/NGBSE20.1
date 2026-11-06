@@ -1,0 +1,52 @@
+name: NGBSE real gap-to-evidence experiment
+
+on:
+  push:
+    branches:
+      - "research/ngbse-gap-execution-pilot-*"
+    paths:
+      - "src/ngbse20/research/**"
+      - "tests/test_gap_execution_cycle.py"
+      - "tests/test_gap_chat_baseline.py"
+      - "research/gap_cycle/chat_baseline.py"
+      - ".github/workflows/ngbse-gap-execution.yml"
+  pull_request:
+    paths:
+      - "src/ngbse20/research/**"
+      - "tests/test_gap_execution_cycle.py"
+      - ".github/workflows/ngbse-gap-execution.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-research-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+      - name: Install official-source and independent-test dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -e . "setuptools>=70" pytest
+      - name: Test before making any network requests
+        run: |
+          python -m pytest -q tests/test_gap_execution_cycle.py tests/test_gap_chat_baseline.py tests/test_ballms50.py
+          python -m py_compile src/ngbse20/research/gap_execution.py
+      - name: Perform real bounded A/B import tests and fetch Python docs
+        run: |
+          python -m ngbse20.research.gap_execution \
+            --output research-artifacts/gap-cycle
+      - name: Save complete before/after analysis and execution receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ngbse-real-gap-evidence-cycle
+          path: research-artifacts/gap-cycle/
+          if-no-files-found: warn
+          retention-days: 14
