@@ -1,0 +1,32 @@
+name: NGBSE Proef 02 - freeze full published sources
+on:
+  push:
+    branches:
+      - research/second-output-ab-20261106
+    paths:
+      - research/second_output_ab/capture_sources.py
+      - .github/workflows/ngbse-proef02-sources.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+      - name: Retrieve full-text papers and preserve evidence IDs
+        run: python research/second_output_ab/capture_sources.py --out research-artifacts/ngbse-proef02
+      - name: Upload unchanged paper snapshot, no model calls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ngbse-proef02-equal-sources
+          path: research-artifacts/ngbse-proef02/sources.json
+          if-no-files-found: warn
+          retention-days: 14
