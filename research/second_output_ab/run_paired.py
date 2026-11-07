@@ -2,7 +2,7 @@
 
 Six independent conversations: 3 cases x 2 arms; each takes two model turns.
 Source snapshots, prior turns, model settings, calls and failures are retained.
-The 'NGBSE' arm is a *research instruction*, not the historical NGBSE engine.
+The 'NGBSE' arm is a *research instruction*, not the historical NGBSE engine.\nInput cards are curated publication excerpts, not the full texts.
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ OUTPUT_PER_M=12.0
 BASE=(
     "Je onderzoekt gepubliceerde wetenschappelijke teksten met zorg voor "
     "positieve én negatieve bevindingen. De input bestaat uit dezelfde "
-    "genummerde, uit de volledige paper geëxtraheerde bronpassages. "
+    "genummerde bronkaarten op basis van geraadpleegde publicatiepassages. "
     "Verwijs naar bron-ID's, onderscheid observatie van hypothese, "
     "en zeg nooit dat auteurs een stap níét deden wanneer die slechts "
     "niet zichtbaar is in de aangeleverde tekst. "
@@ -97,7 +97,7 @@ def unpack_facts(entry, paper):
         "source_doi":paper["doi"],
         "source_url":paper["source_url"],
         "extraction":paper["extraction_method"],
-        "note":"Only visible publication text. No independent raw dataset or hidden author process.",
+        "note":"Curated paraphrases from published article excerpts. Not the complete paper; no raw dataset or hidden reasoning.",
     },ensure_ascii=False)
 
 
