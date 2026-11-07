@@ -1,0 +1,265 @@
+{
+  "source_version": "curated-published-excerpts-v1",
+  "source_limit": "Paper excerpts and openly visible descriptions; not all supplementary files or raw participant data.",
+  "paper_provenance": [
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC12232635/",
+    "https://www.nature.com/articles/s41598-025-97652-6"
+  ],
+  "papers": {
+    "B": {
+      "id": "B",
+      "doi": "10.1073/pnas.2422633122",
+      "pmcid": "PMC12232635",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12232635/",
+      "publisher_title": "Generative AI without guardrails can harm learning",
+      "extraction_method": "manually curated, paraphrased evidence cards from publicly retrieved paper excerpts (not full text)",
+      "selected_paragraphs": 20,
+      "xml_sha256": "NOT_AVAILABLE_FULLTEXT_FETCH_TIMED_OUT",
+      "paragraphs": [
+        {
+          "id": "B-S01",
+          "section": "Significance/abstract",
+          "text": "Het onderzoek vergelijkt circa duizend middelbare scholieren die bij wiskundige oefenopgaven GPT Base, een begrensde GPT Tutor of geen AI-hulp kregen."
+        },
+        {
+          "id": "B-S02",
+          "section": "Abstract",
+          "text": "GPT Base benadert een algemene ChatGPT-interface; GPT Tutor bevat leerwaarborgen, waaronder door docenten ontworpen hints in plaats van directe antwoorden."
+        },
+        {
+          "id": "B-S03",
+          "section": "Abstract",
+          "text": "Tijdens oefenopgaven verbeterde de prestatie ten opzichte van de controlegroep met 48% voor GPT Base en met 127% voor GPT Tutor. Deze percentages betreffen oefenen met AI beschikbaar."
+        },
+        {
+          "id": "B-S04",
+          "section": "Abstract/results",
+          "text": "Op een daaropvolgend examen zonder AI-toegang scoorde GPT Base 17% lager dan de controlegroep, terwijl het verschil bij GPT Tutor klein en statistisch niet overtuigend was."
+        },
+        {
+          "id": "B-S05",
+          "section": "Main results/Table 1",
+          "text": "De genormaliseerde regressiecoëfficiënt op oefenprestaties is +0,137 voor GPT Base (SE 0,031) en +0,361 voor GPT Tutor (SE 0,032)."
+        },
+        {
+          "id": "B-S06",
+          "section": "Main results/Table 1",
+          "text": "Op het examen zonder hulp is de schatting -0,054 voor GPT Base (SE 0,022) en -0,004 voor GPT Tutor (SE 0,013)."
+        },
+        {
+          "id": "B-S07",
+          "section": "Main results/Table 1",
+          "text": "De controlegroep had een genormaliseerd gemiddelde van 0,284 bij oefenen en 0,321 op het examen. De tabel rapporteert 2.848 observaties per uitkomst."
+        },
+        {
+          "id": "B-S08",
+          "section": "Methods/results",
+          "text": "De regressie gebruikt onder andere eerder rapportcijfer, sessie-, beoordelaar-, leerjaar- en docentenvaste effecten. De standaardfouten zijn op klasniveau geclusterd."
+        },
+        {
+          "id": "B-S09",
+          "section": "Methods/results",
+          "text": "AI-toegang verschilt per klas. Dit is geen volledig onafhankelijke randomisatie van elke afzonderlijke leerling."
+        },
+        {
+          "id": "B-S10",
+          "section": "Results",
+          "text": "Een eenvoudiger, vooraf geregistreerde analyse met paarsgewijze toetsen is in de bijlage gerapporteerd en wordt door de auteurs kwalitatief vergelijkbaar genoemd."
+        },
+        {
+          "id": "B-S11",
+          "section": "Mechanism analysis",
+          "text": "De onderzoekers onderzoeken of fouten van GPT Base in oefensessies doorwerken in verwante examenvragen. Zij vinden hiervoor geen overtuigend verband; dat is niet hetzelfde als aantonen dat het nooit gebeurt."
+        },
+        {
+          "id": "B-S12",
+          "section": "Mechanism analysis",
+          "text": "Rekenfouten en logische fouten van GPT Base hangen volgens de onderzoekers ongeveer even sterk samen met oefenprestatie. Zij interpreteren dit, samen met andere patronen, als aanwijzing voor het overnemen van antwoorden."
+        },
+        {
+          "id": "B-S13",
+          "section": "Mechanism interpretation",
+          "text": "Dat leerlingen daadwerkelijk antwoorden kopieerden wordt mede uit patronen afgeleid. Dit is niet hetzelfde als een rechtstreekse registratie van alle cognitieve handelingen."
+        },
+        {
+          "id": "B-S14",
+          "section": "Intervention design",
+          "text": "De GPT Tutor was ontworpen om het leerproces te beschermen door onder meer hints van docenten te gebruiken. Dat maakt de vergelijking tegelijk een vergelijking tussen verschillend ontworpen hulpvormen."
+        },
+        {
+          "id": "B-S15",
+          "section": "Outcome scope",
+          "text": "Het gerapporteerde zelfstandige examen vond plaats na de oefensessies. In de hier vastgelegde passages is geen zelfstandige meting maanden later beschreven."
+        },
+        {
+          "id": "B-S16",
+          "section": "Claim scope",
+          "text": "De bevindingen ondersteunen een begrensd contrast tussen de onderzochte hulpvormen; ze bewijzen niet dat ieder AI-hulpmiddel zelfstandig leren schaadt of helpt."
+        },
+        {
+          "id": "B-S17",
+          "section": "Intervention package",
+          "text": "GPT Base en GPT Tutor verschillen niet alleen in toegang tot AI, maar ook in de interactievorm en de manier waarop antwoorden of hints worden aangeboden."
+        },
+        {
+          "id": "B-S18",
+          "section": "Evidence boundary",
+          "text": "Geen van de weergegeven regressies identificeert zonder verdere tussenstappen het afzonderlijke effect van elk component van de tutorinstructies."
+        },
+        {
+          "id": "B-S19",
+          "section": "Measurement boundary",
+          "text": "De percentages voor oefenprestatie en het examencijfer zijn afzonderlijke uitkomsten; het ene kan het andere niet vervangen als maat voor zelfstandig kunnen."
+        },
+        {
+          "id": "B-S20",
+          "section": "Scope of interpretation",
+          "text": "De auteurs noemen onbeperkte AI-hulp mogelijk een steun die zelfstandig leren vermindert. De hypothese van afhankelijkheid is interessanter dan een algemene uitspraak dat 'AI' op zichzelf de oorzaak is."
+        }
+      ]
+    },
+    "K": {
+      "id": "K",
+      "doi": "10.1038/s41598-025-97652-6",
+      "pmcid": "PMC12179260",
+      "source_url": "https://www.nature.com/articles/s41598-025-97652-6",
+      "publisher_title": "AI tutoring outperforms in-class active learning",
+      "extraction_method": "manually curated, paraphrased evidence cards from publicly retrieved paper excerpts (not full text)",
+      "selected_paragraphs": 22,
+      "xml_sha256": "NOT_AVAILABLE_FULLTEXT_FETCH_TIMED_OUT",
+      "paragraphs": [
+        {
+          "id": "K-S01",
+          "section": "Abstract",
+          "text": "Het artikel rapporteert een gerandomiseerde cross-overproef bij natuurkundestudenten: een door docenten ontworpen AI-tutor versus actieve klassikale leeractiviteiten."
+        },
+        {
+          "id": "K-S02",
+          "section": "Study design",
+          "text": "Twee groepen wisselden na één lesweek van conditie, zodat iedere student een AI-les en een klassikale les meemaakte."
+        },
+        {
+          "id": "K-S03",
+          "section": "Study design",
+          "text": "De onderwerpen waren oppervlaktespanning en stroming; voor elke les waren er voor- en natoetsen."
+        },
+        {
+          "id": "K-S04",
+          "section": "Results",
+          "text": "De mediane directe natoetsscore was 4,5 bij de AI-conditie (N=142) en 3,5 bij klassikale actieve werkvormen (N=174); de gecombineerde voortoetsmediaan was 2,75 (N=316)."
+        },
+        {
+          "id": "K-S05",
+          "section": "Results",
+          "text": "De gerapporteerde Mann-Whitney-vergelijking van de directe natoetsen gaf z=-5,6 en p<10^-8, een sterk statistisch verschil in deze setting."
+        },
+        {
+          "id": "K-S06",
+          "section": "Adjusted analysis",
+          "text": "Een regressiemodel corrigeert voor voortoets, eerder examen, Force Concept Inventory, eerdere ChatGPT-ervaring, onderwerp, toetsversie en tijdsbesteding."
+        },
+        {
+          "id": "K-S07",
+          "section": "Adjusted analysis",
+          "text": "De auteurs rapporteren een gestandaardiseerd effect van 0,63 met lineaire regressie en 0,73 tot 1,3 bij een alternatieve analyse die het plafondeffect anders behandelt."
+        },
+        {
+          "id": "K-S08",
+          "section": "Study design",
+          "text": "De toewijzing vond plaats op het niveau van bestaande groepen van twee of drie leerlingen, niet volledig individueel."
+        },
+        {
+          "id": "K-S09",
+          "section": "Sensitivity analysis",
+          "text": "Een model dat op groepsniveau clustert in plaats van op studentniveau rapporteert eveneens een robuust positief verschil (p<0,001)."
+        },
+        {
+          "id": "K-S10",
+          "section": "Time on task",
+          "text": "De AI-conditie had een mediane platformtijd van 49 minuten; 70% besteedde minder dan 60 minuten. De klassikale leertijd van 60 minuten is berekend als 75 minuten minus 15 minuten voor toetsen."
+        },
+        {
+          "id": "K-S11",
+          "section": "Time on task",
+          "text": "Er was geen duidelijke correlatie tussen gemeten platformtijd en de directe natoetsscore. De twee tijdmetingen komen uit verschillende registratiemethoden."
+        },
+        {
+          "id": "K-S12",
+          "section": "Perceptions",
+          "text": "Studenten in de AI-conditie rapporteerden meer betrokkenheid en motivatie. Dit zijn zelfrapportages, geen zelfstandige leertoetsen."
+        },
+        {
+          "id": "K-S13",
+          "section": "Intervention design",
+          "text": "De AI-les werd thuis doorlopen met persoonlijke feedback en eigen tempo. De klassikale les gebruikte medeleerlingen en docentfeedback op hetzelfde werkblad."
+        },
+        {
+          "id": "K-S14",
+          "section": "Material comparability",
+          "text": "De studie gebruikte voor beide condities dezelfde vragen, leerstof en werkblad. In de AI-conditie werden inleidingen via video aangeboden."
+        },
+        {
+          "id": "K-S15",
+          "section": "Design effort",
+          "text": "Ervaren docenten maakten specifieke tutorprompts en werkten toetsgesprekken uit. Het ondersteunende platform had maanden ontwikkeltijd nodig; afzonderlijke lessen vroegen dagen promptwerk."
+        },
+        {
+          "id": "K-S16",
+          "section": "Interpretation",
+          "text": "De auteurs vermoeden dat persoonlijke feedback en zelfgekozen tempo een deel van de winst verklaren, maar verschillende onderdelen van de aanpak zijn samen veranderd."
+        },
+        {
+          "id": "K-S17",
+          "section": "Research scope",
+          "text": "De onderwijsproef betreft twee lessen in één natuurkundecursus. Zij bevat geen bewijs voor het effect in alle vakken, alle opleidingen of over jaren."
+        },
+        {
+          "id": "K-S18",
+          "section": "Assessment",
+          "text": "De genoemde beheersingsmeting vond direct na de les plaats. Een maanden later afgenomen zelfstandige toets staat niet in deze vastgelegde bewijsstukken."
+        },
+        {
+          "id": "K-S19",
+          "section": "Response to class",
+          "text": "Studenten beoordeelden de gebruikte actieve klassikale methode in een latere vragenlijst vaak als actiever dan lessen in andere STEM-vakken. Dit garandeert niet dat twee onderwijsomstandigheden op alle punten vergelijkbaar waren."
+        },
+        {
+          "id": "K-S20",
+          "section": "Student feedback",
+          "text": "83% vond de uitleg van de tutor even goed of beter dan die van een menselijke docent; dat is een perceptie en niet rechtstreeks een effectmaat."
+        },
+        {
+          "id": "K-S21",
+          "section": "Conclusion boundary",
+          "text": "De beperkte claim dat de AI-conditie in dit onderzoek een hogere directe natoetsscore had, wordt ondersteund door de gerapporteerde gegevens, ook als oorzaken en langere termijn openblijven."
+        },
+        {
+          "id": "K-S22",
+          "section": "Publication claim",
+          "text": "De brede publicatieconclusie wijst op mogelijke brede toepassing. De onderzoekers erkennen tegelijk beperkingen van populatie, eerste leerfase, onderwerp en kosten van ontwikkeling."
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "B-OPEN",
+      "paper": "B",
+      "type": "open",
+      "task": "Onderzoek de opbouw van de conclusie en probeer nieuwe, zelfstandige onderzoeksmogelijkheden te vinden. Behoud de statistisch onderbouwde positieve én negatieve uitkomsten."
+    },
+    {
+      "id": "K-OPEN",
+      "paper": "K",
+      "type": "open",
+      "task": "Onderzoek de opbouw van de conclusie en probeer nieuwe, zelfstandige onderzoeksmogelijkheden te vinden. Behoud de statistisch onderbouwde positieve én negatieve uitkomsten."
+    },
+    {
+      "id": "K-CONTROL",
+      "paper": "K",
+      "type": "negative_control",
+      "task": "Beoordeel alleen de afgebakende claim dat de onderzochte AI-les in dit experiment een hogere directe natoetsscore rapporteert dan de klassikale conditie. Breng geen irrelevante bezwaren in alsof zij deze beperkte claim ontkrachten."
+    }
+  ],
+  "experiment_rule": "Both arms receive identically selected, frozen evidence cards and equal model/output budgets; prior Proef 01 analysis is withheld."
+}
